@@ -15,8 +15,7 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
 
     self.video = video;
 
-    this.mastLoader.Load(url).then(
-        function(result) {
+    this.mastLoader.Load(url, function(result) {
             var resu = self.mastParser.parse(result),
                 triggers = null,
                 startConditions,

@@ -19,9 +19,8 @@ AdsPlayer.dependencies.MastLoader.prototype = {
     constructor: AdsPlayer.dependencies.MastLoader
 };
 
-AdsPlayer.dependencies.MastLoader.prototype.Load = function(url) {
-    var deferred = Q.defer(),
-        request = new XMLHttpRequest(),
+AdsPlayer.dependencies.MastLoader.prototype.Load = function(url, callback) {
+    var request = new XMLHttpRequest(),
         needFailureReport = true,
         onload = null,
         report = null,
@@ -41,7 +40,7 @@ AdsPlayer.dependencies.MastLoader.prototype.Load = function(url) {
 
             needFailureReport = false;
 
-            deferred.resolve(request.responseText);
+            callback(request.responseText);
         }
     };
 
@@ -52,9 +51,9 @@ AdsPlayer.dependencies.MastLoader.prototype.Load = function(url) {
         needFailureReport = false;
 
         if (request.aborted) {
-            deferred.reject();
+            callback();
         } else {
-            deferred.reject({
+            callback({
                 name: "ERROR",
                 message: "Failed to download mast file",
                 data: {
@@ -75,5 +74,4 @@ AdsPlayer.dependencies.MastLoader.prototype.Load = function(url) {
     } catch (e) {
         request.onerror();
     }
-    return deferred.promise;
 };

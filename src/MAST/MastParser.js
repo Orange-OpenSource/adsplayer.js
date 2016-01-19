@@ -13,8 +13,8 @@
  */
 AdsPlayer.dependencies.MastParser = function() {
     "use strict";
-    this._parser;
-    this._xmlDoc;
+    this._parser = null;
+    this._xmlDoc = null;
 };
 
 AdsPlayer.dependencies.MastParser.prototype = {

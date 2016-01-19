@@ -15,16 +15,16 @@
  */
 /*jshint -W020 */
 /*exported AdsPlayer*/
-/*global DMVAST,MediaPlayer,Custom*/
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
         define([], function() {
-            return root["AdsPlayer"] = factory();
+            root.AdsPlayer = factory();
+            return root.AdsPlayer;
         });
     } else if (typeof exports === "object") {
         module.exports = factory();
     } else {
-        root["AdsPlayer"] = factory();
+        root.AdsPlayer = factory();
     }
 })(this, function() {
     var AdsPlayer = {};
@@ -51,7 +51,7 @@
             overlay.innerText = "Playing Ad: " + Math.round(internalPlayer.duration - internalPlayer.currentTime) + "s";
         });
 
-        function _onFinished(args) {
+        function _onFinished() {
             numberOfAdsToPlay--;
             internalPlayer.vastTracker.complete();
             setAdMode(false);
@@ -99,7 +99,7 @@
                                         }
 
                                         internalPlayer.vastTracker = new DMVAST.tracker(ad, creative);
-                                        internalPlayer.vastTracker.on('clickthrough', function(url) {
+                                        internalPlayer.vastTracker.on('clickthrough', function() {
                                             //var win = window.open(url, '_blank');
                                             //win.focus();
                                         });
