@@ -29,7 +29,7 @@
 })(this, function() {
     var AdsPlayer = {};
 
-    AdsPlayer = function(mastUrl, vastUrl, playerElt) {
+    AdsPlayer = function(playerElt) {
         'use strict';
 
         var that = this,
@@ -39,8 +39,8 @@
             playingAds = false;
 
         this.player = playerElt;
-        this.vastUrl = vastUrl;
-        this.mastUrl = mastUrl;
+        this.vastUrl = null;
+        this.mastUrl = null;
 
         internalPlayer.autoplay = true;
         internalPlayer.addEventListener('click', function() {
@@ -143,7 +143,9 @@
 
         };
 
-        this.start = function() {
+        this.start = function(mastUrl, vastUrl) {
+            that.mastUrl = mastUrl;
+            that.vastUrl = vastUrl;
             if (that.mastUrl) {
                var mastClient = new AdsPlayer.dependencies.MastClient();
                mastClient.start(that.mastUrl, that.player, that.mastListener);
