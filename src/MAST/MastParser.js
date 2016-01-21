@@ -87,7 +87,7 @@ AdsPlayer.dependencies.MastParser.prototype.getConditionPosition = function(cond
             }
         }
     }
-    return null;
+    return 0;
 };
 /************************************************** PRIVATE FUNCTIONS *************************************************************************/
 AdsPlayer.dependencies.MastParser.prototype._getChildNodes = function(nodeParent, childName) {
