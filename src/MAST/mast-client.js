@@ -41,7 +41,7 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                         }
                         sources = self.mastParser.getTriggerSources(triggers[i]);
                         var uri = self.mastParser.getSourceUri(sources[0]);
-                        var newCue = new Cue(positionStart, positionEnd, uri);
+                        var newCue = new Cue(positionStart, positionStart+1, uri);
                         newCue.onenter = listener;
                         track.addCue(newCue);
                     }

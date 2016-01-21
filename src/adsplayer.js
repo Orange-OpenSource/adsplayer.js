@@ -27,6 +27,7 @@
         root.AdsPlayer = factory();
     }
 })(this, function() {
+    'use strict';
     var AdsPlayer = {};
 
     AdsPlayer = function(playerElt) {
@@ -41,6 +42,7 @@
         this.player = playerElt;
         this.vastUrl = null;
         this.mastUrl = null;
+        this.mastBaseUrl = null;
 
         internalPlayer.autoplay = true;
         internalPlayer.addEventListener('click', function() {
@@ -78,23 +80,39 @@
         };
 
         this.getVast = function(url) {
+            if (url.indexOf('http://') === -1){
+                url = that.mastBaseUrl + url;
+            }
             DMVAST.client.get(url, function(response) {
                     if (response) {
-                        var videoContainer = document.getElementById('VideoModule');
+                        var videoContainer = document.getElementById('VideoModule'),
+                            adIdx,
+                            adLen,
+                            ad,
+                            creaIdx,
+                            creaLen,
+                            creative,
+                            mfIdx,
+                            mfLen,
+                            mediaFile;
                         videoContainer.appendChild(internalPlayer);
                         videoContainer.appendChild(overlay);
 
                         setAdMode(true);
 
-                        for (var adIdx = 0, adLen = response.ads.length; adIdx < adLen; adIdx++) {
-                            var ad = response.ads[adIdx];
-                            for (var creaIdx = 0, creaLen = ad.creatives.length; creaIdx < creaLen; creaIdx++) {
-                                var creative = ad.creatives[creaIdx];
-
+                        for (adIdx = 0, adLen = response.ads.length; adIdx < adLen; adIdx++) {
+                            ad = response.ads[adIdx];
+                            for (creaIdx = 0, creaLen = ad.creatives.length; creaIdx < creaLen; creaIdx++) {
+                                creative = ad.creatives[creaIdx];
                                 if (creative.type === 'linear') {
-                                    for (var mfIdx = 0, mfLen = creative.mediaFiles.length; mfIdx < mfLen; mfIdx++) {
-                                        var mediaFile = creative.mediaFiles[mfIdx];
-                                        if (mediaFile.mimeType !== 'video/mp4') {
+                                    for (mfIdx = 0, mfLen = creative.mediaFiles.length; mfIdx < mfLen; mfIdx++) {
+                                        mediaFile = creative.mediaFiles[mfIdx];
+                                        if (mediaFile.mimeType === 'video/mp4') {
+                                            internalPlayer.src = mediaFile.fileURL;
+                                        }else if (mediaFile.mimeType === 'image/jpg') {
+                                            internalPlayer.poster = mediaFile.fileURL;
+                                        }
+                                        else{
                                             continue;
                                         }
 
@@ -105,7 +123,6 @@
                                         });
 
                                         numberOfAdsToPlay++;
-                                        internalPlayer.src = mediaFile.fileURL;
                                         playingAds = true;
 
                                         internalPlayer.addEventListener('canplay', function() {
@@ -146,12 +163,19 @@
         this.start = function(mastUrl, vastUrl) {
             that.mastUrl = mastUrl;
             that.vastUrl = vastUrl;
+            that.mastBaseUrl = that._getBaseUri(that.mastUrl);
             if (that.mastUrl) {
                var mastClient = new AdsPlayer.dependencies.MastClient();
                mastClient.start(that.mastUrl, that.player, that.mastListener);
             } else {
                 that.getVast(that.vastUrl);
             }
+        };
+
+        this._getBaseUri = function(url){
+            var l = document.createElement('a');
+            l.href = url;
+            return l.protocol+'//'+l.host;
         };
 
         this.mastListener = function(e) {
