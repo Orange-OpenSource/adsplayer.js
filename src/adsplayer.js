@@ -31,8 +31,6 @@
     var AdsPlayer = {};
 
     AdsPlayer = function(playerElt) {
-        'use strict';
-
         var that = this,
             numberOfAdsToPlay = 0,
             internalPlayer = document.getElementById('adsPlayer'),
