@@ -106,7 +106,9 @@
                                     for (mfIdx = 0, mfLen = creative.mediaFiles.length; mfIdx < mfLen; mfIdx++) {
                                         mediaFile = creative.mediaFiles[mfIdx];
                                         if (mediaFile.mimeType === 'video/mp4') {
-                                            internalPlayer.src = mediaFile.fileURL;
+                                            if (mediaFile.fileURL.indexOf('http://') === -1){
+                                                internalPlayer.src = that.mastBaseUrl+mediaFile.fileURL;
+                                            }
                                         }else if (mediaFile.mimeType === 'image/jpg') {
                                             internalPlayer.poster = mediaFile.fileURL;
                                         }
