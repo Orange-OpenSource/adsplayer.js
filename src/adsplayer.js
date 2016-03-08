@@ -108,6 +108,8 @@
                                         if (mediaFile.mimeType === 'video/mp4') {
                                             if (mediaFile.fileURL.indexOf('http://') === -1){
                                                 internalPlayer.src = that.mastBaseUrl+mediaFile.fileURL;
+                                            } else {
+                                                internalPlayer.src = mediaFile.fileURL;
                                             }
                                         }else if (mediaFile.mimeType === 'image/jpg') {
                                             internalPlayer.poster = mediaFile.fileURL;
