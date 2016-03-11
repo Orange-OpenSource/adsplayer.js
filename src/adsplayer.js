@@ -15,6 +15,7 @@
  */
 /*jshint -W020 */
 /*exported AdsPlayer*/
+
 (function(root, factory) {
     if (typeof define === "function" && define.amd) {
         define([], function() {
@@ -26,10 +27,15 @@
     } else {
         root.AdsPlayer = factory();
     }
-})(this, function() {
+})
+
+
+
+
+(this, function() {
     'use strict';
     var AdsPlayer = {};
-
+	
     AdsPlayer = function(playerElt) {
         var that = this,
             numberOfAdsToPlay = 0,
@@ -41,11 +47,13 @@
         this.vastUrl = null;
         this.mastUrl = null;
         this.mastBaseUrl = null;
-		this.listAds = [];
-		
+		this.listAds = [];		
+		this.descripAds = [];
+	
         internalPlayer.autoplay = true;
-         internalPlayer.addEventListener('click', function() {
-            internalPlayer.vastTracker.click();
+
+        internalPlayer.addEventListener('click', function() {
+		internalPlayer.vastTracker.click();
         });
  
         internalPlayer.addEventListener('timeupdate', function() {
@@ -81,6 +89,60 @@
             playingAds = enabled;
             internalPlayer.muted = !enabled;
         };
+		// Ahmad 10/03/15
+		
+		this.getVastRep = function(urlvast) {
+					
+			var url = urlvast;
+		    var obj = null ;       
+            DMVAST.client.get(url, function(response) {
+                    if (response) {
+                        var videoContainer = document.getElementById('VideoModule'),
+                            adIdx,
+                            adLen,
+                            ad,
+                            creaIdx,
+                            creaLen,
+                            creative,
+                            mfIdx,
+                            mfLen,
+                            mediaFile;
+
+                        for (adIdx = 0, adLen = response.ads.length; adIdx < adLen; adIdx++) {
+                            ad = response.ads[adIdx];
+                            for (creaIdx = 0, creaLen = ad.creatives.length; creaIdx < creaLen; creaIdx++) {
+                                creative = ad.creatives[creaIdx];
+								obj.type = creative.type;
+                                if (creative.type === 'linear') {
+                                    for (mfIdx = 0, mfLen = creative.mediaFiles.length; mfIdx < mfLen; mfIdx++) {
+                                        mediaFile = creative.mediaFiles[mfIdx];
+                                        if (mediaFile.mimeType === 'video/mp4') {
+                                            if (mediaFile.fileURL.indexOf('http://') === -1){
+                                                obj.source = that.mastBaseUrl+mediaFile.fileURL;
+                                            } else {
+                                                obj.source = mediaFile.fileURL;
+                                            }
+                                        }else if (mediaFile.mimeType === 'image/jpg') {
+                                            obj.source = mediaFile.fileURL;
+                                        }
+                                        else{
+                                            continue;
+                                        }
+										
+										obj.mimeType = mediaFile.mimeType;
+
+                                    }
+                                }
+                            }
+                            
+                        }
+                    }
+
+                });
+				return obj;
+
+        };
+		// fin Ahmad 10/03/15
 
         this.getVast = function(url) {
             if (url.indexOf('http://') === -1){
@@ -168,12 +230,26 @@
         };
 
         this.start = function(mastUrl, vastUrl) {
-            that.mastUrl = mastUrl;
+            var vastData;
+			that.mastUrl = mastUrl;
             that.vastUrl = vastUrl;
             that.mastBaseUrl = that._getBaseUri(that.mastUrl);
             if (that.mastUrl) {
                var mastClient = new AdsPlayer.dependencies.MastClient();
+<<<<<<< f530c82e69ea4bf96f366d4a8b2ff76b7dc5a6d8
 			   mastClient.start(that.mastUrl, that.player, that.mastListener, that.listAds);
+=======
+               mastClient.start(that.mastUrl, that.player, that.mastListener, that.listAds);
+			   for (var i=0; i< that.listAds.length; i++)
+			   {
+				   vastData = that.getVastRep(that.listAds[i]);
+				   that.descripAds[i] = vastData;
+			   }
+
+			   //that.getVastRep(that.listAds[0]);
+			console.log(that.listAds.ads);
+	
+>>>>>>> Parsing MAST
             } else {
                 that.getVast(that.vastUrl);
             }
@@ -186,6 +262,7 @@
         };
 
         this.mastListener = function(e) {
+<<<<<<< f530c82e69ea4bf96f366d4a8b2ff76b7dc5a6d8
 			var event= new CustomEvent('playAd', { 'detail': e.target.text });	
 			that.player.dispatchEvent(event);			
          };
@@ -195,6 +272,11 @@
 			var url=that.listAds[ind];
             that.getVast(url);
 		}
+=======
+            that.player.pause();
+            that.getVast(that.listAds[parseInt(e.target.text)]);
+        };
+>>>>>>> Parsing MAST
 
         this.stop = function() {
             setAdMode(false);

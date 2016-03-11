@@ -3,18 +3,20 @@ AdsPlayer.dependencies.MastClient = function() {
     this.mastLoader = new AdsPlayer.dependencies.MastLoader();
     this.mastParser = new AdsPlayer.dependencies.MastParser();
     this.video = null;
+	this.ads = null;
 };
 
 AdsPlayer.dependencies.MastClient.prototype = {
     constructor: AdsPlayer.dependencies.MastClient
 };
 
-AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listener, ads) {
+AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listener, adsMast) {
     var self = this;
     var Cue = window.VTTCue || window.TextTrackCue;
 
     self.video = video;
-	var theAds=ads;
+	self.adsMast = adsMast;
+
     this.mastLoader.Load(url, function(result) {
             var resu = self.mastParser.parse(result),
                 triggers = null,
@@ -41,8 +43,11 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                         }
                         sources = self.mastParser.getTriggerSources(triggers[i]);
                         var uri = self.mastParser.getSourceUri(sources[0]);
-                        var newCue = new Cue(positionStart, positionStart+1, theAds.length);
-                        newCue.onenter = listener;
+                        var newCue = new Cue(positionStart, positionStart+1, adsMast.length);
+						adsMast[adsMast.length] = [uri];
+/* 						vasData = getVastRep(uri);
+						adsVast[adsVast.length] = vastData;
+ */                     newCue.onenter = listener;
                         track.addCue(newCue);
 						theAds[theAds.length] = uri;
                     }
