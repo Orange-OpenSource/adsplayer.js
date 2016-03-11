@@ -9,12 +9,12 @@ AdsPlayer.dependencies.MastClient.prototype = {
     constructor: AdsPlayer.dependencies.MastClient
 };
 
-AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listener) {
+AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listener, ads) {
     var self = this;
     var Cue = window.VTTCue || window.TextTrackCue;
 
     self.video = video;
-
+	var theAds=ads;
     this.mastLoader.Load(url, function(result) {
             var resu = self.mastParser.parse(result),
                 triggers = null,
@@ -41,9 +41,10 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                         }
                         sources = self.mastParser.getTriggerSources(triggers[i]);
                         var uri = self.mastParser.getSourceUri(sources[0]);
-                        var newCue = new Cue(positionStart, positionStart+1, uri);
+                        var newCue = new Cue(positionStart, positionStart+1, theAds.length);
                         newCue.onenter = listener;
                         track.addCue(newCue);
+						theAds[theAds.length] = uri;
                     }
                 }
         });

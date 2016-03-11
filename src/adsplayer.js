@@ -41,12 +41,13 @@
         this.vastUrl = null;
         this.mastUrl = null;
         this.mastBaseUrl = null;
-
+		this.listAds = [];
+		
         internalPlayer.autoplay = true;
-        internalPlayer.addEventListener('click', function() {
+         internalPlayer.addEventListener('click', function() {
             internalPlayer.vastTracker.click();
         });
-
+ 
         internalPlayer.addEventListener('timeupdate', function() {
             overlay.innerText = "Playing Ad: " + Math.round(internalPlayer.duration - internalPlayer.currentTime) + "s";
         });
@@ -54,9 +55,13 @@
         function _onFinished() {
             numberOfAdsToPlay--;
             internalPlayer.vastTracker.complete();
-            setAdMode(false);
+			internalPlayer.style.visibility = overlay.style.visibility = 'hidden';
+			that.player.style.visibility = 'visible';
+			overlay.innerText = "";
+            internalPlayer.pause();
             playingAds = false;
-
+			var event= new CustomEvent('endAd');	
+			that.player.dispatchEvent(event);			
         }
 
         var setAdMode = function(enabled) {
@@ -168,7 +173,7 @@
             that.mastBaseUrl = that._getBaseUri(that.mastUrl);
             if (that.mastUrl) {
                var mastClient = new AdsPlayer.dependencies.MastClient();
-               mastClient.start(that.mastUrl, that.player, that.mastListener);
+			   mastClient.start(that.mastUrl, that.player, that.mastListener, that.listAds);
             } else {
                 that.getVast(that.vastUrl);
             }
@@ -181,9 +186,15 @@
         };
 
         this.mastListener = function(e) {
-            that.player.pause();
-            that.getVast(e.target.text);
-        };
+			var event= new CustomEvent('playAd', { 'detail': e.target.text });	
+			that.player.dispatchEvent(event);			
+         };
+
+		this.playAd = function(charInd) {
+			var ind=parseInt(charInd);
+			var url=that.listAds[ind];
+            that.getVast(url);
+		}
 
         this.stop = function() {
             setAdMode(false);
