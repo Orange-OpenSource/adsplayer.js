@@ -1,0 +1,83 @@
+<!DOCTYPE html> 
+<html> 
+	<head>
+		
+		<title>Demo AdsPlayer</title>
+
+		<!--  Ads player Stuff  -->
+		<script src="..\..\adsplayer.js\src\adsplayer.js"></script>	
+		<script src="..\..\adsplayer.js\src\VAST\vast-client.js"></script>
+		<script src="..\..\adsplayer.js\src\MAST\mast-client.js"></script>
+		<script src="..\..\adsplayer.js\src\MAST\MastLoader.js"></script>
+		<script src="..\..\adsplayer.js\src\MAST\MastParser.js"></script>
+
+	</head>	
+	<style>
+		.videos {
+				position:absolute;
+				width:400px;
+				height:250px;
+				top:20px;
+				left:800px; 
+		}
+		.overlay {
+				position:absolute;
+				width:400px;
+				height:250px;
+				top:10px;
+				left:800px; 
+		}
+	</style>
+	<body> 		
+	
+		<!--  Legacy Has player Stuff  -->
+		<script src=".\src\hasplayer.js\hasPlayer.js"></script>
+		
+		<div id="VideoModule" >
+			<video class="videos" id="videoPlayer" controls="true">
+			</video>
+
+			<video class="videos" id="adsPlayer" >
+			<div class="overlay" id="adsOverlay"></div>
+		</div>
+				
+		<div id= "inputFields" style="display:yes;" >
+			<label>Type or paste a video URL: </label>
+			<br/>
+			<input type="text" id="videoFile" style="width: 500px;"  title="video file input field" value="http://2is7server1.rd.francetelecom.com/VOD/BBB-SD/big_buck_bunny_1080p_stereo.ism/Manifest"; />   
+			</br>
+			<label>Type or paste a Mast URL: </label>
+			<br/>
+			<input type="text" id="mastFile" style="width: 500px;"  title="video file input field" value="http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/10_MAST_multiAds.xml"" />   
+			
+			<button id="loadFiles" title="Load video button" >Load</button>
+			
+		</div>
+		
+		<div id="status" >
+			Length(seconds): <span id="vLen"></span> <br />
+			Current time:  <span id="curTime" title="Current time"></span><br />   Remaining time: <span id="vRemaining" title="Remaining time"></span>
+		</div>
+
+
+			<!--  Demo Interface 		-->
+		<script src="http://localhost:8080/adsPlayer.js/demo/src/AdsPlayerDemo.js"></script>
+
+		<script>
+
+		     function getUrls() {
+				var videoURL = document.getElementById("videoFile").value;  // get input field 			
+				var mastURL = document.getElementById("mastFile").value;  // get input field                    
+				if (videoURL == "" || mastURL == "" ) {
+					errMessage("Enter a valid video/mast URL");  // fail silently
+				}
+				loadFiles(videoURL,mastURL);
+			}
+			loadButton=document.getElementById("loadFiles");
+			loadButton.addEventListener("click", getUrls, false);
+			
+			getUrls();
+			
+		</script>
+	</body> 
+</html>
