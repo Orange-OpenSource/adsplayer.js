@@ -236,9 +236,7 @@
             that.mastBaseUrl = that._getBaseUri(that.mastUrl);
             if (that.mastUrl) {
                var mastClient = new AdsPlayer.dependencies.MastClient();
-<<<<<<< f530c82e69ea4bf96f366d4a8b2ff76b7dc5a6d8
-			   mastClient.start(that.mastUrl, that.player, that.mastListener, that.listAds);
-=======
+
                mastClient.start(that.mastUrl, that.player, that.mastListener, that.listAds);
 			   for (var i=0; i< that.listAds.length; i++)
 			   {
@@ -248,8 +246,6 @@
 
 			   //that.getVastRep(that.listAds[0]);
 			console.log(that.listAds.ads);
-	
->>>>>>> Parsing MAST
             } else {
                 that.getVast(that.vastUrl);
             }
@@ -262,21 +258,15 @@
         };
 
         this.mastListener = function(e) {
-<<<<<<< f530c82e69ea4bf96f366d4a8b2ff76b7dc5a6d8
 			var event= new CustomEvent('playAd', { 'detail': e.target.text });	
 			that.player.dispatchEvent(event);			
          };
 
 		this.playAd = function(charInd) {
 			var ind=parseInt(charInd);
-			var url=that.listAds[ind];
+			var url=that.listAds[ind][0];
             that.getVast(url);
 		}
-=======
-            that.player.pause();
-            that.getVast(that.listAds[parseInt(e.target.text)]);
-        };
->>>>>>> Parsing MAST
 
         this.stop = function() {
             setAdMode(false);

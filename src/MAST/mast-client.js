@@ -49,7 +49,7 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
 						adsVast[adsVast.length] = vastData;
  */                     newCue.onenter = listener;
                         track.addCue(newCue);
-						theAds[theAds.length] = uri;
+//						theAds[theAds.length] = uri;
                     }
                 }
         });
