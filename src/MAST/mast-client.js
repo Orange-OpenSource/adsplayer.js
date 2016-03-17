@@ -30,7 +30,7 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
 
                 if (resu) {
                     triggers = self.mastParser.getTriggersList();
-                    var track = video.addTextTrack("chapters", "orange", "test");
+                    var track = video.addTextTrack("chapters", "ads", "none");
                     track.mode = "hidden";
                     for(i = 0; i<triggers.length; i += 1){
                         startConditions = self.mastParser.getTriggerStartConditions(triggers[i]);
@@ -43,14 +43,28 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                         }
                         sources = self.mastParser.getTriggerSources(triggers[i]);
                         var uri = self.mastParser.getSourceUri(sources[0]);
-                        var newCue = new Cue(positionStart, positionStart+1, adsMast.length);
-						adsMast[adsMast.length] = [uri];
-/* 						vasData = getVastRep(uri);
-						adsVast[adsVast.length] = vastData;
- */                     newCue.onenter = listener;
+						adsMast[adsMast.length] = [uri,positionStart,0];
+                     }
+                    // sort elements by date
+                    adsMast.sort(function(a,b){
+                        if (a[1]< b[1])
+                            return -1;
+                        else if (a[1] > b[1])
+                            return 1;
+                        else 
+                            return 0;
+                    })
+
+                    // create cues according to the sorted ads
+                    for(var i=0;i<adsMast.length;i++)
+                    {
+                        var newCue = new Cue(adsMast[i][1], adsMast[i][1]+1, i);
+                        newCue.onenter = listener;
                         track.addCue(newCue);
-//						theAds[theAds.length] = uri;
-                    }
+                   }
+                    // add an event to the video element
+                    var event= new CustomEvent('mastCompleted');    
+                    video.dispatchEvent(event);           
                 }
         });
 };

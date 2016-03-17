@@ -1,6 +1,8 @@
 			
 			var hasVideoPlayer = document.getElementById("videoPlayer");
 			var vLength;
+			var globalVideoUrl=null;      // global variable used to store the video url passed via the html client.
+
 			//  display video duration when available
 			hasVideoPlayer.addEventListener("loadedmetadata", function () {
 			vLength = hasVideoPlayer.duration.toFixed(1);
@@ -54,10 +56,46 @@
 			}
 			, false);
 
+/*
+			a listenner is added so that the videoplayer is activated once the mast file is processed
+*/
+            hasVideoPlayer.addEventListener('mastCompleted', 
+			function(){
+			    var vid = document.getElementById("videoPlayer");
+			    adsPlayer.setNumOfCues();
+				vid.onseeked = function() {
+			    	adsPlayer.seekedHandler();
+			    };
+				orangeHasPlayer.load(globalVideoUrl);
+				console.log(" new HAS video has been loaded");
+			}
+			, false);
 
 			loadFiles = function(videoUrl,mastUrl){
+				adsPlayer.reset();
+				clearVideosAdsCues();
 				adsPlayer.start(mastUrl);
-			    orangeHasPlayer.load(videoUrl);
-			    console.log(" new HAS video is being played");
+				globalVideoUrl=videoUrl;
 			};
-			
+/*
+	clearVideosAdsCues() is added to allow for new videos to be launched with its own cues
+	i.e. previous cues (if any) are cleared.
+*/			
+			function clearVideosAdsCues() {
+			    var v = document.getElementById("videoPlayer")
+
+			    var textTracks = v.textTracks; // one for each track element
+			    for (var c=0;c<textTracks.length;c++)
+			    {
+				    var textTrack = textTracks[c]; 
+				    if(textTrack.label=='ads'){
+					    var cues = textTrack.cues;
+					    for (var i=cues.length-1;i>=0;i--) {
+					        textTrack.removeCue(cues[i]);
+					    }
+					}
+				}
+			};
+
+
+		
