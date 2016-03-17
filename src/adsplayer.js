@@ -156,6 +156,9 @@
             if (url.indexOf('http://') === -1){
                 url = that.mastBaseUrl + url;
             }
+//            var vastBaseUrl= url.substring(0, Math.max(url.lastIndexOf("/"), url.lastIndexOf("\\"))); 
+            var vastBaseUrl = url.match(/(.*)[\/\\]/)[1]||''+'/';
+            vastBaseUrl=vastBaseUrl+'/';
             DMVAST.client.get(url, function(response) {
                     if (response) {
                         var videoContainer = document.getElementById('VideoModule'),
@@ -182,7 +185,7 @@
                                         mediaFile = creative.mediaFiles[mfIdx];
                                         if (mediaFile.mimeType === 'video/mp4') {
                                             if (mediaFile.fileURL.indexOf('http://') === -1){
-                                                internalPlayer.src = that.mastBaseUrl+mediaFile.fileURL;
+                                                internalPlayer.src = vastBaseUrl+mediaFile.fileURL;
                                             } else {
                                                 internalPlayer.src = mediaFile.fileURL;
                                             }
@@ -241,7 +244,8 @@
             var vastData;
 			that.mastUrl = mastUrl;
             that.vastUrl = vastUrl;
-            that.mastBaseUrl = that._getBaseUri(that.mastUrl);
+            that.mastBaseUrl = that.mastUrl.match(/(.*)[\/\\]/)[1]||'';
+            that.mastBaseUrl=that.mastBaseUrl+'/';
             that.listAds=[];
             if (that.mastUrl) {
                var mastClient = new AdsPlayer.dependencies.MastClient();
