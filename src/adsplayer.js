@@ -49,7 +49,8 @@
         this.mastBaseUrl = null;
 		this.listAds = [];		
 		this.descripAds = [];
-		//this.oneAd = null;
+        that.numOfCues=0;                   // a counter on the number of cues still to play
+        that.adsToPlay=[];                  // used to play several ads in a row , e.g with fast forward operation
 	
         internalPlayer.autoplay = true;
 
@@ -62,16 +63,22 @@
         });
 
         function _onFinished() {
-            numberOfAdsToPlay--;
+            that.numOfCues--;
             internalPlayer.vastTracker.complete();
-			internalPlayer.style.visibility = overlay.style.visibility = 'hidden';
-			that.player.style.visibility = 'visible';
-			overlay.innerText = "";
+            console.log('ad completed or aborted');
             internalPlayer.pause();
-            playingAds = false;
-			var event= new CustomEvent('endAd');	
-			that.player.dispatchEvent(event);			
-        }
+
+           if(that.adsToPlay.length>0)  // if a subsequent ad is to be played, just do it
+                that.playAds();
+            else {                         // no more ad to play
+			     internalPlayer.style.visibility = overlay.style.visibility = 'hidden';
+			     that.player.style.visibility = 'visible';
+			     overlay.innerText = "";
+                 playingAds = false;
+                 var event= new CustomEvent('endAd');
+                that.player.dispatchEvent(event); 
+            }
+        };
 
         var setAdMode = function(enabled) {
             if (enabled) {
@@ -152,6 +159,9 @@
             if (url.indexOf('http://') === -1){
                 url = that.mastBaseUrl + url;
             }
+//            var vastBaseUrl= url.substring(0, Math.max(url.lastIndexOf("/"), url.lastIndexOf("\\"))); 
+            var vastBaseUrl = url.match(/(.*)[\/\\]/)[1]||''+'/';
+            vastBaseUrl=vastBaseUrl+'/';
             DMVAST.client.get(url, function(response) {
                     if (response) {
                         var videoContainer = document.getElementById('VideoModule'),
@@ -178,7 +188,7 @@
                                         mediaFile = creative.mediaFiles[mfIdx];
                                         if (mediaFile.mimeType === 'video/mp4') {
                                             if (mediaFile.fileURL.indexOf('http://') === -1){
-                                                internalPlayer.src = that.mastBaseUrl+mediaFile.fileURL;
+                                                internalPlayer.src = vastBaseUrl+mediaFile.fileURL;
                                             } else {
                                                 internalPlayer.src = mediaFile.fileURL;
                                             }
@@ -237,14 +247,16 @@
             var vastData;
 			that.mastUrl = mastUrl;
             that.vastUrl = vastUrl;
-            that.mastBaseUrl = that._getBaseUri(that.mastUrl);
+            that.mastBaseUrl = that.mastUrl.match(/(.*)[\/\\]/)[1]||'';
+            that.mastBaseUrl=that.mastBaseUrl+'/';
+            that.listAds=[];
             if (that.mastUrl) {
                var mastClient = new AdsPlayer.dependencies.MastClient(that);
 
                mastClient.start(that.mastUrl, that.player, that.mastListener);
 			   /**for (var i=0; i< that.listAds.length; i++)
 			   {
-				   vastData = that.getVastRep(that.listAds[i]);
+				   vastData = that.getVastRep(that.listAds[i][0]);
 				   that.descripAds[i] = vastData;
 			   }
 */
@@ -262,15 +274,30 @@
         };
 
         this.mastListener = function(e) {
-			var event= new CustomEvent('playAd', { 'detail': e.target.text });	
-			that.player.dispatchEvent(event);			
+            var ind=parseInt(e.target.text);
+            if(that.listAds[ind][2]==0){
+			     var event= new CustomEvent('playAd', { 'detail': e.target.text });	
+			     that.player.dispatchEvent(event);
+            }		
          };
 
 		this.playAd = function(charInd) {
 			var ind=parseInt(charInd);
-			var url=that.listAds[ind][0];
-            that.getVast(url);
-		}
+            if(that.listAds[ind][2]==0){
+			    var url=that.listAds[ind][0];
+                that.getVast(url);
+                that.listAds[ind][2]=1;
+            }
+		};
+
+        this.setNumOfCues = function(){
+            that.numOfCues=that.listAds.length;
+        };
+
+        this.playAds = function() {
+            var ind=that.adsToPlay.shift();
+            that.playAd(ind);
+        };
 
         this.stop = function() {
             setAdMode(false);
@@ -290,6 +317,7 @@
             overlay.innerText = "";
             internalPlayer.pause();
             playingAds = false;
+            that.numOfCues=0;
         };
 
         this.isPlayingAds = function() {
@@ -303,6 +331,27 @@
 
         this.setFullscreen = function(fullscreen) {
             internalPlayer.vastTracker.setFullscreen(fullscreen);
+        };
+
+/*
+        function added to play ads after a seek operation.
+        Only unplayed ads will be played. This is indicated with the third parameter
+        in listAds
+*/
+        this.seekedHandler=function(){
+            var seekedTime=that.player.currentTime;
+            console.log(seekedTime);
+
+            for(var i=0;i<that.listAds.length;i++){
+                if(that.listAds[i][1]>=seekedTime){
+                    break;
+                }
+                if(that.listAds[i][2]==0){
+                  that.adsToPlay.push(i.toString());
+                }
+            }
+            if(that.adsToPlay.length>0)
+                that.playAds();
         };
     };
 
