@@ -64,7 +64,7 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                         var newCue = new Cue(self.adsPlayer.listAds[i][1], self.adsPlayer.listAds[i][1]+1, i);
                         newCue.onenter = listener;
                         track.addCue(newCue);
-                        self.adsPlayer.getVastRep(self.adsPlayer.listAds[i][1], i);
+                        self.adsPlayer.getVastRep(self.adsPlayer.listAds[i][0], i);
 
                    }
                     // add an event to the video element
