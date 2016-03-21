@@ -49,6 +49,7 @@
         this.mastBaseUrl = null;
 		this.listAds = [];		
 		this.descripAds = [];
+		//this.oneAd = null;
 	
         internalPlayer.autoplay = true;
 
@@ -91,22 +92,25 @@
         };
 		// Ahmad 10/03/15
 		
-		this.getVastRep = function(urlvast) {
+		this.getVastRep = function(urlvast, ind) {
 					
+			//this.obj = {};		
 			var url = urlvast;
-		    var obj = null ;       
+			var indice = ind;
+		           
             DMVAST.client.get(url, function(response) {
-                    if (response) {
-                        var videoContainer = document.getElementById('VideoModule'),
-                            adIdx,
-                            adLen,
-                            ad,
-                            creaIdx,
-                            creaLen,
-                            creative,
-                            mfIdx,
-                            mfLen,
-                            mediaFile;
+                if (response) {
+                    var videoContainer = document.getElementById('VideoModule'),
+                        adIdx,
+                        adLen,
+                        ad,
+                        creaIdx,
+                        creaLen,
+                        creative,
+                        mfIdx,
+                        mfLen,
+                        mediaFile;
+						var obj = {};
 
                         for (adIdx = 0, adLen = response.ads.length; adIdx < adLen; adIdx++) {
                             ad = response.ads[adIdx];
@@ -137,9 +141,9 @@
                             
                         }
                     }
-
+					that.descripAds[indice] = obj;
                 });
-				return obj;
+			//return this.oneAd;	
 
         };
 		// fin Ahmad 10/03/15
@@ -235,15 +239,15 @@
             that.vastUrl = vastUrl;
             that.mastBaseUrl = that._getBaseUri(that.mastUrl);
             if (that.mastUrl) {
-               var mastClient = new AdsPlayer.dependencies.MastClient();
+               var mastClient = new AdsPlayer.dependencies.MastClient(that);
 
-               mastClient.start(that.mastUrl, that.player, that.mastListener, that.listAds);
-			   for (var i=0; i< that.listAds.length; i++)
+               mastClient.start(that.mastUrl, that.player, that.mastListener);
+			   /**for (var i=0; i< that.listAds.length; i++)
 			   {
 				   vastData = that.getVastRep(that.listAds[i]);
 				   that.descripAds[i] = vastData;
 			   }
-
+*/
 			   //that.getVastRep(that.listAds[0]);
 			console.log(that.listAds.ads);
             } else {

@@ -1,21 +1,22 @@
-AdsPlayer.dependencies.MastClient = function() {
+AdsPlayer.dependencies.MastClient = function(adsplayer) {
     'use strict';
     this.mastLoader = new AdsPlayer.dependencies.MastLoader();
     this.mastParser = new AdsPlayer.dependencies.MastParser();
     this.video = null;
 	this.ads = null;
+	this.adsPlayer = adsplayer;
 };
 
 AdsPlayer.dependencies.MastClient.prototype = {
     constructor: AdsPlayer.dependencies.MastClient
 };
 
-AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listener, adsMast) {
+AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listener) {
     var self = this;
     var Cue = window.VTTCue || window.TextTrackCue;
 
     self.video = video;
-	self.adsMast = adsMast;
+	
 
     this.mastLoader.Load(url, function(result) {
             var resu = self.mastParser.parse(result),
@@ -32,6 +33,7 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                     triggers = self.mastParser.getTriggersList();
                     var track = video.addTextTrack("chapters", "orange", "test");
                     track.mode = "hidden";
+					//var vastData = new Object();
                     for(i = 0; i<triggers.length; i += 1){
                         startConditions = self.mastParser.getTriggerStartConditions(triggers[i]);
                         for(j = 0; j<startConditions.length; j += 1){
@@ -43,13 +45,13 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                         }
                         sources = self.mastParser.getTriggerSources(triggers[i]);
                         var uri = self.mastParser.getSourceUri(sources[0]);
-                        var newCue = new Cue(positionStart, positionStart+1, adsMast.length);
-						adsMast[adsMast.length] = [uri];
-/* 						vasData = getVastRep(uri);
-						adsVast[adsVast.length] = vastData;
- */                     newCue.onenter = listener;
+						var ind = self.adsPlayer.listAds.length;
+                        var newCue = new Cue(positionStart, positionStart+1, ind);
+						self.adsPlayer.listAds[ind] = [uri, positionStart];
+ 						self.adsPlayer.getVastRep(uri, ind);
+						//self.adsPlayer.descripAds[ind] = vastData;
+                        newCue.onenter = listener;
                         track.addCue(newCue);
-//						theAds[theAds.length] = uri;
                     }
                 }
         });
