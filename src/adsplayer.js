@@ -101,9 +101,14 @@
 		
 		this.getVastRep = function(urlvast, ind) {
 					
-			//this.obj = {};		
 			var url = urlvast;
 			var indice = ind;
+            if (url.indexOf('http://') === -1){
+                url = that.mastBaseUrl + url;
+            }
+//            var vastBaseUrl= url.substring(0, Math.max(url.lastIndexOf("/"), url.lastIndexOf("\\"))); 
+            var vastBaseUrl = url.match(/(.*)[\/\\]/)[1]||''+'/';
+            vastBaseUrl=vastBaseUrl+'/';
 		           
             DMVAST.client.get(url, function(response) {
                 if (response) {
@@ -116,39 +121,41 @@
                         creative,
                         mfIdx,
                         mfLen,
-                        mediaFile;
-						var obj = {};
-
+                        mediaFile,
+                        source;
+                        var ads = [];
                         for (adIdx = 0, adLen = response.ads.length; adIdx < adLen; adIdx++) {
                             ad = response.ads[adIdx];
+                            var creativAd = [];
                             for (creaIdx = 0, creaLen = ad.creatives.length; creaIdx < creaLen; creaIdx++) {
                                 creative = ad.creatives[creaIdx];
-								obj.type = creative.type;
+
                                 if (creative.type === 'linear') {
+                                    var mediaAd = [];                             
                                     for (mfIdx = 0, mfLen = creative.mediaFiles.length; mfIdx < mfLen; mfIdx++) {
                                         mediaFile = creative.mediaFiles[mfIdx];
                                         if (mediaFile.mimeType === 'video/mp4') {
                                             if (mediaFile.fileURL.indexOf('http://') === -1){
-                                                obj.source = that.mastBaseUrl+mediaFile.fileURL;
+                                                source = vastBaseUrl+mediaFile.fileURL;
                                             } else {
-                                                obj.source = mediaFile.fileURL;
+                                                source = mediaFile.fileURL;
                                             }
                                         }else if (mediaFile.mimeType === 'image/jpg') {
-                                            obj.source = mediaFile.fileURL;
+                                            source = mediaFile.fileURL;
                                         }
                                         else{
                                             continue;
                                         }
-										
-										obj.mimeType = mediaFile.mimeType;
-
+										mediaAd[mfIdx] = {'mediaType': mediaFile.mimeType, 'mediaSource' : source};
                                     }
+                                    creativAd[creaIdx] = {'creativeType' : creative.type, 'mediaFiles' : mediaAd};
                                 }
                             }
-                            
+                        ads[adIdx] = {'creatives' :creativAd};
                         }
+                    that.descripAds[indice] = {listAds : ads};
                     }
-					that.descripAds[indice] = obj;
+					
                 });
 			//return this.oneAd;	
 
@@ -285,7 +292,39 @@
 			var ind=parseInt(charInd);
             if(that.listAds[ind][2]==0){
 			    var url=that.listAds[ind][0];
-                that.getVast(url);
+                //that.getVast(url);
+                url = adsPlayer.descripAds[0].listAds[0].creatives[0].mediaFiles[0].mediaSource;
+                var ad = adsPlayer.descripAds[0].listAds[0];
+                var creative = ad.creatives[0];
+
+//modify
+                var videoContainer = document.getElementById('VideoModule');
+                videoContainer.appendChild(internalPlayer);
+                videoContainer.appendChild(overlay);
+                setAdMode(true);
+                internalPlayer.src = url;
+                internalPlayer.vastTracker = new DMVAST.tracker(ad, creative);
+                internalPlayer.vastTracker.on('clickthrough', function() {
+                });
+                numberOfAdsToPlay++;
+                playingAds = true;
+
+                internalPlayer.addEventListener('canplay', function() {
+                    this.vastTracker.load();
+                });
+                internalPlayer.addEventListener('timeupdate', function() {
+                    this.vastTracker.setProgress(this.currentTime);
+                });
+                internalPlayer.addEventListener('play', function() {
+                    this.vastTracker.setPaused(false);
+                });
+                internalPlayer.addEventListener('pause', function() {
+                    this.vastTracker.setPaused(true);
+                });
+                internalPlayer.addEventListener("ended", _onFinished);
+//end
+
+
                 that.listAds[ind][2]=1;
             }
 		};
