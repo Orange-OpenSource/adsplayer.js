@@ -33,7 +33,6 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                     triggers = self.mastParser.getTriggersList();
                     var track = video.addTextTrack("chapters", "ads", "none");
                     track.mode = "hidden";
-					//var vastData = new Object();
                     for(i = 0; i<triggers.length; i += 1){
                         startConditions = self.mastParser.getTriggerStartConditions(triggers[i]);
                         for(j = 0; j<startConditions.length; j += 1){

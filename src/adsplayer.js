@@ -51,7 +51,8 @@
 		this.descripAds = [];
         that.numOfCues=0;                   // a counter on the number of cues still to play
         that.adsToPlay=[];                  // used to play several ads in a row , e.g with fast forward operation
-	
+        that.stillAdToplay = false;
+	    that.currentCueIndex = null;        // what is the current Cue being played
         internalPlayer.autoplay = true;
 
         internalPlayer.addEventListener('click', function() {
@@ -63,20 +64,27 @@
         });
 
         function _onFinished() {
-            that.numOfCues--;
-            internalPlayer.vastTracker.complete();
-            console.log('ad completed or aborted');
-            internalPlayer.pause();
 
-           if(that.adsToPlay.length>0)  // if a subsequent ad is to be played, just do it
-                that.playAds();
-            else {                         // no more ad to play
-			     internalPlayer.style.visibility = overlay.style.visibility = 'hidden';
-			     that.player.style.visibility = 'visible';
-			     overlay.innerText = "";
-                 playingAds = false;
-                 var event= new CustomEvent('endAd');
-                that.player.dispatchEvent(event); 
+            if(that.stillAdToplay)
+            {
+                that.playAd(that.currentCueIndex);
+            }
+            else{
+                that.numOfCues--;
+                internalPlayer.vastTracker.complete();
+                console.log('ad completed or aborted');
+                internalPlayer.pause();
+
+               if(that.adsToPlay.length>0)  // if a subsequent ad is to be played, just do it
+                    that.playAds();
+                else {                         // no more ad to play
+    			     internalPlayer.style.visibility = overlay.style.visibility = 'hidden';
+    			     that.player.style.visibility = 'visible';
+    			     overlay.innerText = "";
+                     playingAds = false;
+                     var event= new CustomEvent('endAd');
+                    that.player.dispatchEvent(event); 
+                }
             }
         };
 
@@ -85,13 +93,13 @@
                 that.player.style.visibility = 'hidden';
                 internalPlayer.style.visibility = overlay.style.visibility = 'visible';
                 internalPlayer.play();
-                that.player.pause();
+//                that.player.pause();
             } else {
                 that.player.style.visibility = 'visible';
                 internalPlayer.style.visibility = overlay.style.visibility = 'hidden';
                 overlay.innerText = "";
                 internalPlayer.pause();
-                that.player.play();
+//                that.player.play();
             }
 
             playingAds = enabled;
@@ -101,9 +109,14 @@
 		
 		this.getVastRep = function(urlvast, ind) {
 					
-			//this.obj = {};		
 			var url = urlvast;
 			var indice = ind;
+            if (url.indexOf('http://') === -1){
+                url = that.mastBaseUrl + url;
+            }
+//            var vastBaseUrl= url.substring(0, Math.max(url.lastIndexOf("/"), url.lastIndexOf("\\"))); 
+            var vastBaseUrl = url.match(/(.*)[\/\\]/)[1]||''+'/';
+            vastBaseUrl=vastBaseUrl+'/';
 		           
             DMVAST.client.get(url, function(response) {
                 if (response) {
@@ -116,39 +129,42 @@
                         creative,
                         mfIdx,
                         mfLen,
-                        mediaFile;
-						var obj = {};
-
+                        mediaFile,
+                        source;
+                        var ads = [];
                         for (adIdx = 0, adLen = response.ads.length; adIdx < adLen; adIdx++) {
                             ad = response.ads[adIdx];
+                            var creativAd = [];
                             for (creaIdx = 0, creaLen = ad.creatives.length; creaIdx < creaLen; creaIdx++) {
                                 creative = ad.creatives[creaIdx];
-								obj.type = creative.type;
+
                                 if (creative.type === 'linear') {
+                                    var mediaAd = [];                             
                                     for (mfIdx = 0, mfLen = creative.mediaFiles.length; mfIdx < mfLen; mfIdx++) {
                                         mediaFile = creative.mediaFiles[mfIdx];
                                         if (mediaFile.mimeType === 'video/mp4') {
                                             if (mediaFile.fileURL.indexOf('http://') === -1){
-                                                obj.source = that.mastBaseUrl+mediaFile.fileURL;
+                                                source = vastBaseUrl+mediaFile.fileURL;
                                             } else {
-                                                obj.source = mediaFile.fileURL;
+                                                source = mediaFile.fileURL;
                                             }
                                         }else if (mediaFile.mimeType === 'image/jpg') {
-                                            obj.source = mediaFile.fileURL;
+                                            source = mediaFile.fileURL;
                                         }
                                         else{
                                             continue;
                                         }
-										
-										obj.mimeType = mediaFile.mimeType;
-
+										mediaAd[mfIdx] = {'mediaType': mediaFile.mimeType, 'mediaSource' : source};
                                     }
+                                    creativAd[creaIdx] = {'creativeType' : creative.type, 'mediaFiles' : mediaAd};
                                 }
                             }
-                            
+                        ads[adIdx] = {'creatives' :creativAd,"ad":ad};
                         }
+                    that.descripAds[indice] = {listAds : ads};
+                    that.listAds[indice][3] = 0;                    // this is the number of ads played in the vast file;
+                    that.listAds[indice][4] = response.ads.length;  // this is the number of ads to play in the vast file;
                     }
-					that.descripAds[indice] = obj;
                 });
 			//return this.oneAd;	
 
@@ -281,12 +297,57 @@
             }		
          };
 
-		this.playAd = function(charInd) {
-			var ind=parseInt(charInd);
+		this.playAd = function(myInd) {
+            if(typeof myInd === 'string'){
+                var ind=parseInt(myInd);            // means that this is triggererd via a Cue
+                  if(that.listAds[ind][2]==0){
+                     that.adsToPlay=[ind];
+                     ind=that.adsToPlay.shift();
+                  }
+            }
+            else{
+                var ind=myInd;
+            }
             if(that.listAds[ind][2]==0){
-			    var url=that.listAds[ind][0];
-                that.getVast(url);
-                that.listAds[ind][2]=1;
+                that.currentCueIndex=ind;
+			    //var url=that.listAds[ind][0];
+                //that.getVast(url);
+                var indAd=that.listAds[ind][3]++;
+                console.log("will play add "+indAd+" of "+ind);
+                that.stillAdToplay=(that.listAds[ind][3]<that.listAds[ind][4])?true:false;
+                url = adsPlayer.descripAds[ind].listAds[indAd].creatives[0].mediaFiles[0].mediaSource;
+                var ad = adsPlayer.descripAds[ind].listAds[indAd].ad;
+                var creative = ad.creatives[0];
+
+//modify
+                var videoContainer = document.getElementById('VideoModule');
+                videoContainer.appendChild(internalPlayer);
+                videoContainer.appendChild(overlay);
+                setAdMode(true);
+                internalPlayer.src = url;
+                internalPlayer.vastTracker = new DMVAST.tracker(ad, creative);
+                internalPlayer.vastTracker.on('clickthrough', function() {
+                });
+                numberOfAdsToPlay++;
+                playingAds = true;
+
+                internalPlayer.addEventListener('canplay', function() {
+                    this.vastTracker.load();
+                });
+                internalPlayer.addEventListener('timeupdate', function() {
+                    this.vastTracker.setProgress(this.currentTime);
+                });
+                internalPlayer.addEventListener('play', function() {
+                    this.vastTracker.setPaused(false);
+                });
+                internalPlayer.addEventListener('pause', function() {
+                    this.vastTracker.setPaused(true);
+                });
+                internalPlayer.addEventListener("ended", _onFinished);
+//end
+
+
+                that.listAds[ind][2]=(that.listAds[ind][3]<that.listAds[ind][4])?0:1;
             }
 		};
 
@@ -347,7 +408,7 @@
                     break;
                 }
                 if(that.listAds[i][2]==0){
-                  that.adsToPlay.push(i.toString());
+                  that.adsToPlay.push(i);
                 }
             }
             if(that.adsToPlay.length>0)
