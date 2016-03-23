@@ -346,7 +346,6 @@
                 internalPlayer.addEventListener("ended", _onFinished);
 //end
 
-
                 that.listAds[ind][2]=(that.listAds[ind][3]<that.listAds[ind][4])?0:1;
             }
 		};
