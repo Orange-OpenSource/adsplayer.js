@@ -105,7 +105,6 @@
             playingAds = enabled;
             internalPlayer.muted = !enabled;
         };
-		// Ahmad 10/03/15
 		
 		this.getVastRep = function(urlvast, ind) {
 					
@@ -114,7 +113,6 @@
             if (url.indexOf('http://') === -1){
                 url = that.mastBaseUrl + url;
             }
-//            var vastBaseUrl= url.substring(0, Math.max(url.lastIndexOf("/"), url.lastIndexOf("\\"))); 
             var vastBaseUrl = url.match(/(.*)[\/\\]/)[1]||''+'/';
             vastBaseUrl=vastBaseUrl+'/';
 		           
@@ -130,46 +128,32 @@
                         mfIdx,
                         mfLen,
                         mediaFile,
-                        source;
+                        fileURL;
                         var ads = [];
                         for (adIdx = 0, adLen = response.ads.length; adIdx < adLen; adIdx++) {
                             ad = response.ads[adIdx];
-                            var creativAd = [];
+                            
                             for (creaIdx = 0, creaLen = ad.creatives.length; creaIdx < creaLen; creaIdx++) {
                                 creative = ad.creatives[creaIdx];
 
                                 if (creative.type === 'linear') {
-                                    var mediaAd = [];                             
                                     for (mfIdx = 0, mfLen = creative.mediaFiles.length; mfIdx < mfLen; mfIdx++) {
                                         mediaFile = creative.mediaFiles[mfIdx];
-                                        if (mediaFile.mimeType === 'video/mp4') {
-                                            if (mediaFile.fileURL.indexOf('http://') === -1){
-                                                source = vastBaseUrl+mediaFile.fileURL;
-                                            } else {
-                                                source = mediaFile.fileURL;
-                                            }
-                                        }else if (mediaFile.mimeType === 'image/jpg') {
-                                            source = mediaFile.fileURL;
+                                        
+                                        if (mediaFile.fileURL.indexOf('http://') === -1){
+                                            mediaFile.fileURL = vastBaseUrl+mediaFile.fileURL;
                                         }
-                                        else{
-                                            continue;
-                                        }
-										mediaAd[mfIdx] = {'mediaType': mediaFile.mimeType, 'mediaSource' : source};
                                     }
-                                    creativAd[creaIdx] = {'creativeType' : creative.type, 'mediaFiles' : mediaAd};
                                 }
                             }
-                        ads[adIdx] = {'creatives' :creativAd,"ad":ad};
+                        ads[adIdx] = {"ad":ad};
                         }
                     that.descripAds[indice] = {listAds : ads};
                     that.listAds[indice][3] = 0;                    // this is the number of ads played in the vast file;
                     that.listAds[indice][4] = response.ads.length;  // this is the number of ads to play in the vast file;
                     }
                 });
-			//return this.oneAd;	
-
         };
-		// fin Ahmad 10/03/15
 
         this.getVast = function(url) {
             if (url.indexOf('http://') === -1){
@@ -315,7 +299,8 @@
                 var indAd=that.listAds[ind][3]++;
                 console.log("will play add "+indAd+" of "+ind);
                 that.stillAdToplay=(that.listAds[ind][3]<that.listAds[ind][4])?true:false;
-                url = adsPlayer.descripAds[ind].listAds[indAd].creatives[0].mediaFiles[0].mediaSource;
+                url = adsPlayer.descripAds[ind].listAds[indAd].ad.creatives[0].mediaFiles[0].fileURL; 
+                // attention on suppose qu'il n'y a qu'un seul creative par fichier et un seul média file 
                 var ad = adsPlayer.descripAds[ind].listAds[indAd].ad;
                 var creative = ad.creatives[0];
 
