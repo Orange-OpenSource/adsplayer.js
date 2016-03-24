@@ -71,11 +71,12 @@
 			}
 			, false);
 
-			loadFiles = function(videoUrl,mastUrl){
+			loadFiles = function(videoUrl,mastUrl, vastUrl){
+				
 				adsPlayer.reset();
 				clearVideosAdsCues();
-				adsPlayer.start(mastUrl);
 				globalVideoUrl=videoUrl;
+				adsPlayer.start(mastUrl, vastUrl);
 			};
 /*
 	clearVideosAdsCues() is added to allow for new videos to be launched with its own cues

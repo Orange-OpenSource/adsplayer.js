@@ -93,20 +93,18 @@
                 that.player.style.visibility = 'hidden';
                 internalPlayer.style.visibility = overlay.style.visibility = 'visible';
                 internalPlayer.play();
-//                that.player.pause();
             } else {
                 that.player.style.visibility = 'visible';
                 internalPlayer.style.visibility = overlay.style.visibility = 'hidden';
                 overlay.innerText = "";
                 internalPlayer.pause();
-//                that.player.play();
             }
 
             playingAds = enabled;
             internalPlayer.muted = !enabled;
         };
 		
-		this.getVastRep = function(urlvast, ind) {
+		this.getVast = function(urlvast, ind) {
 					
 			var url = urlvast;
 			var indice = ind;
@@ -155,115 +153,23 @@
                 });
         };
 
-        this.getVast = function(url) {
-            if (url.indexOf('http://') === -1){
-                url = that.mastBaseUrl + url;
-            }
-//            var vastBaseUrl= url.substring(0, Math.max(url.lastIndexOf("/"), url.lastIndexOf("\\"))); 
-            var vastBaseUrl = url.match(/(.*)[\/\\]/)[1]||''+'/';
-            vastBaseUrl=vastBaseUrl+'/';
-            DMVAST.client.get(url, function(response) {
-                    if (response) {
-                        var videoContainer = document.getElementById('VideoModule'),
-                            adIdx,
-                            adLen,
-                            ad,
-                            creaIdx,
-                            creaLen,
-                            creative,
-                            mfIdx,
-                            mfLen,
-                            mediaFile;
-                        videoContainer.appendChild(internalPlayer);
-                        videoContainer.appendChild(overlay);
-
-                        setAdMode(true);
-
-                        for (adIdx = 0, adLen = response.ads.length; adIdx < adLen; adIdx++) {
-                            ad = response.ads[adIdx];
-                            for (creaIdx = 0, creaLen = ad.creatives.length; creaIdx < creaLen; creaIdx++) {
-                                creative = ad.creatives[creaIdx];
-                                if (creative.type === 'linear') {
-                                    for (mfIdx = 0, mfLen = creative.mediaFiles.length; mfIdx < mfLen; mfIdx++) {
-                                        mediaFile = creative.mediaFiles[mfIdx];
-                                        if (mediaFile.mimeType === 'video/mp4') {
-                                            if (mediaFile.fileURL.indexOf('http://') === -1){
-                                                internalPlayer.src = vastBaseUrl+mediaFile.fileURL;
-                                            } else {
-                                                internalPlayer.src = mediaFile.fileURL;
-                                            }
-                                        }else if (mediaFile.mimeType === 'image/jpg') {
-                                            internalPlayer.poster = mediaFile.fileURL;
-                                        }
-                                        else{
-                                            continue;
-                                        }
-
-                                        internalPlayer.vastTracker = new DMVAST.tracker(ad, creative);
-                                        internalPlayer.vastTracker.on('clickthrough', function() {
-                                            //var win = window.open(url, '_blank');
-                                            //win.focus();
-                                        });
-
-                                        numberOfAdsToPlay++;
-                                        playingAds = true;
-
-                                        internalPlayer.addEventListener('canplay', function() {
-                                            this.vastTracker.load();
-                                        });
-                                        internalPlayer.addEventListener('timeupdate', function() {
-                                            this.vastTracker.setProgress(this.currentTime);
-                                        });
-                                        internalPlayer.addEventListener('play', function() {
-                                            this.vastTracker.setPaused(false);
-                                        });
-                                        internalPlayer.addEventListener('pause', function() {
-                                            this.vastTracker.setPaused(true);
-                                        });
-                                        internalPlayer.addEventListener("ended", _onFinished);
-                                    }
-                                }
-                            }
-
-                            if (internalPlayer.vastTracker) {
-                                break;
-                            } else {
-                                // Inform ad server we can't find suitable media file for this ad
-                                DMVAST.util.track(ad.errorURLTemplates, {
-                                    ERRORCODE: 403
-                                });
-                            }
-                        }
-                    }
-
-                    if (!internalPlayer.vastTracker) {
-                        setAdMode(false);
-                    }
-                });
-
-        };
 
         this.start = function(mastUrl, vastUrl) {
             var vastData;
 			that.mastUrl = mastUrl;
             that.vastUrl = vastUrl;
-            that.mastBaseUrl = that.mastUrl.match(/(.*)[\/\\]/)[1]||'';
-            that.mastBaseUrl=that.mastBaseUrl+'/';
             that.listAds=[];
             if (that.mastUrl) {
-               var mastClient = new AdsPlayer.dependencies.MastClient(that);
-
-               mastClient.start(that.mastUrl, that.player, that.mastListener);
-			   /**for (var i=0; i< that.listAds.length; i++)
-			   {
-				   vastData = that.getVastRep(that.listAds[i][0]);
-				   that.descripAds[i] = vastData;
-			   }
-*/
-			   //that.getVastRep(that.listAds[0]);
-			console.log(that.listAds.ads);
+                var mastClient = new AdsPlayer.dependencies.MastClient(that); that.mastBaseUrl = that.mastUrl.match(/(.*)[\/\\]/)[1]||'';
+                that.mastBaseUrl=that.mastBaseUrl+'/';
+                mastClient.start(that.mastUrl, that.player, that.mastListener);
+			     console.log(that.listAds.ads);
             } else {
-                that.getVast(that.vastUrl);
+                that.listAds[that.listAds.length] = [that.vastUrl,0,0];
+                that.getVast(that.listAds[0][0], 0);
+                var event= new CustomEvent('mastCompleted');    
+                that.player.dispatchEvent(event);           
+
             }
         };
 
@@ -294,8 +200,6 @@
             }
             if(that.listAds[ind][2]==0){
                 that.currentCueIndex=ind;
-			    //var url=that.listAds[ind][0];
-                //that.getVast(url);
                 var indAd=that.listAds[ind][3]++;
                 console.log("will play add "+indAd+" of "+ind);
                 that.stillAdToplay=(that.listAds[ind][3]<that.listAds[ind][4])?true:false;
@@ -303,8 +207,6 @@
                 // attention on suppose qu'il n'y a qu'un seul creative par fichier et un seul média file 
                 var ad = adsPlayer.descripAds[ind].listAds[indAd].ad;
                 var creative = ad.creatives[0];
-
-//modify
                 var videoContainer = document.getElementById('VideoModule');
                 videoContainer.appendChild(internalPlayer);
                 videoContainer.appendChild(overlay);
@@ -329,8 +231,6 @@
                     this.vastTracker.setPaused(true);
                 });
                 internalPlayer.addEventListener("ended", _onFinished);
-//end
-
                 that.listAds[ind][2]=(that.listAds[ind][3]<that.listAds[ind][4])?0:1;
             }
 		};
@@ -388,7 +288,7 @@
             console.log(seekedTime);
 
             for(var i=0;i<that.listAds.length;i++){
-                if(that.listAds[i][1]>=seekedTime){
+                if(that.listAds[i][1]>seekedTime){
                     break;
                 }
                 if(that.listAds[i][2]==0){
