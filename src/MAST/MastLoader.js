@@ -36,7 +36,7 @@ AdsPlayer.dependencies.MastLoader.prototype.Load = function(url, callback) {
         }
 
         if (request.status === 200 && request.readyState === 4) {
-            console.log("[MastLoader] Mast downloaded");
+            console.log("<MastLoader:onload> Mast downloaded");
 
             needFailureReport = false;
 
