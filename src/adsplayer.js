@@ -113,7 +113,6 @@
             }
             var vastBaseUrl = url.match(/(.*)[\/\\]/)[1]||''+'/';
             vastBaseUrl=vastBaseUrl+'/';
-		           
             DMVAST.client.get(url, function(response) {
                 if (response) {
                     var videoContainer = document.getElementById('VideoModule'),
@@ -146,7 +145,7 @@
                             }
                         ads[adIdx] = {"ad":ad};
                         }
-                    that.descripAds[indice] = {listAds : ads};
+                    that.descripAds[indice] = {"listAds" : ads};
                     that.listAds[indice][3] = 0;                    // this is the number of ads played in the vast file;
                     that.listAds[indice][4] = response.ads.length;  // this is the number of ads to play in the vast file;
                     }
@@ -204,34 +203,47 @@
                 console.log("will play add "+indAd+" of "+ind);
                 that.stillAdToplay=(that.listAds[ind][3]<that.listAds[ind][4])?true:false;
                 url = adsPlayer.descripAds[ind].listAds[indAd].ad.creatives[0].mediaFiles[0].fileURL; 
-                // attention on suppose qu'il n'y a qu'un seul creative par fichier et un seul média file 
-                var ad = adsPlayer.descripAds[ind].listAds[indAd].ad;
-                var creative = ad.creatives[0];
-                var videoContainer = document.getElementById('VideoModule');
-                videoContainer.appendChild(internalPlayer);
-                videoContainer.appendChild(overlay);
-                setAdMode(true);
-                internalPlayer.src = url;
-                internalPlayer.vastTracker = new DMVAST.tracker(ad, creative);
-                internalPlayer.vastTracker.on('clickthrough', function() {
-                });
-                numberOfAdsToPlay++;
-                playingAds = true;
+                // modify 25/03 
+                var mediaDuration = that.descripAds[ind].listAds[indAd].ad.creatives[0].duration;
+                var mediaMimType = that.descripAds[ind].listAds[indAd].ad.creatives[0].mediaFiles[0].mimeType;
+                if (mediaMimType == "video/mp4") {
+                    var ad = adsPlayer.descripAds[ind].listAds[indAd].ad;
+                    var creative = ad.creatives[0];
+                    var videoContainer = document.getElementById('VideoModule');
+                    videoContainer.appendChild(internalPlayer);
+                    videoContainer.appendChild(overlay);
+                    setAdMode(true);
+                    internalPlayer.src = url;
+                    internalPlayer.vastTracker = new DMVAST.tracker(ad, creative);
+                    internalPlayer.vastTracker.on('clickthrough', function() {
+                    });
+                    numberOfAdsToPlay++;
+                    playingAds = true;
 
-                internalPlayer.addEventListener('canplay', function() {
-                    this.vastTracker.load();
-                });
-                internalPlayer.addEventListener('timeupdate', function() {
-                    this.vastTracker.setProgress(this.currentTime);
-                });
-                internalPlayer.addEventListener('play', function() {
-                    this.vastTracker.setPaused(false);
-                });
-                internalPlayer.addEventListener('pause', function() {
-                    this.vastTracker.setPaused(true);
-                });
-                internalPlayer.addEventListener("ended", _onFinished);
-                that.listAds[ind][2]=(that.listAds[ind][3]<that.listAds[ind][4])?0:1;
+                    internalPlayer.addEventListener('canplay', function() {
+                        this.vastTracker.load();
+                    });
+                    internalPlayer.addEventListener('timeupdate', function() {
+                        this.vastTracker.setProgress(this.currentTime);
+                    });
+                    internalPlayer.addEventListener('play', function() {
+                        this.vastTracker.setPaused(false);
+                    });
+                    internalPlayer.addEventListener('pause', function() {
+                        this.vastTracker.setPaused(true);
+                    });
+                    internalPlayer.addEventListener("ended", _onFinished);
+                    that.listAds[ind][2]=(that.listAds[ind][3]<that.listAds[ind][4])?0:1;
+                }
+                else if (mediaMimType.includes ("image/")) {
+                    that.player.style.visibility = 'hidden';
+                    that.player.pause();
+                    setTimeout (function() {console.log('image !!');
+                    that.player.style.visibility = 'visible';
+                    that.player.play();}, mediaDuration * 1000);
+
+                }
+                // fin modify 25/03 
             }
 		};
 

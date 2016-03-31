@@ -11,7 +11,7 @@ http://openvideoplayer.sf.net/mast/mast.xsd" xmlns="http://openvideoplayer.sf.ne
 				<!-- This 'resets' the trigger for the next clip-->
 			</endConditions>
 			<sources>
-				<source uri="http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/VAST_5.xml" format="vast" >
+				<source uri="http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/VAST_6.xml" format="vast" >
 					<sources/>
 					<targets/>
 				</source>
