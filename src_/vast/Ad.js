@@ -1,77 +1,82 @@
 /*
  * The copyright in this software is being made available under the BSD License, included below. This software may be subject to other third party and contributor rights, including patent rights, and no such rights are granted under this license.
- *
- * Copyright (c) 2013, Digital Primates
+ * 
+ * Copyright (c) 2016, Orange
  * All rights reserved.
- *
+ * 
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
  * •  Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
  * •  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
  * •  Neither the name of the Digital Primates nor the names of its contributors may be used to endorse or promote products derived from this software without specific prior written permission.
- *
+ * 
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-AdsPlayer.dependencies.MastLoader = function() {
+
+
+// MediaFile object
+adsplayer.vast.model.MediaFile = function () {
     "use strict";
+
+    this.id = '';
+    this.type = '';
+    this.height = 0;
+    this.width = 0;
 };
 
-AdsPlayer.dependencies.MastLoader.prototype = {
-    constructor: AdsPlayer.dependencies.MastLoader
+adsplayer.vast.model.MediaFile.prototype = {
+    constructor: adsplayer.vast.model.MediaFile
 };
 
-AdsPlayer.dependencies.MastLoader.prototype.Load = function(url, callback) {
-    var request = new XMLHttpRequest(),
-        needFailureReport = true,
-        onload = null,
-        report = null,
-        onabort = null;
+// VideoClick object
+adsplayer.vast.model.VideoClick = function () {
+    "use strict";
 
-    onabort = function() {
-        request.aborted = true;
-    };
-
-    onload = function() {
-        if (request.status < 200 || request.status > 299) {
-            return;
-        }
-
-        if (request.status === 200 && request.readyState === 4) {
-            console.log("<MastLoader:onload> Mast downloaded");
-
-            needFailureReport = false;
-
-            callback(request.responseText);
-        }
-    };
-
-    report = function() {
-        if (!needFailureReport) {
-            return;
-        }
-        needFailureReport = false;
-
-        if (request.aborted) {
-            callback();
-        } else {
-            callback({
-                name: "ERROR",
-                message: "Failed to download mast file",
-                data: {
-                    url: url,
-                    status: request.status
-                }
-            });
-        }
-    };
-
-    try {
-        request.onload = onload;
-        request.onloadend = report;
-        request.onerror = report;
-        request.onabort = onabort;
-        request.open("GET", url, true);
-        request.send();
-    } catch (e) {
-        request.onerror();
-    }
+    this.clickThrough = '';
+    this.clickTracking = '';
 };
+
+adsplayer.vast.model.VideoClick.prototype = {
+    constructor: adsplayer.vast.model.VideoClick
+};
+
+// Linear object
+adsplayer.vast.model.Linear = function () {
+    "use strict";
+
+    this.id = '';
+    this.duration = 0;
+};
+
+adsplayer.vast.model.Linear.prototype = {
+    constructor: adsplayer.vast.model.Linear
+};
+
+// Creative object
+adsplayer.vast.model.Creative = function () {
+    "use strict";
+
+    this.id = '';
+    this.sequence = 0;
+    this.linear = null;
+    this.companionAds = [];
+    this.nonLinearAds = [];
+};
+
+adsplayer.vast.model.Creative.prototype = {
+    constructor: adsplayer.vast.model.Creative
+};
+
+// Ad object
+adsplayer.vast.model.Ad = function () {
+    "use strict";
+
+    this.system = '';
+    this.title = '';
+    this.description = '';
+    this.creatives = [];
+};
+
+adsplayer.vast.model.Ad.prototype = {
+    constructor: adsplayer.vast.model.Ad
+};
+

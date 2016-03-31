@@ -47,7 +47,7 @@
         this.vastUrl = null;
         this.mastUrl = null;
         this.mastBaseUrl = null;
-		this.listAds = [];		
+		this.listVastAds = [];		            // this table will be used to track the ads defined in the vast files : one entry per vast file
 		this.descripAds = [];
         that.numOfCues=0;                   // a counter on the number of cues still to play
         that.adsToPlay=[];                  // used to play several ads in a row , e.g with fast forward operation
@@ -65,15 +65,16 @@
 
         function _onFinished() {
 
+            console.log('<adsPlayer:_onFinished> ad completed or aborted');
             if(that.stillAdToplay)
             {
                 that.playAd(that.currentCueIndex);
             }
             else{
+                console.log('<adsPlayer:_onFinished> cue #'+that.currentCueIndex+' has been completed');
                 that.numOfCues--;
                 internalPlayer.vastTracker.complete();
-                console.log('ad completed or aborted');
-                internalPlayer.pause();
+               internalPlayer.pause();
 
                if(that.adsToPlay.length>0)  // if a subsequent ad is to be played, just do it
                     that.playAds();
@@ -143,11 +144,11 @@
                                     }
                                 }
                             }
-                        ads[adIdx] = {"ad":ad};
+                        ads[adIdx] = {"ad" : ad};
                         }
                     that.descripAds[indice] = {"listAds" : ads};
-                    that.listAds[indice][3] = 0;                    // this is the number of ads played in the vast file;
-                    that.listAds[indice][4] = response.ads.length;  // this is the number of ads to play in the vast file;
+                    that.listVastAds[indice].numPlayedAds = 0;              // this is the number of ads played in the vast file;
+                    that.listVastAds[indice].numAds = response.ads.length;  // this is the number of ads to play in the vast file;
                     }
                 });
         };
@@ -157,15 +158,16 @@
             var vastData;
 			that.mastUrl = mastUrl;
             that.vastUrl = vastUrl;
-            that.listAds=[];
+            that.listVastAds = [];
+            that.descripAds = [];
             if (that.mastUrl) {
                 var mastClient = new AdsPlayer.dependencies.MastClient(that); that.mastBaseUrl = that.mastUrl.match(/(.*)[\/\\]/)[1]||'';
                 that.mastBaseUrl=that.mastBaseUrl+'/';
                 mastClient.start(that.mastUrl, that.player, that.mastListener);
-			     console.log(that.listAds.ads);
+			     console.log(that.listVastAds.ads);
             } else {
-                that.listAds[that.listAds.length] = [that.vastUrl,0,0];
-                that.getVast(that.listAds[0][0], 0);
+                that.listVastAds[that.listVastAds.length] = {"vastUrl":that.vastUrl,"startTime":0,"completed":0};
+                that.getVast(that.listVastAds[0].vastUrl, 0);
                 var event= new CustomEvent('mastCompleted');    
                 that.player.dispatchEvent(event);           
 
@@ -180,7 +182,7 @@
 
         this.mastListener = function(e) {
             var ind=parseInt(e.target.text);
-            if(that.listAds[ind][2]==0){
+            if(that.listVastAds[ind].completed==0){
 			     var event= new CustomEvent('playAd', { 'detail': e.target.text });	
 			     that.player.dispatchEvent(event);
             }		
@@ -188,8 +190,9 @@
 
 		this.playAd = function(myInd) {
             if(typeof myInd === 'string'){
+                console.log("<adsPlayer:playAd> cue #"+myInd+" has been detected");
                 var ind=parseInt(myInd);            // means that this is triggererd via a Cue
-                  if(that.listAds[ind][2]==0){
+                  if(that.listVastAds[ind].completed==0){
                      that.adsToPlay=[ind];
                      ind=that.adsToPlay.shift();
                   }
@@ -197,13 +200,12 @@
             else{
                 var ind=myInd;
             }
-            if(that.listAds[ind][2]==0){
+            if(that.listVastAds[ind].completed==0){
                 that.currentCueIndex=ind;
-                var indAd=that.listAds[ind][3]++;
-                console.log("will play add "+indAd+" of "+ind);
-                that.stillAdToplay=(that.listAds[ind][3]<that.listAds[ind][4])?true:false;
+                var indAd=that.listVastAds[ind].numPlayedAds++;
+                that.stillAdToplay=(that.listVastAds[ind].numPlayedAds<that.listVastAds[ind].numAds)?true:false;
+                console.log("<adsPlayer:playAd> will play add #"+that.listVastAds[ind].numPlayedAds+"/"+that.listVastAds[ind].numAds+" of cue #"+ind);
                 url = adsPlayer.descripAds[ind].listAds[indAd].ad.creatives[0].mediaFiles[0].fileURL; 
-                // modify 25/03 
                 var mediaDuration = that.descripAds[ind].listAds[indAd].ad.creatives[0].duration;
                 var mediaMimType = that.descripAds[ind].listAds[indAd].ad.creatives[0].mediaFiles[0].mimeType;
                 if (mediaMimType == "video/mp4") {
@@ -212,12 +214,13 @@
                     var videoContainer = document.getElementById('VideoModule');
                     videoContainer.appendChild(internalPlayer);
                     videoContainer.appendChild(overlay);
-                    setAdMode(true);
+                    
                     internalPlayer.src = url;
                     internalPlayer.vastTracker = new DMVAST.tracker(ad, creative);
                     internalPlayer.vastTracker.on('clickthrough', function() {
                     });
                     numberOfAdsToPlay++;
+                    setAdMode(true);
                     playingAds = true;
 
                     internalPlayer.addEventListener('canplay', function() {
@@ -233,7 +236,7 @@
                         this.vastTracker.setPaused(true);
                     });
                     internalPlayer.addEventListener("ended", _onFinished);
-                    that.listAds[ind][2]=(that.listAds[ind][3]<that.listAds[ind][4])?0:1;
+                    that.listVastAds[ind].completed=(that.listVastAds[ind].numPlayedAds<that.listVastAds[ind].numAds)?0:1;
                 }
                 else if (mediaMimType.includes ("image/")) {
                     that.player.style.visibility = 'hidden';
@@ -243,12 +246,11 @@
                     that.player.play();}, mediaDuration * 1000);
 
                 }
-                // fin modify 25/03 
             }
 		};
 
         this.setNumOfCues = function(){
-            that.numOfCues=that.listAds.length;
+            that.numOfCues=that.listVastAds.length;
         };
 
         this.playAds = function() {
@@ -292,22 +294,22 @@
 
 /*
         function added to play ads after a seek operation.
-        Only unplayed ads will be played. This is indicated with the third parameter
-        in listAds
+        Only unplayed ads will be played. 
 */
         this.seekedHandler=function(){
             var seekedTime=that.player.currentTime;
-            console.log(seekedTime);
+            console.log('<adsPlayer:seekedHandler> currentTime = '+seekedTime);
 
-            for(var i=0;i<that.listAds.length;i++){
-                if(that.listAds[i][1]>seekedTime){
+            for(var i=0;i<that.listVastAds.length;i++){
+                if(that.listVastAds[i].startTime>seekedTime){
                     break;
                 }
-                if(that.listAds[i][2]==0){
+                if(that.listVastAds[i].completed==0){
                   that.adsToPlay.push(i);
+                  console.log('<adsPlayer:seekedHandler> cue #',i,' will be played');
                 }
             }
-            if(that.adsToPlay.length>0)
+            if(!that.player.playing && that.adsToPlay.length>0)
                 that.playAds();
         };
     };

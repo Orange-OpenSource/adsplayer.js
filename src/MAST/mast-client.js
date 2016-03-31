@@ -45,25 +45,27 @@ AdsPlayer.dependencies.MastClient.prototype.start = function(url, video, listene
                         sources = self.mastParser.getTriggerSources(triggers[i]);
                         var uri = self.mastParser.getSourceUri(sources[0]);
 
-						self.adsPlayer.listAds[self.adsPlayer.listAds.length] = [uri,positionStart,0];
+						//self.adsPlayer.listAds[self.adsPlayer.listAds.length] = [uri,positionStart,0];
+                        self.adsPlayer.listVastAds[self.adsPlayer.listVastAds.length]={"vastUrl":uri,"startTime":positionStart,"completed":0};
+
                      }
                     // sort elements by date
-                    self.adsPlayer.listAds.sort(function(a,b){
-                        if (a[1]< b[1])
+                    self.adsPlayer.listVastAds.sort(function(a,b){
+                        if (a.startTime< b.startTime)
                             return -1;
-                        else if (a[1] > b[1])
+                        else if (a.startTime > b.startTime)
                             return 1;
                         else 
                             return 0;
                     })
 
                     // create cues according to the sorted ads
-                    for(var i=0;i<self.adsPlayer.listAds.length;i++)
+                    for(var i=0;i<self.adsPlayer.listVastAds.length;i++)
                     {
-                        var newCue = new Cue(self.adsPlayer.listAds[i][1], self.adsPlayer.listAds[i][1]+1, i);
+                        var newCue = new Cue(self.adsPlayer.listVastAds[i].startTime, self.adsPlayer.listVastAds[i].startTime+1, i);
                         newCue.onenter = listener;
                         track.addCue(newCue);
-                        self.adsPlayer.getVast(self.adsPlayer.listAds[i][0], i);
+                        self.adsPlayer.getVast(self.adsPlayer.listVastAds[i].vastUrl, i);
 
                    }
                     // add an event to the video element

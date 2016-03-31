@@ -28,10 +28,10 @@
             hasVideoPlayer.addEventListener('playAd', 
 			function(e){
 				var that=this;
-				console.log('will play add :'+e.detail);
+				console.log('<adsPlayerDemo:hasVideoPlayer.addEventListener> will play add :'+e.detail);
 				
 				var _playAd = function() {
-					console.log("<video> do pause");
+					console.log("<adsPlayerDemo:hasVideoPlayer.addEventListener> do video pause");
 					that.pause();
 					adsPlayer.playAd(e.detail);
 					};
@@ -53,6 +53,7 @@
             hasVideoPlayer.addEventListener('endAd', 
 			function(){
 				this.play();
+				console.log("<adsPlayerDemo:hasVideoPlayer.addEventListener> Resume video");
 			}
 			, false);
 
@@ -61,13 +62,15 @@
 */
             hasVideoPlayer.addEventListener('mastCompleted', 
 			function(){
+				console.log("<adsPlayerDemo:hasVideoPlayer.addEventListener> Mast parsing completed");
 			    var vid = document.getElementById("videoPlayer");
 			    adsPlayer.setNumOfCues();
 				vid.onseeked = function() {
 			    	adsPlayer.seekedHandler();
 			    };
 				orangeHasPlayer.load(globalVideoUrl);
-				console.log(" new HAS video has been loaded");
+				console.log("<adsPlayerDemo:hasVideoPlayer.addEventListener> New HAS video has been loaded");
+				displayVideosAdsCues();
 			}
 			, false);
 
@@ -98,5 +101,20 @@
 				}
 			};
 
+			function displayVideosAdsCues() {
+			    var v = document.getElementById("videoPlayer")
+
+			    var textTracks = v.textTracks; // one for each track element
+			    for (var c=0;c<textTracks.length;c++)
+			    {
+				    var textTrack = textTracks[c]; 
+				    if(textTrack.label=='ads'){
+					    var cues = textTrack.cues;
+					    for (var i=0;i<cues.length;++i) {
+					        console.log('<adsPlayerDemo:displayVideosAdsCues> cue #'+i+'  at '+cues[i].startTime+' sec');
+					    }
+					}
+				}
+			};
 
 		
