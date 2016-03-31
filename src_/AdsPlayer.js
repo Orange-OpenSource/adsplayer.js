@@ -65,17 +65,9 @@ AdsPlayer = function() {
             throw new Error('AdsPlayer.init(): Invalid Argument');
         }
 
+        // TODO in AdsPlayerController
         _mainVideo = mainVideo;
         _adsVideo = adsVideo;
-
-        context = new MediaPlayer.di.Context();
-        mediaPlayer = new MediaPlayer(context);
-        video = videoElement;
-        mediaPlayer.startup();
-        mediaPlayer.attachView(video);
-        state = 'PLAYER_CREATED';
-
-        debug = mediaPlayer.getDebug();
 
         _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart.bind(this));
         _mainVideo.addEventListener("playing", _onMainVideoPlaying.bind(this));
@@ -141,6 +133,7 @@ AdsPlayer = function() {
      */
     this.load = function(mastUrl) {
         // TODO
+        AdsPlayerController.load(mastUrl);
     };
 
     /**

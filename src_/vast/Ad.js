@@ -14,7 +14,7 @@
 
 
 // MediaFile object
-adsplayer.vast.MediaFile = function () {
+adsplayer.vast.model.MediaFile = function () {
     "use strict";
 
     this.id = '';
@@ -23,36 +23,36 @@ adsplayer.vast.MediaFile = function () {
     this.width = 0;
 };
 
-adsplayer.vast.MediaFile.prototype = {
-    constructor: adsplayer.vast.MediaFile
+adsplayer.vast.model.MediaFile.prototype = {
+    constructor: adsplayer.vast.model.MediaFile
 };
 
 // VideoClick object
-adsplayer.vast.VideoClick = function () {
+adsplayer.vast.model.VideoClick = function () {
     "use strict";
 
     this.clickThrough = '';
     this.clickTracking = '';
 };
 
-adsplayer.vast.VideoClick.prototype = {
-    constructor: adsplayer.vast.VideoClick
+adsplayer.vast.model.VideoClick.prototype = {
+    constructor: adsplayer.vast.model.VideoClick
 };
 
 // Linear object
-adsplayer.vast.Linear = function () {
+adsplayer.vast.model.Linear = function () {
     "use strict";
 
     this.id = '';
     this.duration = 0;
 };
 
-adsplayer.vast.Linear.prototype = {
-    constructor: adsplayer.vast.Linear
+adsplayer.vast.model.Linear.prototype = {
+    constructor: adsplayer.vast.model.Linear
 };
 
 // Creative object
-adsplayer.vast.Creative = function () {
+adsplayer.vast.model.Creative = function () {
     "use strict";
 
     this.id = '';
@@ -62,12 +62,12 @@ adsplayer.vast.Creative = function () {
     this.nonLinearAds = [];
 };
 
-adsplayer.vast.Creative.prototype = {
-    constructor: adsplayer.vast.Creative
+adsplayer.vast.model.Creative.prototype = {
+    constructor: adsplayer.vast.model.Creative
 };
 
 // Ad object
-adsplayer.vast.Ad = function () {
+adsplayer.vast.model.Ad = function () {
     "use strict";
 
     this.system = '';
@@ -76,7 +76,7 @@ adsplayer.vast.Ad = function () {
     this.creatives = [];
 };
 
-adsplayer.vast.Ad.prototype = {
-    constructor: adsplayer.vast.Ad
+adsplayer.vast.model.Ad.prototype = {
+    constructor: adsplayer.vast.model.Ad
 };
 
