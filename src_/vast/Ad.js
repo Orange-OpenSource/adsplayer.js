@@ -13,70 +13,172 @@
  */
 
 
+// CreativeType
+var CreativeType = {
+    LINEAR: 'linear',
+    NON_LINEAR_ADS: 'NonLinearAds',
+    COMPANION_ADS : 'CompanionAds'
+};
+
+// MediaFileDelivery
+var MediaFileDelivery = {
+    STREAMING: 'streaming',
+    PROGRESSIVE: 'progressive '
+};
+
+// TrackingEvent
+var TrackingEvent={
+    CREATIVEVIEW:'creativeView',
+    START:'start',
+    MIDPOINT: 'midpoint',
+    FIRSTQUARTILE: 'firstQuartile',
+    THIRDQUARTILE: 'thirdQuartile', 
+    COMPLETE: 'complete',
+    MUTE: 'mute',
+    UNMUTE: 'unmute',
+    PAUSE: 'pause',
+    REWIND: 'rewind',
+    RESUME: 'resume',
+    FULLSCREEN: 'fullscreen',
+    EXPAND: 'expand',
+    COLLAPSE: 'collapse', 
+    ACCEPTINVITATION: 'acceptInvitation',
+    CLOSE: 'close' 
+}
+
+
+//
+//      Linear Ads
+//
+
 // MediaFile object
-adsplayer.vast.model.MediaFile = function () {
+AdsPlayer.Vast.Model.MediaFile = function () {
     "use strict";
 
-    this.id = '';
+    this.id = '';                   // optional : identifier
+    this.delivery = '';
     this.type = '';
+    this.bitrate = 0;               // optional : bitrate of encoded video in Kbps 
     this.height = 0;
     this.width = 0;
+    this.scalable=true;             // optional : whether it is acceptable to scale the image.
+    this.maintainAspectRatio=true;  // optional : whether the ad must have its aspect ratio maintained when scaled
+    this.apiFramework='';           // optional : defines the method to use for communication if the MediaFile is interactive. 
 };
 
-adsplayer.vast.model.MediaFile.prototype = {
-    constructor: adsplayer.vast.model.MediaFile
+AdsPlayer.Vast.Model.MediaFile.prototype = {
+    constructor: AdsPlayer.Vast.Model.MediaFile
 };
 
-// VideoClick object
-adsplayer.vast.model.VideoClick = function () {
+// VideoClicks object
+AdsPlayer.Vast.Model.VideoClicks = function () {
     "use strict";
-
-    this.clickThrough = '';
-    this.clickTracking = '';
+    this.clickThrough = '';                 // URI to open as destination page when user clicks on the video
+    this.clickTracking = '';                // URI to request for tracking purposes when user clicks on the video 
+    this.customClick = '';                  // URIs to request on custom events such as hotspotted video  
 };
 
-adsplayer.vast.model.VideoClick.prototype = {
-    constructor: adsplayer.vast.model.VideoClick
+AdsPlayer.Vast.Model.VideoClicks.prototype = {
+    constructor: AdsPlayer.Vast.Model.VideoClicks
+};
+
+// Tracking object
+AdsPlayer.Vast.Model.Tracking = function () {
+    "use strict";
+    this.event = '';
+    this.uri = '';
+};
+
+AdsPlayer.Vast.Model.Tracking.prototype = {
+    constructor: AdsPlayer.Vast.Model.Tracking
 };
 
 // Linear object
-adsplayer.vast.model.Linear = function () {
+AdsPlayer.Vast.Model.Linear = function () {
     "use strict";
-
     this.id = '';
     this.duration = 0;
+    this.trackingEvents = [];         // pointer to any number of tracking objects : AdsPlayer.Vast.Model.Tracking
+    this.videoClicks = null;          // pointer video clicks object : AdsPlayer.Vast.Model.VideoClicks
+    this.mediaFiles = [];             // pointer to media file object : AdsPlayer.Vast.Model.MediaFile
 };
 
-adsplayer.vast.model.Linear.prototype = {
-    constructor: adsplayer.vast.model.Linear
+AdsPlayer.Vast.Model.Linear.prototype = {
+    constructor: AdsPlayer.Vast.Model.Linear
 };
+
+
+//
+//      Companion Ads
+//
+
+// Companion object
+AdsPlayer.Vast.Model.Companion = function () {
+    "use strict";
+    this.id = '';               //
+    this.width = 0;             // width pixel dimension of companion
+    this.height = 0;            // height pixel dimension of companion
+};
+
+AdsPlayer.Vast.Model.Companion.prototype = {
+    constructor: AdsPlayer.Vast.Model.Companion
+};
+
+
+//
+//      Non Linear Ads
+//
+
+// NonLinear object
+AdsPlayer.Vast.Model.NonLinear = function () {
+    "use strict";
+    this.id = '';               //
+    this.width = 0;             // width pixel dimension of non linear 
+    this.height = 0;            // height pixel dimension of non linear
+};
+
+AdsPlayer.Vast.Model.NonLinear.prototype = {
+    constructor: AdsPlayer.Vast.Model.NonLinear
+};
+
+
+//
+//      Creatives
+//
 
 // Creative object
-adsplayer.vast.model.Creative = function () {
+AdsPlayer.Vast.Model.Creative = function () {
     "use strict";
 
-    this.id = '';
-    this.sequence = 0;
-    this.linear = null;
-    this.companionAds = [];
-    this.nonLinearAds = [];
+    this.id = '';                       // optional : identifier
+    this.adId = '';                     // optional : Ad-ID for the creative (formerly ISCI) 
+    this.sequence = 0;                  // optional : the preferred order in which multiple Creatives should be displayed 
+    this.linear = null;                 // pointer to a unique (if any) linear Ad : AdsPlayer.Vast.Model.Linear
+    this.companionAds = [];             // pointer to any number of companions Ads : AdsPlayer.Vast.Model.Companion
+    this.nonLinearAds = [];             // pointer to any number of non-linear Ads : AdsPlayer.Vast.Model.NonLinear
 };
 
-adsplayer.vast.model.Creative.prototype = {
-    constructor: adsplayer.vast.model.Creative
+AdsPlayer.Vast.Model.Creative.prototype = {
+    constructor: AdsPlayer.Vast.Model.Creative
 };
+
+
+//
+//      Ads
+//
 
 // Ad object
-adsplayer.vast.model.Ad = function () {
+AdsPlayer.Vast.Model.Ad = function () {
     "use strict";
 
     this.system = '';
     this.title = '';
     this.description = '';
-    this.creatives = [];
+    this.impression='';
+    this.creatives = [];            // pointer to any number of creative objects : AdsPlayer.Vast.Model.Creative
 };
 
-adsplayer.vast.model.Ad.prototype = {
-    constructor: adsplayer.vast.model.Ad
+AdsPlayer.Vast.Model.Ad.prototype = {
+    constructor: AdsPlayer.Vast.Model.Ad
 };
 
