@@ -121,7 +121,9 @@ AdsPlayer.MastParser.prototype._parseTimings = function(timingStr) {
         parsedTime,
         SECONDS_IN_HOUR = 60 * 60,
         SECONDS_IN_MIN = 60;
-
+    if(timingStr==null) {
+        return -1;
+    }
     timeParts = timingStr.split(":");
 
     parsedTime = (parseFloat(timeParts[0]) * SECONDS_IN_HOUR +
@@ -139,6 +141,7 @@ AdsPlayer.MastParser.prototype.getConditions = function(conditions) {
         var condition = new AdsPlayer.Mast.Trigger.Condition();
         condition.type = this.parser.getAttributeValue(conditions[j], 'type');
         condition.name = this.parser.getAttributeValue(conditions[j], 'name');
+        condition.value = this._parseTimings(this.parser.getAttributeValue(conditions[j], 'value'));
         condition.operator = this.parser.getAttributeValue(conditions[j], 'operator');
         condition.conditions=this.getConditions(this.parser.getChildNodes(conditions[j],'conditions') );
         cond.push(condition);

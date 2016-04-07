@@ -161,7 +161,8 @@
             that.listVastAds = [];
             that.descripAds = [];
             if (that.mastUrl) {
-                var mastClient = new AdsPlayer.dependencies.MastClient(that); that.mastBaseUrl = that.mastUrl.match(/(.*)[\/\\]/)[1]||'';
+                var mastClient = new AdsPlayer.dependencies.MastClient(that); 
+                that.mastBaseUrl = that.mastUrl.match(/(.*)[\/\\]/)[1]||'';
                 that.mastBaseUrl=that.mastBaseUrl+'/';
                 mastClient.start(that.mastUrl, that.player, that.mastListener);
 			     console.log(that.listVastAds.ads);

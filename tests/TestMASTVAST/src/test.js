@@ -50,11 +50,15 @@
       };
 
       this.parseMastFile = function() {
-          if(that.mastFileContent!==''){
-              this.mastTriggers=that.mastParser.parse(that.mastFileContent);
+          if(that.mastFileContent !== ''){
+              that.mastTriggers=that.mastParser.parse(that.mastFileContent);
+          }
+    
+          if(that.mastTriggers !== []) {
+              // here goes the code parsing the triggers'sources if in vast format
           }
       }
-
+      
    	  this.loadMastUrl = function(url)
    		{
    			that.fileLoader.load(url).then(function(result){
@@ -70,6 +74,7 @@
             });
         },function(reason){
             console.log(reason);
+            alert(reason.message);
         });
    		}
     };

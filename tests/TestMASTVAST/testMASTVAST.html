@@ -16,8 +16,9 @@
 		<p><strong>Test MAST VAST</strong></p>
 	<script>
 		var adsPlayer = new AdsPlayer();
-		//var url = "http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/04_MAST_preroll_midroll.xml";
-		var url = "http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/test.txtt";
+		var url = "http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/04_MAST_preroll_midroll.xml";  // this should work
+		//var url = "http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/test.txt";			// this should return : 'not xml'
+		//var url = "http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/test.txtt";			// this sould return : 'not found'
 		adsPlayer.eventBus.addEventListener("mastFileLoaded",adsPlayer.parseMastFile)
 		adsPlayer.loadMastUrl(url);
 	</script>
