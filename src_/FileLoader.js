@@ -11,7 +11,7 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-AdsPlayer.util.FileLoader = function() {
+AdsPlayer.FileLoader = function() {
     "use strict";
 
     var deferred = null,
@@ -118,9 +118,18 @@ AdsPlayer.util.FileLoader = function() {
                 }
                 needFailureReport = false;
 
-                if (request.responseXML==null) {
+                if (request.status == 404) {
                     deferred.reject({
-                        name: AdsPlayer.dependencies.ErrorHandler.prototype.DOWNLOAD_ERR_NOTXML,
+                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_FILES,
+                        message: "File not found",
+                        data : {
+                            url: url,
+                            status: request.status
+                        }
+                    });
+                } else if (request.responseXML==null) {
+                    deferred.reject({
+                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_NOTXML,
                         message: "the downloaded file format is not xml",
                         data : {
                             url: url,
@@ -129,7 +138,7 @@ AdsPlayer.util.FileLoader = function() {
                     });
                 } else if (request.aborted) {
                     deferred.reject({
-                        name: AdsPlayer.dependencies.ErrorHandler.prototype.DOWNLOAD_ERR_ABORTED,
+                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_ABORTED,
                         message: "download has been aborted",
                         data : {
                             url: url,
@@ -138,7 +147,7 @@ AdsPlayer.util.FileLoader = function() {
                     });
                 } else {
                     deferred.reject({
-                        name: AdsPlayer.dependencies.ErrorHandler.prototype.DOWNLOAD_ERR_FILES,
+                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_FILES,
                         message: "Failed to download file",
                         data : {
                             url: url,
@@ -172,6 +181,6 @@ AdsPlayer.util.FileLoader = function() {
     };
 };
 
-AdsPlayer.util.FileLoader.prototype = {
-    constructor: AdsPlayer.util.FileLoader
+AdsPlayer.FileLoader.prototype = {
+    constructor: AdsPlayer.utils.FileLoader
 };

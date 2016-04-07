@@ -44,6 +44,22 @@ var SourceFormat = {
     UIF: 'uif'
 };
 
+
+// Trigger object
+AdsPlayer.Mast.Trigger = function () {
+    "use strict";
+
+    this.id = '';
+    this.description = 0;
+    this.startConditions = [];          // pointer to a list of start conditions to  : AdsPlayer.Mast.Trigger.Condition
+    this.endConditions = [];            // pointer to a list of end conditions : AdsPlayer.Mast.Trigger.Condition
+    this.sources = [];                  // pointer to a list of sources : AdsPlayer.Mast.Trigger.Source
+};
+
+AdsPlayer.Mast.Trigger.prototype = {
+    constructor: AdsPlayer.Mast.Trigger
+};
+
 // Condition object
 AdsPlayer.Mast.Trigger.Condition = function () {
     "use strict";
@@ -56,7 +72,7 @@ AdsPlayer.Mast.Trigger.Condition = function () {
 };
 
 AdsPlayer.Mast.Trigger.Condition.prototype = {
-    constructor: mast.Trigger.Condition
+    constructor: AdsPlayer.Mast.Trigger.Condition
 };
 
 // Source object
@@ -66,27 +82,10 @@ AdsPlayer.Mast.Trigger.Source = function () {
     this.uri = '';
     this.altReference = '';
     this.format = '';
-    // this.sources = [];
+    this.sources = [];
     // this.targets = [];
 };
 
 AdsPlayer.Mast.Trigger.Source.prototype = {
-    constructor: mast.Trigger.Source
+    constructor: AdsPlayer.Mast.Trigger.Source
 };
-
-
-// Trigger object
-AdsPlayer.Mast.Trigger = function () {
-    "use strict";
-
-    this.id = '';
-    this.description = 0;
-    this.startConditions = [];
-    this.endConditions = [];
-    this.sources = [];
-};
-
-AdsPlayer.Mast.Trigger.prototype = {
-    constructor: AdsPlayer.Mast.Trigger
-};
-

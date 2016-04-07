@@ -112,12 +112,41 @@ AdsPlayer.Vast.Model.Linear.prototype = {
 //      Companion Ads
 //
 
+// StaticResource Object
+AdsPlayer.Vast.Model.StaticResource = function () {
+    "use strict";
+    this.uRI = '';              // optional : URI to a static file, such as an image or SWF file 
+    this.creativeType  ='';     // mime type of static resource
+};
+
+AdsPlayer.Vast.Model.StaticResource.prototype = {
+    constructor: AdsPlayer.Vast.Model.StaticResource
+};
+
+// CompanionTracking object
+AdsPlayer.Vast.Model.CompanionTracking = function () {
+    "use strict";
+    this.event = 'creativeView ';     // the creativeView should always be requested when present. For Companions creativeView is the only supported event. 
+    this.uri = '';
+};
+
+AdsPlayer.Vast.Model.CompanionTracking.prototype = {
+    constructor: AdsPlayer.Vast.Model.CompanionTracking
+};
+
 // Companion object
 AdsPlayer.Vast.Model.Companion = function () {
     "use strict";
-    this.id = '';               //
-    this.width = 0;             // width pixel dimension of companion
-    this.height = 0;            // height pixel dimension of companion
+    this.id = '';                       // optional : identifier
+    this.width = 0;                     // width pixel dimension of companion
+    this.height = 0;                    // height pixel dimension of companion
+    this.staticResource = null;         // optional : pointer to the static resource : AdsPlayer.Vast.Model.StaticResource
+    this.iFrameResource = '';           // optional : URI source for an IFrame to display the companion element 
+    this.hTMLResource = '';             // optional : HTML to display the companion element : shall be CDATA value
+    this.trackingEvents = [];           // optional : pointer to any number of tracking objects : AdsPlayer.Vast.Model.CompanionTracking
+    this.clickThrough = '';             // optional : URI to open as destination page when user clicks on the companion 
+    this.altText = '';                  // optional : alt text to be displayed when companion is rendered in HTML environment. 
+    this.adParameters = '';             // optional : data to be passed into the companion ads
 };
 
 AdsPlayer.Vast.Model.Companion.prototype = {
@@ -132,9 +161,19 @@ AdsPlayer.Vast.Model.Companion.prototype = {
 // NonLinear object
 AdsPlayer.Vast.Model.NonLinear = function () {
     "use strict";
-    this.id = '';               //
-    this.width = 0;             // width pixel dimension of non linear 
-    this.height = 0;            // height pixel dimension of non linear
+    this.id = '';                       // optional : identifier
+    this.width = 0;                     // width pixel dimension of non linear 
+    this.height = 0;                    // height pixel dimension of non linear
+    this.expandedWidth = 0;             // optional : pixel dimensions of expanding nonlinear ad when in expanded state
+    this.expandedHeight  = 0;           // optional : pixel dimensions of expanding nonlinear ad when in expanded state
+    this.scalable = true;               // optional : whether it is acceptable to scale the image 
+    this.maintainAspectRatio = true;    // optional : whether the ad must have its aspect ratio maintained when scaled 
+    this.apiFramework = '';             // optional : defines the method to use for communication with the nonlinear element
+    this.staticResource = null;         // optional : pointer to the static resource : AdsPlayer.Vast.Model.StaticResource
+    this.hTMLResource = '';             // optional : HTML to display the companion element : shall be CDATA value
+    this.trackingEvents = [];           // optional : pointer to any number of tracking objects : AdsPlayer.Vast.Model.Tracking
+    this.clickThrough = '';             // optional : URI to open as destination page when user clicks on the non-linear ad unit  
+    this.adParameters = '';             // optional : data to be passed into the video ad
 };
 
 AdsPlayer.Vast.Model.NonLinear.prototype = {
@@ -154,8 +193,8 @@ AdsPlayer.Vast.Model.Creative = function () {
     this.adId = '';                     // optional : Ad-ID for the creative (formerly ISCI) 
     this.sequence = 0;                  // optional : the preferred order in which multiple Creatives should be displayed 
     this.linear = null;                 // pointer to a unique (if any) linear Ad : AdsPlayer.Vast.Model.Linear
-    this.companionAds = [];             // pointer to any number of companions Ads : AdsPlayer.Vast.Model.Companion
-    this.nonLinearAds = [];             // pointer to any number of non-linear Ads : AdsPlayer.Vast.Model.NonLinear
+    this.companions = [];               // pointer to any number of companions Ads : AdsPlayer.Vast.Model.Companion
+    this.nonLinears = [];               // pointer to any number of non-linear Ads : AdsPlayer.Vast.Model.NonLinear
 };
 
 AdsPlayer.Vast.Model.Creative.prototype = {

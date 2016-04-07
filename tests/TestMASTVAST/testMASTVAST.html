@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="UTF-8" />
+		<title>Test MAST VAST </title>
+		<script src=".\src\test.js"> </script>
+		<script src=".\src\q.js"> </script>
+		<script src="..\..\src_\ErrorHandler.js"> </script>
+		<script src="..\..\src_\FileLoader.js"> </script>
+		<script src="..\..\src_\utils\DOMParser.js"> </script>
+		<script src="..\..\src_\EventBus.js"> </script>
+		<script src="..\..\src_\mast\Trigger.js"> </script>
+		<script src="..\..\src_\mast\MastParser.js"> </script>
+	</head>
+	<body>
+		<p><strong>Test MAST VAST</strong></p>
+	<script>
+		var adsPlayer = new AdsPlayer();
+		//var url = "http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/04_MAST_preroll_midroll.xml";
+		var url = "http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/test.txtt";
+		adsPlayer.eventBus.addEventListener("mastFileLoaded",adsPlayer.parseMastFile)
+		adsPlayer.loadMastUrl(url);
+	</script>
+	</body>
+</html>

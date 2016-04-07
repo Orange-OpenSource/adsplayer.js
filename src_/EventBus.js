@@ -1,9 +1,12 @@
-AdsPlayer.utils.EventBus = function() {
+AdsPlayer.EventBus = function() {
     "use strict";
 
     var registrations,
 
         getListeners = function(type, useCapture) {
+            if(useCapture===undefined){                 // to provide a default parameter that works !! 
+                useCapture=false;
+            }
             var captype = (useCapture ? '1' : '0') + type;
 
             if (!(captype in registrations)) {
