@@ -41,8 +41,8 @@
 
    		this.fileLoader = new AdsPlayer.FileLoader();
       this.fileLoader.errorHandler = new AdsPlayer.ErrorHandler();
-      this.mastParser = new AdsPlayer.MastParser();
       this.vastParser = new AdsPlayer.Vast.VastParser();
+      this.mastParser = new AdsPlayer.Mast.MastParser();
       this.eventBus = new AdsPlayer.EventBus();
       this.mastTriggers = [];
       this.vastAds = [];
@@ -62,8 +62,7 @@
           }
       };
 
-   	  this.loadMastUrl = function(url)
-   		{
+   	  this.loadMastUrl = function(url) {
    			that.fileLoader.load(url).then(function(result){
             console.log("output from mast file loading : ");
             console.log("***************************************************");
