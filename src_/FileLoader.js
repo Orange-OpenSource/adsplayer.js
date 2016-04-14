@@ -64,8 +64,6 @@ AdsPlayer.FileLoader = function() {
                 this.debug.log("[FileLoader] File download abort.");
                 request.abort();
             }
-
-            this.parser.abort();
         },
 
         _load = function(url) {
@@ -118,7 +116,16 @@ AdsPlayer.FileLoader = function() {
                 }
                 needFailureReport = false;
 
-                if (request.status == 404) {
+                if (request.aborted) {
+                    deferred.reject({
+                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_ABORTED,
+                        message: "download has been aborted",
+                        data : {
+                            url: url,
+                            status: request.status
+                        }
+                    });
+                } else if (request.status == 404) {
                     deferred.reject({
                         name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_FILES,
                         message: "File not found",
@@ -131,15 +138,6 @@ AdsPlayer.FileLoader = function() {
                     deferred.reject({
                         name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_NOTXML,
                         message: "the downloaded file format is not xml",
-                        data : {
-                            url: url,
-                            status: request.status
-                        }
-                    });
-                } else if (request.aborted) {
-                    deferred.reject({
-                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_ABORTED,
-                        message: "download has been aborted",
                         data : {
                             url: url,
                             status: request.status

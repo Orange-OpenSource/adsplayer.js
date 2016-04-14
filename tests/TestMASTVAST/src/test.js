@@ -58,7 +58,7 @@
               // here goes the code parsing the triggers'sources if in vast format
           }
       }
-      
+
    	  this.loadMastUrl = function(url)
    		{
    			that.fileLoader.load(url).then(function(result){
@@ -76,6 +76,7 @@
             console.log(reason);
             alert(reason.message);
         });
+ //     that.fileLoader.abort();
    		}
     };
 

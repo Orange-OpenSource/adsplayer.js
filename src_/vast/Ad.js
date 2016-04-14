@@ -213,7 +213,8 @@ AdsPlayer.Vast.Model.Ad = function () {
     this.system = '';
     this.title = '';
     this.description = '';
-    this.impression='';
+    this.impression = '';           // URI to track impression 
+    this.id = '';
     this.creatives = [];            // pointer to any number of creative objects : AdsPlayer.Vast.Model.Creative
 };
 

@@ -31,7 +31,6 @@ AdsPlayer.MastParser.prototype.getTriggersList = function() {
         return this.parser.getChildNodes(this.parser.getChildNode(this.parser.getChildNode(this._xmlDoc, 'MAST'), 'triggers'), 'trigger');
     }
     return [];
-    
 };
 
 AdsPlayer.MastParser.prototype.getTriggerStartConditions = function(trigger) {
@@ -50,7 +49,7 @@ AdsPlayer.MastParser.prototype.getTriggerId = function(trigger) {
 
 AdsPlayer.MastParser.prototype.getTriggerDescription = function(trigger) {
     if (trigger) {
-        return this.parser.getAttributeValue(trigger, 'description');;
+        return this.parser.getAttributeValue(trigger, 'description');
     }
     return '';
 };
@@ -121,7 +120,7 @@ AdsPlayer.MastParser.prototype._parseTimings = function(timingStr) {
         parsedTime,
         SECONDS_IN_HOUR = 60 * 60,
         SECONDS_IN_MIN = 60;
-    if(timingStr==null) {
+    if(timingStr == null) {
         return -1;
     }
     timeParts = timingStr.split(":");
@@ -135,8 +134,8 @@ AdsPlayer.MastParser.prototype._parseTimings = function(timingStr) {
 
 AdsPlayer.MastParser.prototype.getConditions = function(conditions) {
     var j;
-    if(conditions!==[]) {
-      cond=[];
+    if(conditions !== []) {
+      var cond = [];
       for(j = 0; j < conditions.length ; j++){
         var condition = new AdsPlayer.Mast.Trigger.Condition();
         condition.type = this.parser.getAttributeValue(conditions[j], 'type');
@@ -149,24 +148,24 @@ AdsPlayer.MastParser.prototype.getConditions = function(conditions) {
       return cond;
     }
     return [];
-}
+};
 
 AdsPlayer.MastParser.prototype.getSources = function(sources) {
     var j;
-    if(sources!==[]) {
-      src=[];
+    if(sources !== []) {
+      var src = [];
       for(j = 0; j < sources.length ; j++){
         var source = new AdsPlayer.Mast.Trigger.Source();
         source.uri = this.parser.getAttributeValue(sources[j], 'uri');
         source.altReference = this.parser.getAttributeValue(sources[j], 'altReference');
         source.format = this.parser.getAttributeValue(sources[j], 'format');
-        source.sources=this.getConditions(this.parser.getChildNodes(sources[j],'sources') );
+        source.sources=this.getSources(this.parser.getChildNodes(sources[j],'sources') );
         src.push(source);
       }
       return src;
     }
     return [];
-}
+};
 
 //
 //  Below is the full parsing of the Mast file
@@ -202,4 +201,4 @@ AdsPlayer.MastParser.prototype.parse = function(mastFileContent) {
       triggers.push(trigger);
     }
     return triggers;
-}
+};
