@@ -37,12 +37,15 @@
    		var that = this;
 
       this.mastFileContent="";
+      this.vastFileContent= "";
 
    		this.fileLoader = new AdsPlayer.FileLoader();
       this.fileLoader.errorHandler = new AdsPlayer.ErrorHandler();
       this.mastParser = new AdsPlayer.MastParser();
+      this.vastParser = new AdsPlayer.Vast.VastParser();
       this.eventBus = new AdsPlayer.EventBus();
       this.mastTriggers = [];
+      this.vastAds = [];
 
       this.fileLoader.debug = {};
       this.fileLoader.debug.log = function(debugText){  
@@ -57,7 +60,7 @@
           if(that.mastTriggers !== []) {
               // here goes the code parsing the triggers'sources if in vast format
           }
-      }
+      };
 
    	  this.loadMastUrl = function(url)
    		{
@@ -78,17 +81,50 @@
         });
  //     that.fileLoader.abort();
    		}
+    //vast tests
+     this.parseVastFile = function() {
+          if(that.vastFileContent !== ''){
+              that.vastAds=that.vastParser.parse(that.vastFileContent);
+          }
+      }
+
+      this.loadVastUrl = function(url)
+      {
+        that.fileLoader.load(url).then(function(result){
+            console.log("output from vast file loading : ");
+            console.log("***************************************************");
+            console.log(result.response);
+            console.log("***************************************************");
+            console.log('');
+            that.vastFileContent=result.response;
+            that.eventBus.dispatchEvent({
+              type : "vastFileLoaded",
+              data : {}
+            });
+        },function(reason){
+            console.log(reason);
+            alert(reason.message);
+        });
+ //     that.fileLoader.abort();
+      }
+    // fin vast test
+
     };
 
     AdsPlayer.prototype = {
         constructor: AdsPlayer
     };
 
+
+
+
+
     AdsPlayer.Mast = {};
     AdsPlayer.Mast.Trigger = {};
     AdsPlayer.Mast.Trigger.Condition = {};
     AdsPlayer.dependencies = {};
     AdsPlayer.utils = {};
+    AdsPlayer.Vast = {};
     return AdsPlayer;
 });
 
