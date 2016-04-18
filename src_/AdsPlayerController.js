@@ -16,30 +16,27 @@
  *
  */
 /*jshint -W020 */
-AdsPlayer = function() {
+AdsPlayerController = function() {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
-
-    var self=this;
-
     var VERSION = "1.0.0_dev",
         GIT_TAG = "@@REVISION",
         BUILD_DATE = "@@TIMESTAMP",
         _mainVideo,
-        _adsVideo,
         _error = null,
         _warning = null;
 
 
     var _onMainVideoLoadStart = function () {
         // TODO
-        //adsPlayerController.addTextTrackCues();
-        adsPlayerController.analyseCues();
     };
 
     var _onMainVideoPlaying = function () {
-//        _mainVideo.pause();
+        if(this.preRoll){
+             _mainVideo.pause();
+             console.log('pause main video');
+       }
     };
 
     // ...
@@ -52,7 +49,19 @@ AdsPlayer = function() {
         warning = e.data;
     };
 
-    var adsPlayerController=new AdsPlayerController;
+    var self = this;
+
+    var adsMediaPlayer=new AdsMediaPlayer;
+
+    function _onEnded() {
+        console.log('ad video ended');
+        self.dispatchEvent("adEnd");
+        self.preRoll=false;
+        _mainVideo.removeEventListener("playing",_onMainVideoPlaying);
+        _mainVideo.play();
+        console.log('play main video')
+    };
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
@@ -63,33 +72,71 @@ AdsPlayer = function() {
      * Initialize the Ads player.
      * @method init
      * @access public
-     * @memberof AdsPlayer#
+     * @memberof AdsPlayerController#
      * @param {Object} mainVideo - the HTML5 video element used by the main media player
      * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
      */
 
 
+    var mastFileContent="";
+    var mastTriggers = [];
 
+    this.listVastAds = [];   // this table is used to track the (groups of) ads to be played
+                             // as defined in the vast files : one entry per vast file
+                             // each group except for the preroll/enroll cases will be associated to a cue 
 
-    this.init = function(mainVideo, adsContainer) {
+    this.fileLoader = new AdsPlayer.FileLoader();
+    this.fileLoader.errorHandler = new AdsPlayer.ErrorHandler();
+    this.mastParser = new AdsPlayer.Mast.MastParser();
+    this.eventBus = new AdsPlayer.EventBus();
 
+    this.preRoll = false;               // to indicate if a preRoll ad has been detected
+
+    this.fileLoader.debug = {};
+    this.fileLoader.debug.log = function(debugText){  
+       console.log(debugText);
+    };
+
+    this.init = function(mainVideo,adsContainer) {
         if (!mainVideo || !adsContainer) {
-            throw new Error('AdsPlayer.init(): Invalid Argument');
+            throw new Error('AdsPlayerController.init(): Invalid Argument');
+        }
+        _mainVideo = mainVideo;
+        _adsContainer   = adsContainer;
+        adsMediaPlayer.createVideoElt(adsContainer);
+        adsMediaPlayer.addlistener("ended", _onEnded);
+    }
+
+    this.playAd = function(videoUrl) {
+        if(this.preRoll){
+            console.log('PreRoll');
+        } else {
+            console.log('MidRoll');
         }
 
-        _mainVideo      = mainVideo;
-        _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart.bind(this));
-        _mainVideo.addEventListener("playing", _onMainVideoPlaying.bind(this));
-
-        adsPlayerController.init(mainVideo,adsContainer);
-
+        if (!videoUrl) {
+            throw new Error('AdsPlayerController.playVideo(): Invalid Argument');
+        }
+        this.dispatchEvent("adStart");
+        if(!this.preRoll){
+            _mainVideo.pause();
+        } 
+        adsMediaPlayer.playVideo(videoUrl);
     };
+
+    this.analyseCues = function() {
+        this.preRoll=true;
+        if (this.preRoll){
+            _mainVideo.addEventListener("playing", _onMainVideoPlaying.bind(this));
+            this.playAd('http://localhost:8080/adsPlayer.js/demo/medias/pubOasis.mp4');
+        }
+    }
 
     /**
      * Returns the version of the Ads player.
      * @method getVersion
      * @access public
-     * @memberof AdsPlayer#
+     * @memberof AdsPlayerController#
      * @return {string} the version of the Ads player
      */
     this.getVersion = function() {
@@ -101,7 +148,7 @@ AdsPlayer = function() {
      * Returns the build date of this Ads player.
      * @method getBuildDate
      * @access public
-     * @memberof AdsPlayer#
+     * @memberof AdsPlayerController#
      * @return {string} the build date of this Ads player
      */
     this.getBuildDate = function() {
@@ -117,7 +164,7 @@ AdsPlayer = function() {
     /**
      * Returns the Error object for the most recent error
      * @access public
-     * @memberof AdsPlayer#
+     * @memberof AdsPlayerController#
      * @return {object} the Error object for the most recent error, or null if there has not been an error
      */
     this.getError = function() {
@@ -127,7 +174,7 @@ AdsPlayer = function() {
     /**
      * Returns the Warning object for the most recent warning
      * @access public
-     * @memberof AdsPlayer#
+     * @memberof AdsPlayerController#
      * @return {object} the Warning object for the most recent warning, or null if there has not been a warning
      */
     this.getWarning = function() {
@@ -136,22 +183,48 @@ AdsPlayer = function() {
 
     ///////////
 
+
+    this.parseMastFile = function() {
+      if(self.mastFileContent !== ''){
+          self.mastTriggers=self.mastParser.parse(mastFileContent);
+      }
+
+      if(self.mastTriggers !== []) {
+          // here goes the code parsing the triggers'sources if in vast format
+      }
+     self.dispatchEvent("mastLoaded");
+    }
+
+
     /**
      * Load/open a MAST file.
      * @method load
      * @access public
-     * @memberof AdsPlayer#
+     * @memberof AdsPlayerController#
      * @param {string} mastUrl - the MAST file url
      */
-    this.load = function(mastUrl) {
-        adsPlayerController.load(mastUrl);
-    };
+    this.load = function(url) {
+        this.addEventListener("mastFileLoaded",this.parseMastFile);
+
+        this.fileLoader.load(url).then(function(result){
+            console.log("output from mast file loading : ");
+            console.log("***************************************************");
+            console.log(result.response);
+            console.log("***************************************************");
+            console.log('');
+            mastFileContent=result.response;
+            self.dispatchEvent("mastFileLoaded");
+        },function(reason){
+            console.log(reason);
+            alert(reason.message);
+        });
+    }
 
     /**
      * Stops and resets the Ads player.
      * @method reset
      * @access public
-     * @memberof AdsPlayer#
+     * @memberof AdsPlayerController#
      */
     this.reset = function() {
         // TODO
@@ -162,32 +235,48 @@ AdsPlayer = function() {
     /**
      * Registers a listener on the specified event.
      * The possible event types are:
-     * <li>'error' (see [error]{@link AdsPlayer#event:error} event specification)
-     * <li>'warning' (see [warning]{@link AdsPlayer#event:warning} event specification)
-     * <li>'adStart' (see [adStart]{@link AdsPlayer#event:adStart} event specification)
-     * <li>'adEnd' (see [adEnd]{@link AdsPlayer#event:adEnd} event specification)
+     * <li>'error' (see [error]{@link AdsPlayerController#event:error} event specification)
+     * <li>'warning' (see [warning]{@link AdsPlayerController#event:warning} event specification)
+     * <li>'adStart' (see [adStart]{@link AdsPlayerController#event:adStart} event specification)
+     * <li>'adEnd' (see [adEnd]{@link AdsPlayerController#event:adEnd} event specification)
      * @method addEventListener
      * @access public
-     * @memberof AdsPlayer#
+     * @memberof AdsPlayerController#
      * @param {string} type - the event type for listen to
      * @param {callback} listener - the callback which is called when an event of the specified type occurs
      * @param {boolean} useCapture - see HTML DOM addEventListener() method specification
      */
     this.addEventListener = function(type, listener, useCapture) {
-        adsPlayerController.addEventListener(type, listener, useCapture);
+        this.eventBus.addEventListener(type,listener);
     };
+
+    /**
+     * dispatch the specified event 
+     * The possible event types are:
+     * @method dispatchEvent
+     * @access public
+     * @memberof AdsPlayerController#
+     * @param {string} type - the event type for listen to
+     */
+    this.dispatchEvent = function(type) {
+        self.eventBus.dispatchEvent({
+              type : type,
+              data : {}
+            });
+    };
+
 
     /**
      * Unregisters the listener previously registered with the addEventListener() method.
      * @method removeEventListener
      * @access public
-     * @memberof AdsPlayer#
-     * @see [addEventListener]{@link AdsPlayer#addEventListener}
+     * @memberof AdsPlayerController#
+     * @see [addEventListener]{@link AdsPlayerController#addEventListener}
      * @param {string} type - the event type on which the listener was registered
      * @param {callback} listener - the callback which was registered to the event type
      */
     this.removeEventListener = function(type, listener) {
-        adsPlayerController.removeEventListener(type, listener);
+        this.eventBus.removeEventListener(type,listener);
     };
 
     /////////// EVENTS
@@ -196,7 +285,7 @@ AdsPlayer = function() {
      * The error event is fired when an error occurs.
      * When the error event is fired, the application shall stop the player.
      *
-     * @event AdsPlayer#error
+     * @event AdsPlayerController#error
      * @param {object} event - the event
      * @param {object} event.type - the event type ('error')
      * @param {object} event.data - the event data
@@ -208,7 +297,7 @@ AdsPlayer = function() {
     /**
      * The warning event is fired when a warning occurs.
      *
-     * @event AdsPlayer#warning
+     * @event AdsPlayerController#warning
      * @param {object} event - the event
      * @param {object} event.type - the event type ('warning')
      * @param {object} event.data - the event data
@@ -220,7 +309,7 @@ AdsPlayer = function() {
      /**
      * The adStart event is fired when the Ads player starts to play and ad.
      *
-     * @event AdsPlayer#cueEnter
+     * @event AdsPlayerController#cueEnter
      * @param {object} event - the event
      * @param {object} event.type - the event type ('adStart')
      */
@@ -228,21 +317,10 @@ AdsPlayer = function() {
      /**
      * The adEnd event is fired when the Ads player has ended to play and ad.
      *
-     * @event AdsPlayer#cueEnter
+     * @event AdsPlayerController#cueEnter
      * @param {object} event - the event
      * @param {object} event.type - the event type ('adEnd')
      */
-
 };
-
-AdsPlayer.prototype = {
-    constructor: AdsPlayer
-};
-
-AdsPlayer.Mast = {};
-AdsPlayer.Mast.Trigger = {};
-AdsPlayer.Mast.Trigger.Condition = {};
-AdsPlayer.dependencies = {};
-AdsPlayer.utils = {};
 
 

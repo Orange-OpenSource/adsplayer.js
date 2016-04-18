@@ -1,0 +1,113 @@
+<!DOCTYPE html> 
+<html> 
+	<head>
+		
+		<title>Test AdsPlayer</title>
+
+		<!--  Ads player Stuff  -->
+		<script src="..\..\src_\utils\q.js"> </script>
+		<script src="..\..\src_\AdsPlayer.js"></script>	
+		<script src="..\..\src_\AdsMediaPlayer.js"></script>	
+		<script src="..\..\src_\AdsPlayerController.js"></script>	
+
+		
+		<script src="..\..\src_\utils\DOMParser.js"> </script>
+		<script src="..\..\src_\ErrorHandler.js"> </script>
+		<script src="..\..\src_\FileLoader.js"> </script>		
+		<script src="..\..\src_\mast\Trigger.js"> </script>
+		<script src="..\..\src_\mast\MastParser.js"> </script>
+		<script src="..\..\src_\EventBus.js"> </script>
+<!---->
+
+	<style>
+		.demo-player {
+				position:absolute;
+				width:400px;
+				height:250px;
+				top:25px;
+				left:800px; 
+		}
+		.op-video {
+			position: relative;
+			width: 100%;
+			height: 100%;
+			background: black; 
+		}
+		.op-video video {
+			width: 100%;
+			height: 100%; 
+		}
+		.op-video .stretch {
+			-o-object-fit: cover;
+			object-fit: cover; 
+		}
+		.videos {
+				position:absolute;
+				width:400px;
+				height:250px;
+				top:25px;
+				left:800px; 
+		}
+		.overlay {
+				position:absolute;
+				width:400px;
+				height:250px;
+				top:25px;
+				left:800px; 
+		}
+	</style>
+
+    </head>	
+
+	<body> 		
+	
+		<!--  Legacy haslayer Stuff  -->
+		<script src=".\src\hasplayer.js\hasPlayer.js"></script>
+		
+		<div id="demo-player-container" class="demo-player" >
+		 		<div id="VideoModule" class="op-video">
+					<video class="player" id="videoPlayer" controls="true">
+					</video>
+		 		</div>
+		</div>	
+
+		<div id= "inputFields" style="display:yes;" >
+			<label>Type or paste a video URL: </label>
+			<br/>
+			<input type="text" id="videoFile" style="width: 500px;"  title="video file input field" value="http://2is7server1.rd.francetelecom.com/VOD/BBB-SD/big_buck_bunny_1080p_stereo.ism/Manifest" />   
+			<br/>
+			<label>Type or paste a Mast URL: </label>
+			<br/>
+			<input type="text" id="mastFile" style="width: 500px;"  title="video file input field" value="http://localhost:8080/adsPlayer.js/demo/MAST_VAST_FILES/12_MAST_multiAds.xml" />   
+			
+			<button id="loadFiles" title="Load video button" >Load</button>
+			
+		</div>
+		
+		<div id="status" >
+			Length(seconds): <span id="vLen"></span> <br/>
+			Current time:  <span id="curTime" title="Current time"></span><br />   Remaining time: <span id="vRemaining" title="Remaining time"></span>
+		</div>
+
+
+			<!--  Demo Interface -->
+		<script src="./src/TestAdsPlayer.js"></script>
+		<script>
+
+		     function getUrls() {
+				var videoURL = document.getElementById("videoFile").value;  // get input field 			
+				var mastURL = document.getElementById("mastFile").value;  // get input field                    
+				if (videoURL == "" || mastURL == "" ) {
+					errMessage("Enter a valid video/mast URL");  // fail silently
+				}
+				Init(videoURL, mastURL);
+			}
+			loadButton=document.getElementById("loadFiles");
+			loadButton.addEventListener("click", getUrls, false);
+
+
+//			getUrls();
+			
+		</script>
+	</body> 
+</html>
