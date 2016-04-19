@@ -4,8 +4,8 @@ AdsPlayer.EventBus = function() {
     var registrations,
 
         getListeners = function(type, useCapture) {
-            if(useCapture===undefined){                 // to provide a default parameter that works !! 
-                useCapture=false;
+            if (useCapture === undefined) { // to provide a default parameter that works !! 
+                useCapture = false;
             }
             var captype = (useCapture ? '1' : '0') + type;
 

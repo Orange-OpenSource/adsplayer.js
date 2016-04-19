@@ -21,28 +21,11 @@ AdsPlayer = function() {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
-    var self=this;
-
     var VERSION = "1.0.0_dev",
         GIT_TAG = "@@REVISION",
         BUILD_DATE = "@@TIMESTAMP",
-        _mainVideo,
-        _adsVideo,
         _error = null,
         _warning = null;
-
-
-    var _onMainVideoLoadStart = function () {
-        // TODO
-        //adsPlayerController.addTextTrackCues();
-        adsPlayerController.analyseCues();
-    };
-
-    var _onMainVideoPlaying = function () {
-//        _mainVideo.pause();
-    };
-
-    // ...
 
     var _onError = function(e) {
         error = e.data;
@@ -52,7 +35,7 @@ AdsPlayer = function() {
         warning = e.data;
     };
 
-    var adsPlayerController=new AdsPlayerController;
+    var adsPlayerController = new AdsPlayerController;
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
@@ -67,22 +50,11 @@ AdsPlayer = function() {
      * @param {Object} mainVideo - the HTML5 video element used by the main media player
      * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
      */
-
-
-
-
     this.init = function(mainVideo, adsContainer) {
-
         if (!mainVideo || !adsContainer) {
             throw new Error('AdsPlayer.init(): Invalid Argument');
         }
-
-        _mainVideo      = mainVideo;
-        _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart.bind(this));
-        _mainVideo.addEventListener("playing", _onMainVideoPlaying.bind(this));
-
-        adsPlayerController.init(mainVideo,adsContainer);
-
+        adsPlayerController.init(mainVideo, adsContainer);
     };
 
     /**
@@ -154,7 +126,7 @@ AdsPlayer = function() {
      * @memberof AdsPlayer#
      */
     this.reset = function() {
-        // TODO
+        adsPlayerController.reset();
     };
 
     /////////// EVENTS
@@ -217,7 +189,7 @@ AdsPlayer = function() {
      * @param {object} event.data.data - warning additionnal data
      */
 
-     /**
+    /**
      * The adStart event is fired when the Ads player starts to play and ad.
      *
      * @event AdsPlayer#cueEnter
@@ -225,7 +197,7 @@ AdsPlayer = function() {
      * @param {object} event.type - the event type ('adStart')
      */
 
-     /**
+    /**
      * The adEnd event is fired when the Ads player has ended to play and ad.
      *
      * @event AdsPlayer#cueEnter
@@ -239,10 +211,9 @@ AdsPlayer.prototype = {
     constructor: AdsPlayer
 };
 
-AdsPlayer.Mast = {};
-AdsPlayer.Mast.Trigger = {};
-AdsPlayer.Mast.Trigger.Condition = {};
+AdsPlayer.mast = {};
+AdsPlayer.mast.model = {};
+AdsPlayer.mast.model.Trigger = {};
+AdsPlayer.mast.model.Trigger.Condition = {};
 AdsPlayer.dependencies = {};
 AdsPlayer.utils = {};
-
-

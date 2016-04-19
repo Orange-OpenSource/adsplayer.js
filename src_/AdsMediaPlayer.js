@@ -13,69 +13,49 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-/*jshint -W020 */
-/*exported AdsMediaPlayer*/
 
-(function(root, factory) {
-    if (typeof define === "function" && define.amd) {
-        define([], function() {
-            root.AdsMediaPlayer = factory();
-            return root.AdsMediaPlayer;
-        });
-    } else if (typeof exports === "object") {
-        module.exports = factory();
-    } else {
-        root.AdsMediaPlayer = factory();
+AdsMediaPlayer = function() {
+    var that = this;
+    var internalPlayer = null;
+    var overlay = null;
+    var playingAds = false;
+
+    var adsVideoPlayer = null;
+
+    this.isPlayingAds = function() {
+        return playingAds;
+    };
+
+    this.init = function() {
+
     }
-})
-(this, function() {
-    'use strict';
-    var AdsMediaPlayer = {};
-	
-    AdsMediaPlayer = function() {
-        var that = this;
-        var internalPlayer = null;
-        var overlay = null;
-        var playingAds = false;
 
-        var adsVideoPlayer = null;
+    this.createVideoElt = function(adsContainer) {
+        if (adsVideoPlayer == null) {
+            adsVideoPlayer = document.createElement('video');
+            adsVideoPlayer.autoplay = false;
+            adsVideoPlayer.id = 'adsVideoPlayer';
+            adsVideoPlayer.style.position = 'absolute';
+            adsVideoPlayer.style.top = 0;
+            adsVideoPlayer.style.left = 0;
+            adsVideoPlayer.style.width = '100%';
+            adsContainer.appendChild(adsVideoPlayer);
+        }
+    };
 
-        this.isPlayingAds = function() {
-            return playingAds;
-        };
-
-        this.createVideoElt = function(adsContainer) {
-            if (adsVideoPlayer == null) {
-                adsVideoPlayer = document.createElement('video');
-                adsVideoPlayer.autoplay = false;
-                adsVideoPlayer.id = 'adsVideoPlayer';
-                adsVideoPlayer.style.position = 'absolute';
-                adsVideoPlayer.style.top = 0;
-                adsVideoPlayer.style.left = 0;
-                adsVideoPlayer.style.width = '100%';
-                adsContainer.appendChild(adsVideoPlayer);
-            }
-        };
-
-       this.addlistener = function(type, listener) {
-            adsVideoPlayer.addEventListener(type, listener);
-        };
-
-
-        this.playVideo = function(videoUrl) {
-            adsVideoPlayer.src = videoUrl;
-            adsVideoPlayer.play();
-            console.log('Play ad : '+videoUrl);
-        };
-
+    this.addlistener = function(type, listener) {
+        adsVideoPlayer.addEventListener(type, listener);
     };
 
 
-    AdsMediaPlayer.prototype = {
-        constructor: AdsMediaPlayer
+    this.playVideo = function(videoUrl) {
+        adsVideoPlayer.src = videoUrl;
+        adsVideoPlayer.play();
+        console.log('Play ad : ' + videoUrl);
     };
 
-    AdsMediaPlayer.dependencies = {};
+};
 
-    return AdsMediaPlayer;
-});
+AdsMediaPlayer.prototype = {
+    constructor: AdsMediaPlayer
+};

@@ -18,28 +18,14 @@
 /*jshint -W020 */
 AdsPlayerController = function() {
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
-    var VERSION = "1.0.0_dev",
-        GIT_TAG = "@@REVISION",
-        BUILD_DATE = "@@TIMESTAMP",
-        _mainVideo,
+    var _mainVideo,
         _error = null,
         _warning = null;
 
 
-    var _onMainVideoLoadStart = function () {
-        // TODO
+    var _onMainVideoLoadStart = function() {
+        this.analyseCues();
     };
-
-    var _onMainVideoPlaying = function () {
-        if(this.preRoll){
-             _mainVideo.pause();
-             console.log('pause main video');
-       }
-    };
-
-    // ...
 
     var _onError = function(e) {
         error = e.data;
@@ -51,13 +37,11 @@ AdsPlayerController = function() {
 
     var self = this;
 
-    var adsMediaPlayer=new AdsMediaPlayer;
+    var adsMediaPlayer = new AdsMediaPlayer;
 
     function _onEnded() {
         console.log('ad video ended');
         self.dispatchEvent("adEnd");
-        self.preRoll=false;
-        _mainVideo.removeEventListener("playing",_onMainVideoPlaying);
         _mainVideo.play();
         console.log('play main video')
     };
@@ -78,86 +62,64 @@ AdsPlayerController = function() {
      */
 
 
-    var mastFileContent="";
+    var mastFileContent = "";
     var mastTriggers = [];
 
-    this.listVastAds = [];   // this table is used to track the (groups of) ads to be played
-                             // as defined in the vast files : one entry per vast file
-                             // each group except for the preroll/enroll cases will be associated to a cue 
+    this.listVastAds = []; // this table is used to track the (groups of) ads to be played
+    // as defined in the vast files : one entry per vast file
+    // each group except for the preroll/enroll cases will be associated to a cue 
 
     this.fileLoader = new AdsPlayer.FileLoader();
-    this.fileLoader.errorHandler = new AdsPlayer.ErrorHandler();
-    this.mastParser = new AdsPlayer.Mast.MastParser();
+    this.errorHandler = new AdsPlayer.ErrorHandler();
+    this.mastParser = new AdsPlayer.mast.MastParser();
     this.eventBus = new AdsPlayer.EventBus();
 
-    this.preRoll = false;               // to indicate if a preRoll ad has been detected
-
     this.fileLoader.debug = {};
-    this.fileLoader.debug.log = function(debugText){  
-       console.log(debugText);
+    this.fileLoader.debug.log = function(debugText) {
+        console.log(debugText);
     };
 
-    this.init = function(mainVideo,adsContainer) {
+    this.init = function(mainVideo, adsContainer) {
         if (!mainVideo || !adsContainer) {
             throw new Error('AdsPlayerController.init(): Invalid Argument');
         }
         _mainVideo = mainVideo;
-        _adsContainer   = adsContainer;
+        _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart.bind(this));
+
+        // adsMediaPlayer.init()
         adsMediaPlayer.createVideoElt(adsContainer);
         adsMediaPlayer.addlistener("ended", _onEnded);
     }
 
-    this.playAd = function(videoUrl) {
-        if(this.preRoll){
-            console.log('PreRoll');
-        } else {
-            console.log('MidRoll');
-        }
-
+    this.playAd = function(videoUrl, preRoll) {
+        console.log(preRoll ? 'PreRoll' : 'MidRoll');
         if (!videoUrl) {
             throw new Error('AdsPlayerController.playVideo(): Invalid Argument');
         }
         this.dispatchEvent("adStart");
-        if(!this.preRoll){
+        if (!preRoll) {
             _mainVideo.pause();
-        } 
+        }
         adsMediaPlayer.playVideo(videoUrl);
     };
 
     this.analyseCues = function() {
-        this.preRoll=true;
-        if (this.preRoll){
-            _mainVideo.addEventListener("playing", _onMainVideoPlaying.bind(this));
-            this.playAd('http://localhost:8080/adsPlayer.js/demo/medias/pubOasis.mp4');
+        var preRoll = false;
+        var onPlaying = function() {
+            _mainVideo.pause();
+            console.log('pause main video');
+            _mainVideo.removeEventListener("playing", onPlaying);
+            preRoll = false;
+        };
+
+        preRoll = true;
+        if (preRoll) {
+            _mainVideo.addEventListener("playing", onPlaying);
+            this.playAd('http://localhost:8080/adsPlayer.js/demo/medias/pubOasis.mp4', preRoll);
         }
     }
 
-    /**
-     * Returns the version of the Ads player.
-     * @method getVersion
-     * @access public
-     * @memberof AdsPlayerController#
-     * @return {string} the version of the Ads player
-     */
-    this.getVersion = function() {
-        return VERSION;
-    };
 
-
-    /**
-     * Returns the build date of this Ads player.
-     * @method getBuildDate
-     * @access public
-     * @memberof AdsPlayerController#
-     * @return {string} the build date of this Ads player
-     */
-    this.getBuildDate = function() {
-        if (BUILD_DATE.indexOf("@@") === -1) {
-            return BUILD_DATE;
-        } else {
-            return 'Not a builded version';
-        }
-    };
 
     /////////// ERROR/WARNING
 
@@ -181,18 +143,16 @@ AdsPlayerController = function() {
         return warning;
     };
 
-    ///////////
-
 
     this.parseMastFile = function() {
-      if(self.mastFileContent !== ''){
-          self.mastTriggers=self.mastParser.parse(mastFileContent);
-      }
+        if (self.mastFileContent !== '') {
+            self.mastTriggers = self.mastParser.parse(mastFileContent);
+        }
 
-      if(self.mastTriggers !== []) {
-          // here goes the code parsing the triggers'sources if in vast format
-      }
-     self.dispatchEvent("mastLoaded");
+        if (self.mastTriggers !== []) {
+            // here goes the code parsing the triggers'sources if in vast format
+        }
+        self.dispatchEvent("mastLoaded");
     }
 
 
@@ -204,17 +164,17 @@ AdsPlayerController = function() {
      * @param {string} mastUrl - the MAST file url
      */
     this.load = function(url) {
-        this.addEventListener("mastFileLoaded",this.parseMastFile);
+        this.addEventListener("mastFileLoaded", this.parseMastFile);
 
-        this.fileLoader.load(url).then(function(result){
+        this.fileLoader.load(url).then(function(result) {
             console.log("output from mast file loading : ");
             console.log("***************************************************");
             console.log(result.response);
             console.log("***************************************************");
             console.log('');
-            mastFileContent=result.response;
+            mastFileContent = result.response;
             self.dispatchEvent("mastFileLoaded");
-        },function(reason){
+        }, function(reason) {
             console.log(reason);
             alert(reason.message);
         });
@@ -247,11 +207,11 @@ AdsPlayerController = function() {
      * @param {boolean} useCapture - see HTML DOM addEventListener() method specification
      */
     this.addEventListener = function(type, listener, useCapture) {
-        this.eventBus.addEventListener(type,listener);
+        this.eventBus.addEventListener(type, listener);
     };
 
     /**
-     * dispatch the specified event 
+     * dispatch the specified event
      * The possible event types are:
      * @method dispatchEvent
      * @access public
@@ -260,9 +220,9 @@ AdsPlayerController = function() {
      */
     this.dispatchEvent = function(type) {
         self.eventBus.dispatchEvent({
-              type : type,
-              data : {}
-            });
+            type: type,
+            data: {}
+        });
     };
 
 
@@ -276,7 +236,7 @@ AdsPlayerController = function() {
      * @param {callback} listener - the callback which was registered to the event type
      */
     this.removeEventListener = function(type, listener) {
-        this.eventBus.removeEventListener(type,listener);
+        this.eventBus.removeEventListener(type, listener);
     };
 
     /////////// EVENTS
@@ -306,7 +266,7 @@ AdsPlayerController = function() {
      * @param {object} event.data.data - warning additionnal data
      */
 
-     /**
+    /**
      * The adStart event is fired when the Ads player starts to play and ad.
      *
      * @event AdsPlayerController#cueEnter
@@ -314,7 +274,7 @@ AdsPlayerController = function() {
      * @param {object} event.type - the event type ('adStart')
      */
 
-     /**
+    /**
      * The adEnd event is fired when the Ads player has ended to play and ad.
      *
      * @event AdsPlayerController#cueEnter
@@ -322,5 +282,3 @@ AdsPlayerController = function() {
      * @param {object} event.type - the event type ('adEnd')
      */
 };
-
-
