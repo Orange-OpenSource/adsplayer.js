@@ -47,110 +47,161 @@ var TrackingEvent={
 }
 
 
-//
-//      Linear Ads
-//
+// Vast object
+AdsPlayer.Vast = function () {
+    "use strict";
+
+    this.version = '';
+    this.ads = [];     // pointer to any number of Ad objects
+};
+
+
+//      Ad object
+AdsPlayer.Vast.Ad = function () {
+    "use strict";
+    
+    this.id = '';
+    this.inLine = null;       // pointer to one InLine object
+    this.wrapper = null;     
+};
+
+
+// InLine object
+AdsPlayer.Vast.Ad.InLine = function () {
+    "use strict";
+
+    this.adSystem = '';              // Ad server (required)
+    this.adTitle = '';               // Ad Title
+    this.description = '';           // ad Description (optional)
+    this.survey= '';                 // URL of request to survey vendor
+    this.error = '';                 // URL to request if ad does not play due to error
+    this.impression = [];            // URI to track impression. We can use ClickTracking {uri, id}
+    this.creatives = [];             // pointer to any number of creative objects : AdsPlayer.Vast.Ad.Creative
+    this.extentions = [];            // Any valid XML may be included in the Extensions node 
+};
+
+AdsPlayer.Vast.Ad.InLine.prototype = {
+    constructor: AdsPlayer.Vast.Ad.InLine
+};
+
+
+// Creative object
+AdsPlayer.Vast.Ad.Creative = function () {
+    "use strict";
+
+    this.id = '';                       // optional : identifier
+    this.adId = '';                     // optional : Ad-ID for the creative (formerly ISCI) 
+    this.sequence = 0;                  // optional : the preferred order in which multiple Creatives should be displayed 
+    this.linear = null;                 // pointer to a unique (if any) linear Ad : AdsPlayer.Vast.Ad.Creative
+    this.CompanionAds = [];             // pointer to any number of companions Ads : AdsPlayer.Vast.Ad.Creative.CompanionAds
+    this.nonLinearAds = [];             // pointer to any number of non-linear Ads : AdsPlayer.Vast.Ad.Creative.NonLinearAds
+};
+
+AdsPlayer.Vast.Ad.Creative.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Creative
+};
+
+
+// Linear object
+AdsPlayer.Vast.Ad.Creative.Linear = function () {
+    "use strict";
+    this.duration = 0;                // Duration in standard time format, hh:mm:ss
+    this.trackingEvents = [];         // pointer to any number of tracking objects : AdsPlayer.Vast.Ad.Creative.Tracking
+    this.adParameters = '';           // Data to be passed into the video ad
+    this.videoClicks = null;          // pointer video clicks object : AdsPlayer.Vast.Ad.Creative.VideoClicks
+    this.mediaFiles = [];             // pointer to media file object : AdsPlayer.Vast.Ad.Creative.MediaFile
+};
+
+AdsPlayer.Vast.Ad.Creative.Linear.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Creative.Linear
+};
+
+
+//TrackingEvent object
+AdsPlayer.Vast.Ad.TrackingEvent = function () {
+    "use strict";
+    this.event = '';   // 'creativeView'
+    this.uri = '';
+};
+
+AdsPlayer.Vast.Ad.TrackingEvent.prototype = {
+    constructor: AdsPlayer.Vast.Ad.TrackingEvent
+};
 
 // MediaFile object
-AdsPlayer.Vast.Model.MediaFile = function () {
+AdsPlayer.Vast.Ad.Creative.MediaFile = function () {
     "use strict";
 
     this.id = '';                   // optional : identifier
-    this.delivery = '';
-    this.type = '';
+    this.delivery = '';             // required: Method of delivery of ad
+    this.type = '';                 // required : MIME type
     this.bitrate = 0;               // optional : bitrate of encoded video in Kbps 
-    this.height = 0;
-    this.width = 0;
+    this.width = 0;                 // requierd : Pixel dimensions of video
+    this.height = 0;                // requierd : Pixel dimensions of video
     this.scalable=true;             // optional : whether it is acceptable to scale the image.
     this.maintainAspectRatio=true;  // optional : whether the ad must have its aspect ratio maintained when scaled
     this.apiFramework='';           // optional : defines the method to use for communication if the MediaFile is interactive. 
 };
 
-AdsPlayer.Vast.Model.MediaFile.prototype = {
-    constructor: AdsPlayer.Vast.Model.MediaFile
+AdsPlayer.Vast.Ad.Creative.MediaFile.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Creative.MediaFile
 };
-
+ 
 // VideoClicks object
-AdsPlayer.Vast.Model.VideoClicks = function () {
+AdsPlayer.Vast.Ad.VideoClicks = function () {
     "use strict";
     this.clickThrough = '';                 // URI to open as destination page when user clicks on the video
-    this.clickTracking = '';                // URI to request for tracking purposes when user clicks on the video 
-    this.customClick = '';                  // URIs to request on custom events such as hotspotted video  
+    this.clickTracking = [];                // URIs to request for tracking purposes when user clicks on the video 
+    this.customClick = [];                  // URIs to request on custom events such as hotspotted video  
 };
 
-AdsPlayer.Vast.Model.VideoClicks.prototype = {
-    constructor: AdsPlayer.Vast.Model.VideoClicks
+AdsPlayer.Vast.Ad.VideoClicks.prototype = {
+    constructor: AdsPlayer.Vast.Ad.VideoClicks
 };
 
-// Tracking object
-AdsPlayer.Vast.Model.Tracking = function () {
+
+// ClickTracking object >> for clickTracking and CustomClick object tables associated to VideoClicks
+
+AdsPlayer.Vast.Ad.ClickTracking = function () {
     "use strict";
-    this.event = '';
-    this.uri = '';
+    this.uri = '';                 // URL to request for tracking purposes when user clicks on the video
+    this.id = '';                  // optional 
 };
 
-AdsPlayer.Vast.Model.Tracking.prototype = {
-    constructor: AdsPlayer.Vast.Model.Tracking
+AdsPlayer.Vast.Ad.ClickTracking.prototype = {
+    constructor: AdsPlayer.Vast.Ad.ClickTracking
 };
 
-// Linear object
-AdsPlayer.Vast.Model.Linear = function () {
-    "use strict";
-    this.id = '';
-    this.duration = 0;
-    this.trackingEvents = [];         // pointer to any number of tracking objects : AdsPlayer.Vast.Model.Tracking
-    this.videoClicks = null;          // pointer video clicks object : AdsPlayer.Vast.Model.VideoClicks
-    this.mediaFiles = [];             // pointer to media file object : AdsPlayer.Vast.Model.MediaFile
-};
-
-AdsPlayer.Vast.Model.Linear.prototype = {
-    constructor: AdsPlayer.Vast.Model.Linear
-};
-
-
-//
-//      Companion Ads
-//
-
+//---------------------------ici -----------------------------
 // StaticResource Object
-AdsPlayer.Vast.Model.StaticResource = function () {
+AdsPlayer.Vast.Ad.StaticResource = function () {
     "use strict";
     this.uRI = '';              // optional : URI to a static file, such as an image or SWF file 
     this.creativeType  ='';     // mime type of static resource
 };
 
-AdsPlayer.Vast.Model.StaticResource.prototype = {
-    constructor: AdsPlayer.Vast.Model.StaticResource
+AdsPlayer.Vast.Ad.StaticResource.prototype = {
+    constructor: AdsPlayer.Vast.Ad.StaticResource
 };
 
-// CompanionTracking object
-AdsPlayer.Vast.Model.CompanionTracking = function () {
-    "use strict";
-    this.event = 'creativeView ';     // the creativeView should always be requested when present. For Companions creativeView is the only supported event. 
-    this.uri = '';
-};
-
-AdsPlayer.Vast.Model.CompanionTracking.prototype = {
-    constructor: AdsPlayer.Vast.Model.CompanionTracking
-};
 
 // Companion object
-AdsPlayer.Vast.Model.Companion = function () {
+AdsPlayer.Vast.Ad.Companion = function () {
     "use strict";
     this.id = '';                       // optional : identifier
     this.width = 0;                     // width pixel dimension of companion
     this.height = 0;                    // height pixel dimension of companion
-    this.staticResource = null;         // optional : pointer to the static resource : AdsPlayer.Vast.Model.StaticResource
+    this.staticResource = null;         // optional : pointer to the static resource : AdsPlayer.Vast.Ad.StaticResource
     this.iFrameResource = '';           // optional : URI source for an IFrame to display the companion element 
     this.hTMLResource = '';             // optional : HTML to display the companion element : shall be CDATA value
-    this.trackingEvents = [];           // optional : pointer to any number of tracking objects : AdsPlayer.Vast.Model.CompanionTracking
+    this.trackingEvents = [];           // optional : pointer to any number of tracking objects : AdsPlayer.Vast.Ad.CompanionTracking
     this.clickThrough = '';             // optional : URI to open as destination page when user clicks on the companion 
     this.altText = '';                  // optional : alt text to be displayed when companion is rendered in HTML environment. 
     this.adParameters = '';             // optional : data to be passed into the companion ads
 };
 
-AdsPlayer.Vast.Model.Companion.prototype = {
-    constructor: AdsPlayer.Vast.Model.Companion
+AdsPlayer.Vast.Ad.Companion.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Companion
 };
 
 
@@ -159,7 +210,7 @@ AdsPlayer.Vast.Model.Companion.prototype = {
 //
 
 // NonLinear object
-AdsPlayer.Vast.Model.NonLinear = function () {
+AdsPlayer.Vast.Ad.NonLinear = function () {
     "use strict";
     this.id = '';                       // optional : identifier
     this.width = 0;                     // width pixel dimension of non linear 
@@ -169,15 +220,15 @@ AdsPlayer.Vast.Model.NonLinear = function () {
     this.scalable = true;               // optional : whether it is acceptable to scale the image 
     this.maintainAspectRatio = true;    // optional : whether the ad must have its aspect ratio maintained when scaled 
     this.apiFramework = '';             // optional : defines the method to use for communication with the nonlinear element
-    this.staticResource = null;         // optional : pointer to the static resource : AdsPlayer.Vast.Model.StaticResource
+    this.staticResource = null;         // optional : pointer to the static resource : AdsPlayer.Vast.Ad.StaticResource
     this.hTMLResource = '';             // optional : HTML to display the companion element : shall be CDATA value
-    this.trackingEvents = [];           // optional : pointer to any number of tracking objects : AdsPlayer.Vast.Model.Tracking
+    this.trackingEvents = [];           // optional : pointer to any number of tracking objects : AdsPlayer.Vast.Ad.Tracking
     this.clickThrough = '';             // optional : URI to open as destination page when user clicks on the non-linear ad unit  
     this.adParameters = '';             // optional : data to be passed into the video ad
 };
 
-AdsPlayer.Vast.Model.NonLinear.prototype = {
-    constructor: AdsPlayer.Vast.Model.NonLinear
+AdsPlayer.Vast.Ad.NonLinear.prototype = {
+    constructor: AdsPlayer.Vast.Ad.NonLinear
 };
 
 
@@ -185,40 +236,5 @@ AdsPlayer.Vast.Model.NonLinear.prototype = {
 //      Creatives
 //
 
-// Creative object
-AdsPlayer.Vast.Model.Creative = function () {
-    "use strict";
 
-    this.id = '';                       // optional : identifier
-    this.adId = '';                     // optional : Ad-ID for the creative (formerly ISCI) 
-    this.sequence = 0;                  // optional : the preferred order in which multiple Creatives should be displayed 
-    this.linear = null;                 // pointer to a unique (if any) linear Ad : AdsPlayer.Vast.Model.Linear
-    this.companions = [];               // pointer to any number of companions Ads : AdsPlayer.Vast.Model.Companion
-    this.nonLinears = [];               // pointer to any number of non-linear Ads : AdsPlayer.Vast.Model.NonLinear
-};
-
-AdsPlayer.Vast.Model.Creative.prototype = {
-    constructor: AdsPlayer.Vast.Model.Creative
-};
-
-
-//
-//      Ads
-//
-
-// Ad object
-AdsPlayer.Vast.Model.Ad = function () {
-    "use strict";
-
-    this.system = '';
-    this.title = '';
-    this.description = '';
-    this.impression = '';           // URI to track impression 
-    this.id = '';
-    this.creatives = [];            // pointer to any number of creative objects : AdsPlayer.Vast.Model.Creative
-};
-
-AdsPlayer.Vast.Model.Ad.prototype = {
-    constructor: AdsPlayer.Vast.Model.Ad
-};
 
