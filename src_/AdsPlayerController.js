@@ -24,7 +24,7 @@ AdsPlayerController = function() {
 
 
     var _onMainVideoLoadStart = function() {
-        this.analyseCues();
+        this.analyseTriggers();
     };
 
     var _onError = function(e) {
@@ -41,9 +41,13 @@ AdsPlayerController = function() {
 
     function _onEnded() {
         console.log('ad video ended');
-        self.dispatchEvent("adEnd");
-        _mainVideo.play();
-        console.log('play main video')
+        if (self.listVastAds.length) {
+            self.playAds();
+        } else {
+            self.dispatchEvent("adEnd");
+            _mainVideo.play();
+            console.log('play main video')
+        }
     };
 
 
@@ -67,7 +71,8 @@ AdsPlayerController = function() {
 
     this.listVastAds = []; // this table is used to track the (groups of) ads to be played
     // as defined in the vast files : one entry per vast file
-    // each group except for the preroll/enroll cases will be associated to a cue 
+    // each group except for the preroll/enroll cases will be associated to a cue
+
 
     this.fileLoader = new AdsPlayer.FileLoader();
     this.errorHandler = new AdsPlayer.ErrorHandler();
@@ -86,36 +91,59 @@ AdsPlayerController = function() {
         _mainVideo = mainVideo;
         _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart.bind(this));
 
-        // adsMediaPlayer.init()
+        adsMediaPlayer.init()
         adsMediaPlayer.createVideoElt(adsContainer);
         adsMediaPlayer.addlistener("ended", _onEnded);
     }
 
-    this.playAd = function(videoUrl, preRoll) {
-        console.log(preRoll ? 'PreRoll' : 'MidRoll');
-        if (!videoUrl) {
-            throw new Error('AdsPlayerController.playVideo(): Invalid Argument');
+    this.playAds = function() {
+        var i;
+        if (this.listVastAds.length) {
+            var videoUrl = this.listVastAds.shift();
+            adsMediaPlayer.playVideo(videoUrl);
         }
-        this.dispatchEvent("adStart");
-        if (!preRoll) {
-            _mainVideo.pause();
-        }
-        adsMediaPlayer.playVideo(videoUrl);
     };
 
-    this.analyseCues = function() {
-        var preRoll = false;
+
+    //    Look for preRoll ads triggers 
+    //
+    this.analyseTriggers = function() {
+        var i, j;
+        var preRoll = 'false';
         var onPlaying = function() {
             _mainVideo.pause();
             console.log('pause main video');
             _mainVideo.removeEventListener("playing", onPlaying);
-            preRoll = false;
+            //           preRoll = false;
         };
 
-        preRoll = true;
+        for (i = 0; i < mastTriggers.length; i++) {
+            var trigger = mastTriggers[i];
+            if (trigger.alreadyPlayed || trigger.startConditions == []) {
+                continue;
+            }
+            if (trigger.startConditions[0].type === ConditionType.EVENT && trigger.startConditions[0].name === ConditionName.ON_ITEM_START) {
+                preRoll = true;
+                for (j = 0; j < trigger.sources.length; j++) {
+                    this.listVastAds.push(trigger.sources[j].uri)
+                }
+                trigger.alreadyPlayed = true;
+            } else if (trigger.startConditions[0].type === ConditionType.PROPERTY &&
+                trigger.startConditions[0].name === ConditionName.POSITION &&
+                trigger.startConditions[0].operator === ConditionOperator.GEQ &&
+                trigger.startConditions[0].value === 0) {
+                preRoll = true;
+                for (j = 0; j < trigger.sources.length; j++) {
+                    this.listVastAds.push(trigger.sources[j].uri)
+                }
+                trigger.alreadyPlayed = true;
+            }
+        }
         if (preRoll) {
+            console.log('PreRoll');
+            this.dispatchEvent("adStart");
             _mainVideo.addEventListener("playing", onPlaying);
-            this.playAd('http://localhost:8080/adsPlayer.js/demo/medias/pubOasis.mp4', preRoll);
+            this.playAds();
         }
     }
 
@@ -151,6 +179,9 @@ AdsPlayerController = function() {
 
         if (self.mastTriggers !== []) {
             // here goes the code parsing the triggers'sources if in vast format
+
+            self.createPreRollTriggers(); // for test only
+
         }
         self.dispatchEvent("mastLoaded");
     }
@@ -281,4 +312,74 @@ AdsPlayerController = function() {
      * @param {object} event - the event
      * @param {object} event.type - the event type ('adEnd')
      */
+
+
+    // create a preRoll Trigger for test    
+
+    this.createPreRollTrigger = function(uri) {
+        var trigger = new AdsPlayer.mast.model.Trigger();
+        trigger.id = 'preRoll';
+        trigger.description = 0;
+        var condition = new AdsPlayer.mast.model.Trigger.Condition();
+        condition.type = 'event';
+        condition.name = 'OnItemStart';
+        condition.value = '';
+        condition.operator = '';
+        condition.conditions = [];
+
+        trigger.startConditions.push(condition);
+
+        trigger.endConditions = [];
+
+        source = new AdsPlayer.mast.model.Trigger.Source();
+        source.uri = uri;
+        source.altReference = '';
+        source.format = '';
+        source.sources = [];
+
+        trigger.sources.push(source); // pointer to a list of sources : AdsPlayer.mast.model.Trigger.Source
+        trigger.alreadyPlayed = false; // mainly in the seeked case : do not replay trigger allready played
+
+        return trigger;
+    }
+
+    this.createMidRollTrigger = function(uri, time) {
+        var trigger = new AdsPlayer.mast.model.Trigger();
+        trigger.id = 'preRoll';
+        trigger.description = 0;
+        var condition = new AdsPlayer.mast.model.Trigger.Condition();
+        condition.type = 'property';
+        condition.name = 'Position';
+        condition.value = time;
+        condition.operator = 'GEQ';
+        condition.conditions = [];
+
+        trigger.startConditions.push(condition);
+
+        trigger.endConditions = [];
+
+        source = new AdsPlayer.mast.model.Trigger.Source();
+        source.uri = uri;
+        source.altReference = '';
+        source.format = '';
+        source.sources = [];
+
+        trigger.sources.push(source); // pointer to a list of sources : AdsPlayer.mast.model.Trigger.Source
+        trigger.alreadyPlayed = false; // mainly in the seeked case : do not replay trigger allready played
+
+        return trigger;
+    }
+
+
+    this.createPreRollTriggers = function() {
+        var trigger;
+        trigger = this.createPreRollTrigger('http://localhost:8080/adsPlayer.js/demo/medias/pubOasis.mp4');
+        mastTriggers.push(trigger);
+        trigger = this.createPreRollTrigger('http://localhost:8080/adsPlayer.js/demo/medias/pubLancome.mp4');
+        mastTriggers.push(trigger);
+        trigger = this.createMidRollTrigger('http://localhost:8080/adsPlayer.js/demo/medias/pubLego.mp4', 0);
+        mastTriggers.push(trigger);
+    }
+
+
 };
