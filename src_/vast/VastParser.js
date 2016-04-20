@@ -65,29 +65,16 @@ AdsPlayer.Vast.VastParser = function () {
         return [];
     },
 
-    _getCreatives = function(theInLineNode) {
-        if (theInLineNode) {
-            var node, creatives = [];
-            var creativeNodes = parser.getChildNodes(parser.getChildNode(theInLineNode, 'Creatives'), 'Creative');
-            //var creativeNodes = parser.getChildNode(theInLineNode, 'Creatives');
-            if (creativeNodes){
-                for (var k = 0; k < creativeNodes.length; k++) {
-                    var creative = new AdsPlayer.Vast.Ad.Creative();
-                    creative.id = parser.getAttributeValue(creativeNodes[K], 'id');
-                    creative.adId = parser.getAttributeValue(creativeNodes[K], 'AdID');
-                    creative.sequence = parser.getAttributeValue(creativeNodes[K], 'sequence');                    
-                    creative.linear = null;
-                    creative.CompanionAds = [];
-                    creative.nonLinearAds = [];
-                    creatives.push(creative);
-                }
-            }
-            return creatives;
-        }
-        return [];
-    },
-
     _getMediafiles = function() {
+               var linearNode = parser.getChildNode(creative, 'Linear');
+        var linear = new AdsPlayer.Vast.Ad.Creative.Linear();
+
+        linear.duration = (parser.getChildNode(linearNode, 'Duration')? linearNode.innerHTML: '');
+        linear.adParameters = (parser.getChildNode(linearNode, 'AdParameters')? linearNode.innerHTML: '');
+        linear.trackingEvents = []; // TO DO
+        linear.videoClicks = null; // TO DO
+        linear.mediaFiles = _getMediafiles(linearNode);    
+        return linear;
 
     },
 
@@ -109,6 +96,86 @@ AdsPlayer.Vast.VastParser = function () {
 
     _getTrackingEvents = function() {
 
+    },
+/*  
+AdsPlayer.Vast.Ad.Creative.MediaFile = function () {
+    "use strict";
+
+    this.id = '';                   // optional : identifier
+    this.delivery = '';             // required: Method of delivery of ad
+    this.type = '';                 // required : MIME type
+    this.bitrate = 0;               // optional : bitrate of encoded video in Kbps 
+    this.width = 0;                 // requierd : Pixel dimensions of video
+    this.height = 0;                // requierd : Pixel dimensions of video
+    this.scalable=true;             // optional : whether it is acceptable to scale the image.
+    this.maintainAspectRatio=true;  // optional : whether the ad must have its aspect ratio maintained when scaled
+    this.apiFramework='';           // optional : defines the method to use for communication if the MediaFile is interactive. 
+};
+
+MediaFile delivery="progressive" type="video/x-flv" bitrate="500" width="400" height="300" scalable="true" maintainAspectRatio="true">http://cdnp.tremormedia.com/video/acudeo/Carrot_400x300_500kb.flv</MediaFile>
+apiFramework="" bitrate="" delivery="" height="" id="" maintainAspectRatio="" scalable="" type="" width=""
+*/
+
+
+    _getMediafiles = function(theLinear) {
+        var mediaFilesNode = parser.getChildNode(theLinear, 'MediaFiles'),
+            mediaFiles = [],
+            i=0;
+        if (mediaFilesNode) {
+            var mediaFileNode = parser.getChildNodes(mediaFilesNode, 'MediaFile')
+            for (i = 0; i<mediaFileNode.length; i++) {
+                var mediaFile = new AdsPlayer.Vast.Ad.Creative.MediaFile();
+
+                mediaFile.id = parser.getAttributeValue(mediaFileNode[i], 'id');
+                mediaFile.delivery = parser.getAttributeValue(mediaFileNode[i], 'delivery');
+                mediaFile.type = parser.getAttributeValue(mediaFileNode[i], 'type');
+                mediaFile.bitrate = parser.getAttributeValue(mediaFileNode[i], 'bitrate');
+                mediaFile.width = parser.getAttributeValue(mediaFileNode[i], 'width');
+                mediaFile.height = parser.getAttributeValue(mediaFileNode[i], 'height');
+                mediaFile.scalable = parser.getAttributeValue(mediaFileNode[i], 'scalable');
+                mediaFile.maintainAspectRatio = parser.getAttributeValue(mediaFileNode[i], 'maintainAspectRatio');
+                mediaFile.apiFramework = parser.getAttributeValue(mediaFileNode[i], 'apiFramework');
+                mediaFiles.push(mediaFile);
+            }
+        }
+        return mediaFiles;
+    },
+
+    _getLinearObject = function(creative) {
+        var linearNode = parser.getChildNode(creative, 'Linear'),
+            linear = new AdsPlayer.Vast.Ad.Creative.Linear(),
+            node = null;
+        if (linearNode) {
+            linear.duration = ((node = parser.getChildNode(linearNode, 'Duration'))? node.innerHTML: '');
+            linear.adParameters = ((node = parser.getChildNode(linearNode, 'AdParameters'))? node.innerHTML: '');
+            linear.trackingEvents = []; // TO DO
+            linear.videoClicks = null; // TO DO
+            linear.mediaFiles = _getMediafiles(linearNode);    
+            return linear;
+        }
+        return null;
+    },
+
+    _getCreatives = function(theInLineNode) {
+        if (theInLineNode) {
+            var node, creatives = [];
+            var creativeNodes = parser.getChildNodes(parser.getChildNode(theInLineNode, 'Creatives'), 'Creative');
+            //var creativeNodes = parser.getChildNode(theInLineNode, 'Creatives');
+            if (creativeNodes){
+                for (var k = 0; k < creativeNodes.length; k++) {
+                    var creative = new AdsPlayer.Vast.Ad.Creative();
+                    creative.id = parser.getAttributeValue(creativeNodes[k], 'id');
+                    creative.adId = parser.getAttributeValue(creativeNodes[k], 'AdID');
+                    creative.sequence = parser.getAttributeValue(creativeNodes[k], 'sequence');                    
+                    creative.linear = _getLinearObject(creativeNodes[k]);
+                    creative.CompanionAds = []; // TO DO
+                    creative.nonLinearAds = []; // TO DO
+                    creatives.push(creative);
+                }
+            }
+            return creatives;
+        }
+        return [];
     },
 
 
@@ -152,7 +219,8 @@ AdsPlayer.Vast.VastParser = function () {
             // associate ads to vast
             vast.ads.push(myAd);
         } // end of for adsList
-        console.log(vast) ;      
+        console.log(vast) ; 
+        return vast;     
     };
 
 
@@ -164,36 +232,9 @@ AdsPlayer.Vast.VastParser = function () {
         },
 
         parse : function (vastFileContent) {
+           
            return _parse(vastFileContent);
         },
-
-
-            
-/*
-    
-    triggersList = this.getTriggersList();
-    for (i = 0 ; i < triggersList.length ; i++) {
-      console.log('trigger #'+i+':');
-      var trigger = new AdsPlayer.Mast.Trigger();
-
-      trigger.id=this.getTriggerId(triggersList[i]);
-      trigger.description=this.getTriggerDescription(triggersList[i]);
-
-      var startConditions = this.getTriggerStartConditions(triggersList[i]);
-      trigger.startConditions=this.getConditions(startConditions);
-
-      var endConditions = this.getTriggerEndConditions(triggersList[i]);
-      trigger.endConditions=this.getConditions(endConditions);
-
-      var sources=this.getTriggerSources(triggersList[i]);
-      trigger.sources=this.getSources(sources);
-      
-      console.log(trigger);
-      console.log('');
-      triggers.push(trigger);
-    }
-    return triggers;
-    */
 
         load: function (vastUrl) {
             // this function must be handled by AdsPlayerController
