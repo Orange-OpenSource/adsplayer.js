@@ -11,7 +11,9 @@
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
-AdsPlayer.MastParser = function() {
+
+//AdsPlayer.mast.MastParser = function () {
+AdsPlayer.mast.MastParser = function() {
     "use strict";
     this.parser = new AdsPlayer.utils.DOMParser();
     this._xmlDoc=null;
@@ -22,87 +24,167 @@ AdsPlayer.MastParser.prototype = {
     constructor: AdsPlayer.MastParser
 };
 
-AdsPlayer.MastParser.prototype.createXmlTree = function(data) {
-    this._xmlDoc=this.parser.createXmlTree(data);
-};
+        _createXmlTree = function(data) {
+            _xmlDoc = _parser.createXmlTree(data);
+        },
 
-AdsPlayer.MastParser.prototype.getTriggersList = function() {
-    if (this._xmlDoc) {
-        return this.parser.getChildNodes(this.parser.getChildNode(this.parser.getChildNode(this._xmlDoc, 'MAST'), 'triggers'), 'trigger');
-    }
-    return [];
-};
+        _getTriggersList = function(mastDom) {
+            // s'assurer que le fils 'triggers' existe
+            var mastNode = null,
+                triggersNode = null,
+                trigerNode = null;
 
-AdsPlayer.MastParser.prototype.getTriggerStartConditions = function(trigger) {
-    if (trigger) {
-        return this.parser.getChildNodes(this.parser.getChildNode(trigger, 'startConditions'), 'condition');
-    }
-    return [];
-};
-
-AdsPlayer.MastParser.prototype.getTriggerId = function(trigger) {
-    if (trigger) {
-        return this.parser.getAttributeValue(trigger, 'id');;
-    }
-    return '';
-};
-
-AdsPlayer.MastParser.prototype.getTriggerDescription = function(trigger) {
-    if (trigger) {
-        return this.parser.getAttributeValue(trigger, 'description');
-    }
-    return '';
-};
-
-AdsPlayer.MastParser.prototype.getTriggerEndConditions = function(trigger) {
-    if (trigger) {
-        return this.parser.getChildNodes(this.parser.getChildNode(trigger, 'endConditions'), 'condition');
-    }
-    return [];
-};
-
-AdsPlayer.MastParser.prototype.getTriggerSources = function(trigger) {
-    if (trigger) {
-        return this.parser.getChildNodes(this.parser.getChildNode(trigger, 'sources'), 'source');
-    }
-    return [];
-};
-
-AdsPlayer.MastParser.prototype.getSourceUri = function(source) {
-    if (source) {
-        return this.parser.getAttributeValue(source, 'uri');
-    }
-    return null;
-};
-
-AdsPlayer.MastParser.reset = function() {
-    this._xmlDoc = null;
-};
-
-
-/*
-    Parsing of conditions
-*/
-
-AdsPlayer.MastParser.prototype.getConditionType = function(condition) {
-    if (condition) {
-        if (this.parser.getAttributeValue(condition, 'type') === 'property') {
-            if (this.parser.getAttributeValue(condition, 'name') === 'Position') {
-                return "midRoll";
+            mastNode = _parser.getChildNode(mastDom, 'MAST');
+            if (!mastNode) {
+                return [];
             }
-        }
-        else if (this.parser.getAttributeValue(condition, 'type') === 'event') {
-            if (this.parser.getAttributeValue(condition, 'name') === 'OnItemStart') {
-                return "preRoll";
+            triggersNode = _parser.getChildNode(mastNode, 'triggers');
+            if (!triggersNode) {
+                return [];
             }
-            else if (this.parser.getAttributeValue(condition, 'name') === 'OnItemEnd') {
-                return "endRoll";
-            }
-        }
-    }
-    return '';
-};
 
+            return _parser.getChildNodes(triggersNode, 'trigger');
+        },
+
+        _parseTriggersList = function(triggersList) {
+            var i,
+                triggers = [];
+
+            for (i = 0; i < triggersList.length; i++) {
+                console.log('trigger #' + i + ':');
+                var trigger = new AdsPlayer.mast.model.Trigger();
+
+                trigger.id = _parser.getAttributeValue(triggersList[i], 'id');
+                trigger.description = _parser.getAttributeValue(triggersList[i], 'description');
+
+                var startConditions = _getTriggerValues(triggersList[i], 'startConditions', 'condition');
+                trigger.startConditions = _getConditions(startConditions);
+
+                var endConditions = _getTriggerValues(triggersList[i], 'endConditions', 'condition');
+                trigger.endConditions = _getConditions(endConditions);
+
+                var sources = _getTriggerValues(triggersList[i], 'sources', 'source');
+                trigger.sources = _getSources(sources);
+
+                console.log(trigger);
+                console.log('');
+                triggers.push(trigger);
+            }
+
+            return triggers;
+        },
+
+        _getTriggerValues = function(trigger, mainNodeName, subNodesName) {
+            var mainNode;
+            if (trigger) {
+                mainNode = _parser.getChildNode(trigger, mainNodeName);
+                if (mainNode) {
+                    return _parser.getChildNodes(mainNode, subNodesName);
+                }
+            }
+            return [];
+        },
+
+
+        /*
+            Parsing of conditions
+        */
+        _getConditionType = function(condition) {
+            if (condition) {
+                if (_parser.getAttributeValue(condition, 'type') === ConditionType.PROPERTY) {
+                    if (_parser.getAttributeValue(condition, 'name') === ConditionName.POSITION) {
+                        return "midRoll";
+                    }
+                } else if (_parser.getAttributeValue(condition, 'type') === ConditionType.EVENT) {
+                    if (_parser.getAttributeValue(condition, 'name') === ConditionType.ON_ITEM_START) {
+                        return "preRoll";
+                    } else if (_parser.getAttributeValue(condition, 'name') === ConditionType.ON_ITEM_END) {
+                        return "endRoll";
+                    }
+                }
+            }
+            return '';
+        },
+
+        _getConditionPosition = function(condition) {
+            if (condition) {
+                if (_parser.getAttributeValue(condition, 'type') === ConditionType.PROPERTY) {
+                    if (_parser.getAttributeValue(condition, 'name') === ConditionType.EVENT) {
+                        return __parseTimings(_parser.getAttributeValue(condition, 'value'));
+                    }
+                }
+            }
+            return '';
+        },
+
+        __parseTimings = function(timingStr) {
+            var timeParts,
+                parsedTime,
+                SECONDS_IN_HOUR = 60 * 60,
+                SECONDS_IN_MIN = 60;
+            if (timingStr == null) {
+                return -1;
+            }
+            timeParts = timingStr.split(":");
+
+            parsedTime = (parseFloat(timeParts[0]) * SECONDS_IN_HOUR +
+                parseFloat(timeParts[1]) * SECONDS_IN_MIN +
+                parseFloat(timeParts[2]));
+
+            return parsedTime;
+        },
+
+        _getConditions = function(conditions) {
+            var j;
+            if (conditions !== []) {
+                var cond = [];
+                for (j = 0; j < conditions.length; j++) {
+                    var condition = new AdsPlayer.mast.model.Trigger.Condition();
+                    condition.type = _parser.getAttributeValue(conditions[j], 'type');
+                    condition.name = _parser.getAttributeValue(conditions[j], 'name');
+                    condition.value = __parseTimings(_parser.getAttributeValue(conditions[j], 'value'));
+                    condition.operator = _parser.getAttributeValue(conditions[j], 'operator');
+                    condition.conditions = _getConditions(_parser.getChildNodes(conditions[j], 'conditions'));
+                    cond.push(condition);
+                }
+                return cond;
+            }
+            return [];
+        },
+
+        /*
+            Parsing of sources (vast files)
+        */
+        _getSources = function(sources) {
+            var j;
+            if (sources !== []) {
+                var src = [];
+                for (j = 0; j < sources.length; j++) {
+                    var source = new AdsPlayer.mast.model.Trigger.Source();
+                    source.uri = _parser.getAttributeValue(sources[j], 'uri');
+                    source.altReference = _parser.getAttributeValue(sources[j], 'altReference');
+                    source.format = _parser.getAttributeValue(sources[j], 'format');
+                    source.sources = _getSources(_parser.getChildNodes(sources[j], 'sources'));
+                    src.push(source);
+                }
+                return src;
+            }
+            return [];
+        },
+
+        /*
+            Parsing of the xml content to get the triggers (main function)
+        */
+        _parse = function(mastDom) {
+            // Mast client
+            var triggers = [], // will contain a description of each trigger contained in the mast file under consideration
+                triggersList = [];
+
+            triggersList = _getTriggersList(mastDom);
+            triggers = _parseTriggersList(triggersList);
+
+            return triggers;
+        };
 
 AdsPlayer.MastParser.prototype.getConditionPosition = function(condition) {
     if (condition) {
@@ -115,90 +197,16 @@ AdsPlayer.MastParser.prototype.getConditionPosition = function(condition) {
     return '';
 };
 
-AdsPlayer.MastParser.prototype._parseTimings = function(timingStr) {
-    var timeParts,
-        parsedTime,
-        SECONDS_IN_HOUR = 60 * 60,
-        SECONDS_IN_MIN = 60;
-    if(timingStr == null) {
-        return -1;
-    }
-    timeParts = timingStr.split(":");
+        init: function() {},
 
-    parsedTime = (parseFloat(timeParts[0]) * SECONDS_IN_HOUR +
-        parseFloat(timeParts[1]) * SECONDS_IN_MIN +
-        parseFloat(timeParts[2]));
+        reset: function() {},
 
-    return parsedTime;
+        parse: function(mastDom) {
+            return _parse(mastDom);
+        }
+    };
 };
 
-AdsPlayer.MastParser.prototype.getConditions = function(conditions) {
-    var j;
-    if(conditions !== []) {
-      var cond = [];
-      for(j = 0; j < conditions.length ; j++){
-        var condition = new AdsPlayer.Mast.Trigger.Condition();
-        condition.type = this.parser.getAttributeValue(conditions[j], 'type');
-        condition.name = this.parser.getAttributeValue(conditions[j], 'name');
-        condition.value = this._parseTimings(this.parser.getAttributeValue(conditions[j], 'value'));
-        condition.operator = this.parser.getAttributeValue(conditions[j], 'operator');
-        condition.conditions=this.getConditions(this.parser.getChildNodes(conditions[j],'conditions') );
-        cond.push(condition);
-      }
-      return cond;
-    }
-    return [];
-};
-
-AdsPlayer.MastParser.prototype.getSources = function(sources) {
-    var j;
-    if(sources !== []) {
-      var src = [];
-      for(j = 0; j < sources.length ; j++){
-        var source = new AdsPlayer.Mast.Trigger.Source();
-        source.uri = this.parser.getAttributeValue(sources[j], 'uri');
-        source.altReference = this.parser.getAttributeValue(sources[j], 'altReference');
-        source.format = this.parser.getAttributeValue(sources[j], 'format');
-        source.sources=this.getSources(this.parser.getChildNodes(sources[j],'sources') );
-        src.push(source);
-      }
-      return src;
-    }
-    return [];
-};
-
-//
-//  Below is the full parsing of the Mast file
-//  It is assumed for the moment that a trigger has only one start condition, one end condition and one source
-//
-AdsPlayer.MastParser.prototype.parse = function(mastFileContent) {
-    // Mast client
-    var triggers = [];                 // will contain a description of each trigger contained in the mast file under consideration
-    var triggersList = [];
-    var i;
-
-    this.createXmlTree(mastFileContent);   // get the DOM
-
-    triggersList = this.getTriggersList();
-    for (i = 0 ; i < triggersList.length ; i++) {
-      console.log('trigger #'+i+':');
-      var trigger = new AdsPlayer.Mast.Trigger();
-
-      trigger.id=this.getTriggerId(triggersList[i]);
-      trigger.description=this.getTriggerDescription(triggersList[i]);
-
-      var startConditions = this.getTriggerStartConditions(triggersList[i]);
-      trigger.startConditions=this.getConditions(startConditions);
-
-      var endConditions = this.getTriggerEndConditions(triggersList[i]);
-      trigger.endConditions=this.getConditions(endConditions);
-
-      var sources=this.getTriggerSources(triggersList[i]);
-      trigger.sources=this.getSources(sources);
-      
-      console.log(trigger);
-      console.log('');
-      triggers.push(trigger);
-    }
-    return triggers;
+AdsPlayer.mast.MastParser.prototype = {
+    constructor: AdsPlayer.mast.MastParser
 };

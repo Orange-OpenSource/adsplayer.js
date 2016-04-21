@@ -87,8 +87,8 @@ AdsPlayer.FileLoader = function() {
                     self.debug.log("[FileLoader] file downloaded");
 
                     // test if the file is in xml format.
-                    if(request.responseXML==null){
-                        needFailureReport=true;
+                    if (request.responseXML == null) {
+                        needFailureReport = true;
                         return;
                     }
 
@@ -100,13 +100,12 @@ AdsPlayer.FileLoader = function() {
 
                     needFailureReport = false;
 
-
-
+                    // return XML DOM (as input to parsers)
                     deferred.resolve({
-                        response: _getDecodedResponseText(request.responseText),
+                        response: request.responseXML,
                         baseUrl: baseUrl
                     });
-                   
+
                 }
             };
 
@@ -117,28 +116,13 @@ AdsPlayer.FileLoader = function() {
                 needFailureReport = false;
 
                 if (request.aborted) {
-                    deferred.reject({
-                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_ABORTED,
-                        message: "download has been aborted",
-                        data : {
-                            url: url,
-                            status: request.status
-                        }
-                    });
-                } else if (request.status == 404) {
-                    deferred.reject({
-                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_FILES,
-                        message: "File not found",
-                        data : {
-                            url: url,
-                            status: request.status
-                        }
-                    });
-                } else if (request.responseXML==null) {
+                    deferred.reject();
+                } else if (request.responseXML === null) {
+                    // status not useful
                     deferred.reject({
                         name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_NOTXML,
                         message: "the downloaded file format is not xml",
-                        data : {
+                        data: {
                             url: url,
                             status: request.status
                         }
@@ -147,7 +131,7 @@ AdsPlayer.FileLoader = function() {
                     deferred.reject({
                         name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_FILES,
                         message: "Failed to download file",
-                        data : {
+                        data: {
                             url: url,
                             status: request.status
                         }

@@ -1,11 +1,31 @@
+
+adEventBus = (function() {
+    var instance;
+
+    function createInstance() {
+        var object = new AdsPlayer.EventBus();
+        return object;
+    }
+
+    return {
+        getInstance: function() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
+})();
+
+
 AdsPlayer.EventBus = function() {
     "use strict";
 
     var registrations,
 
         getListeners = function(type, useCapture) {
-            if(useCapture===undefined){                 // to provide a default parameter that works !! 
-                useCapture=false;
+            if (useCapture === undefined) { // to provide a default parameter that works !! 
+                useCapture = false;
             }
             var captype = (useCapture ? '1' : '0') + type;
 
