@@ -15,45 +15,68 @@
  */
 
 AdsMediaPlayer = function() {
-    var that = this;
-    var internalPlayer = null;
-    var overlay = null;
-    var playingAds = false;
 
-    var adsVideoPlayer = null;
+    var self = this,
+        internalPlayer = null,
+        overlay = null,
+        playingAds = false,
+        adsVideoPlayer = null,
+        _videoUrl = '',
 
-    this.isPlayingAds = function() {
-        return playingAds;
-    };
+        // functions
+        _isPlayingAds = function() {
+            return playingAds;
+        },
 
-    this.init = function() {
+        _init = function() {
 
+        },
+
+        _createVideoElt = function(adsContainer) {
+            if (adsVideoPlayer == null) {
+                adsVideoPlayer = document.createElement('video');
+                adsVideoPlayer.autoplay = false;
+                adsVideoPlayer.id = 'adsVideoPlayer';
+                adsVideoPlayer.style.position = 'absolute';
+                adsVideoPlayer.style.top = 0;
+                adsVideoPlayer.style.left = 0;
+                adsVideoPlayer.style.width = '100%';
+                adsContainer.appendChild(adsVideoPlayer);
+            }
+        },
+
+        _addlistener = function(type, listener) {
+            adsVideoPlayer.addEventListener(type, listener);
+        },
+
+        _isLoaded = function() {
+            adsVideoPlayer.play();
+            console.log('Play ad : ' + _videoUrl);
+            adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
+        },
+
+        _onError = function(e) {
+            var error = e.data;
+            adsVideoPlayer.removeEventListener("error", _onError);
+            var event = new CustomEvent('aborted');
+            adsVideoPlayer.dispatchEvent(event);
+        },
+
+        _playVideo = function(videoUrl) {
+            _videoUrl=videoUrl;
+            adsVideoPlayer.src = _videoUrl;
+            adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
+            adsVideoPlayer.addEventListener("error", _onError);
+            adsVideoPlayer.load();
+        };
+
+    return {
+        init: _init,
+        isPlayingAds: _isPlayingAds,
+        createVideoElt: _createVideoElt,
+        playVideo: _playVideo,
+        addlistener: _addlistener
     }
-
-    this.createVideoElt = function(adsContainer) {
-        if (adsVideoPlayer == null) {
-            adsVideoPlayer = document.createElement('video');
-            adsVideoPlayer.autoplay = false;
-            adsVideoPlayer.id = 'adsVideoPlayer';
-            adsVideoPlayer.style.position = 'absolute';
-            adsVideoPlayer.style.top = 0;
-            adsVideoPlayer.style.left = 0;
-            adsVideoPlayer.style.width = '100%';
-            adsContainer.appendChild(adsVideoPlayer);
-        }
-    };
-
-    this.addlistener = function(type, listener) {
-        adsVideoPlayer.addEventListener(type, listener);
-    };
-
-
-    this.playVideo = function(videoUrl) {
-        adsVideoPlayer.src = videoUrl;
-        adsVideoPlayer.play();
-        console.log('Play ad : ' + videoUrl);
-    };
-
 };
 
 AdsMediaPlayer.prototype = {
