@@ -15,20 +15,11 @@
 //AdsPlayer.mast.MastParser = function () {
 AdsPlayer.mast.MastParser = function() {
     "use strict";
-    this.parser = new AdsPlayer.utils.DOMParser();
-    this._xmlDoc=null;
+    var _parser = new AdsPlayer.utils.DOMParser();
     var that = this;
-};
 
-AdsPlayer.MastParser.prototype = {
-    constructor: AdsPlayer.MastParser
-};
 
-        _createXmlTree = function(data) {
-            _xmlDoc = _parser.createXmlTree(data);
-        },
-
-        _getTriggersList = function(mastDom) {
+    var _getTriggersList = function(mastDom) {
             // s'assurer que le fils 'triggers' existe
             var mastNode = null,
                 triggersNode = null,
@@ -186,16 +177,7 @@ AdsPlayer.MastParser.prototype = {
             return triggers;
         };
 
-AdsPlayer.MastParser.prototype.getConditionPosition = function(condition) {
-    if (condition) {
-        if (this.parser.getAttributeValue(condition, 'type') === 'property') {
-            if (this.parser.getAttributeValue(condition, 'name') === 'Position') {
-                return this._parseTimings(this.parser.getAttributeValue(condition, 'value'));
-            }
-        }
-    }
-    return '';
-};
+    return {
 
         init: function() {},
 
