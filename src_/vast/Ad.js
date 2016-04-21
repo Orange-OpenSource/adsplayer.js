@@ -75,7 +75,7 @@ AdsPlayer.Vast.Ad.InLine = function () {
     this.description = '';           // ad Description (optional)
     this.survey= '';                 // URL of request to survey vendor
     this.error = '';                 // URL to request if ad does not play due to error
-    this.impression = [];            // URI to track impression. We can use ClickTracking {uri, id}
+    this.impression = [];            // URI to track impression. 
     this.creatives = [];             // pointer to any number of creative objects : AdsPlayer.Vast.Ad.Creative
     this.extentions = [];            // Any valid XML may be included in the Extensions node 
 };
@@ -84,6 +84,25 @@ AdsPlayer.Vast.Ad.InLine.prototype = {
     constructor: AdsPlayer.Vast.Ad.InLine
 };
 
+AdsPlayer.Vast.Ad.Impressions = function () {
+    "use strict";
+    this.uri = '';                 // 
+    this.id = '';                  // optional 
+};
+
+AdsPlayer.Vast.Ad.Impressions.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Impressions
+};
+
+AdsPlayer.Vast.Ad.Extensions = function () {
+    "use strict";
+    this.uri = '';                 // 
+    this.other = '';                  // optional 
+};
+
+AdsPlayer.Vast.Ad.Extensions.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Extensions
+};
 
 // Creative object
 AdsPlayer.Vast.Ad.Creative = function () {
@@ -138,9 +157,10 @@ AdsPlayer.Vast.Ad.Creative.MediaFile = function () {
     this.bitrate = 0;               // optional : bitrate of encoded video in Kbps 
     this.width = 0;                 // requierd : Pixel dimensions of video
     this.height = 0;                // requierd : Pixel dimensions of video
-    this.scalable=true;             // optional : whether it is acceptable to scale the image.
-    this.maintainAspectRatio=true;  // optional : whether the ad must have its aspect ratio maintained when scaled
-    this.apiFramework='';           // optional : defines the method to use for communication if the MediaFile is interactive. 
+    this.scalable = true;             // optional : whether it is acceptable to scale the image.
+    this.maintainAspectRatio = true;  // optional : whether the ad must have its aspect ratio maintained when scaled
+    this.apiFramework = '';           // optional : defines the method to use for communication if the MediaFile is interactive. 
+    this.uri = '';
 };
 
 AdsPlayer.Vast.Ad.Creative.MediaFile.prototype = {
@@ -148,29 +168,54 @@ AdsPlayer.Vast.Ad.Creative.MediaFile.prototype = {
 };
  
 // VideoClicks object
-AdsPlayer.Vast.Ad.VideoClicks = function () {
+AdsPlayer.Vast.Ad.Creative.VideoClicks = function () {
     "use strict";
-    this.clickThrough = '';                 // URI to open as destination page when user clicks on the video
+    this.clickThrough = null;                 // URI to open as destination page when user clicks on the video
     this.clickTracking = [];                // URIs to request for tracking purposes when user clicks on the video 
     this.customClick = [];                  // URIs to request on custom events such as hotspotted video  
 };
 
-AdsPlayer.Vast.Ad.VideoClicks.prototype = {
-    constructor: AdsPlayer.Vast.Ad.VideoClicks
+AdsPlayer.Vast.Ad.Creative.VideoClicks.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Creative.VideoClicks
 };
 
 
-// ClickTracking object >> for clickTracking and CustomClick object tables associated to VideoClicks
+// ClickThrough object 
 
-AdsPlayer.Vast.Ad.ClickTracking = function () {
+AdsPlayer.Vast.Ad.Creative.VideoClicks.ClickThrough = function () {
+    "use strict";
+    this.uri = '';                 // 
+    this.id = '';                  // optional 
+};
+
+AdsPlayer.Vast.Ad.Creative.VideoClicks.ClickThrough.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Creative.VideoClicks.ClickThrough
+};
+
+// ClickTracking object 
+
+AdsPlayer.Vast.Ad.Creative.VideoClicks.ClickTracking = function () {
     "use strict";
     this.uri = '';                 // URL to request for tracking purposes when user clicks on the video
     this.id = '';                  // optional 
 };
 
-AdsPlayer.Vast.Ad.ClickTracking.prototype = {
-    constructor: AdsPlayer.Vast.Ad.ClickTracking
+AdsPlayer.Vast.Ad.Creative.VideoClicks.ClickTracking.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Creative.VideoClicks.ClickTracking
 };
+
+// CustomClick object 
+
+AdsPlayer.Vast.Ad.Creative.VideoClicks.CustomClick = function () {
+    "use strict";
+    this.uri = '';                 // 
+    this.id = '';                  // optional 
+};
+
+AdsPlayer.Vast.Ad.Creative.VideoClicks.CustomClick.prototype = {
+    constructor: AdsPlayer.Vast.Ad.Creative.VideoClicks.CustomClick
+};
+
 
 //---------------------------ici -----------------------------
 // StaticResource Object

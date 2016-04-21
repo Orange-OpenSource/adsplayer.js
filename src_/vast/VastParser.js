@@ -35,7 +35,7 @@ AdsPlayer.Vast.VastParser = function () {
             var impressionNodes = parser.getChildNodes(theInLineNode, 'Impression');
             if (impressionNodes){
                 for (var l = 0; l < impressionNodes.length; l++) {
-                    var impression = {};
+                    var impression = new AdsPlayer.Vast.Ad.Impressions();
                     impression.uri = impressionNodes[l].innerHTML;
                     impression.id = parser.getAttributeValue(impressionNodes[l], 'id');
                     impressions.push(impression);
@@ -52,11 +52,11 @@ AdsPlayer.Vast.VastParser = function () {
             var extensionNodes = parser.getChildNodes(theInLineNode, 'Extensions');
             if (extensionNodes){
                 for (var l = 0; l < extensionNodes.length; l++) {
-                    var extension = {};
+                    var extension = new AdsPlayer.Vast.Ad.Extensions();
                     extension.uri = extensionNodes[l].innerHTML;
                     // to do a function in DOMParser which can get the names of the attributes and then we get attributeValue by the function getAttributeValue
                     //extension.id = parser.getAttributeValue(extensionNodes[l], 'id');
-                    extension.id = '';                    
+                    extension.other = '';                    
                     extensions.push(extension);
                 }
                 return extensions;
@@ -78,43 +78,72 @@ AdsPlayer.Vast.VastParser = function () {
 
     },
 
-    _getClickThrough = function() {
-
+    _getClickThrough = function(theVideoClicks) {
+        var clickthroughNode = parser.getChildNode(theVideoClicks, 'ClickThrough'), // there is only one clickthrough node
+        clickThrough = new AdsPlayer.Vast.Ad.Creative.VideoClicks.ClickThrough(); 
+        if (clickthroughNode) {
+            clickThrough.id = parser.getAttributeValue(clickthroughNode, 'id');
+            clickThrough.uri = clickthroughNode.innerHTML;
+        }
+        return clickThrough;
     },
 
-    _getClickTracking = function() {
-
+    _getClickTracking = function(theVideoClicks) {
+        var clickTrackings = [],
+        i,
+        clickTrackingsNode = parser.getChildNodes(theVideoClicks, 'ClickTracking');
+        if (clickTrackingsNode) {
+            for (i=0; i < clickTrackingsNode.length; i++){
+                var clickTracking = new AdsPlayer.Vast.Ad.Creative.VideoClicks.ClickTracking();
+                clickTracking.id = parser.getAttributeValue(clickTrackingsNode[i], 'id');
+                clickTracking.uri = clickTrackingsNode[i].innerHTML;
+            }
+            clickTrackings.push(clickTracking);
+        }
+        return clickTrackings;
     },
 
-    _getCustomClick = function() {
-
+    _getCustomClick = function(theVideoClicks) {
+        var customClicks = [],
+        i,
+        customClicksNode = parser.getChildNodes(theVideoClicks, 'CustomClick');
+        if (customClicksNode) {
+            for (i=0; i < customClicksNode.length; i++){
+                var customClick = new AdsPlayer.Vast.Ad.Creative.VideoClicks.CustomClick();
+                customClick.id = parser.getAttributeValue(customClicksNode[i], 'id');
+                customClick.uri = customClicksNode[i].innerHTML;
+            }
+            customClicks.push(customClick);
+        }
+        return customClicks;
     },
 
-    _getVideoClicks = function() {
-
+    _getVideoClicks = function(theLinear) {
+        var videoClicksNode = parser.getChildNode(theLinear, 'VideoClicks'),
+            videoClicks = new AdsPlayer.Vast.Ad.Creative.VideoClicks();
+        if (videoClicksNode) {
+            videoClicks.clickThrough = _getClickThrough(videoClicksNode);
+            videoClicks.clickTracking = _getClickTracking(videoClicksNode);
+            videoClicks.customClick = _getCustomClick(videoClicksNode);
+        }
+        return videoClicks;
     },
 
-    _getTrackingEvents = function() {
-
+    _getTrackingEvents = function(theLinear) {
+        var trackingNode = parser.getChildNode(theLinear, 'TrackingEvents'),
+            trackingEvents = [],
+            i;
+        if (trackingNode) {
+            var trackingNode = parser.getChildNodes(trackingNode, 'Tracking')
+            for (i = 0; i<trackingNode.length; i++) {
+                var TrackingEvent = new AdsPlayer.Vast.Ad.TrackingEvent();
+                TrackingEvent.event = parser.getAttributeValue(trackingNode[i], 'event');
+                TrackingEvent.uri = trackingNode[i].innerHTML;
+                trackingEvents.push(TrackingEvent);
+            }
+        }
+        return trackingEvents;
     },
-/*  
-AdsPlayer.Vast.Ad.Creative.MediaFile = function () {
-    "use strict";
-
-    this.id = '';                   // optional : identifier
-    this.delivery = '';             // required: Method of delivery of ad
-    this.type = '';                 // required : MIME type
-    this.bitrate = 0;               // optional : bitrate of encoded video in Kbps 
-    this.width = 0;                 // requierd : Pixel dimensions of video
-    this.height = 0;                // requierd : Pixel dimensions of video
-    this.scalable=true;             // optional : whether it is acceptable to scale the image.
-    this.maintainAspectRatio=true;  // optional : whether the ad must have its aspect ratio maintained when scaled
-    this.apiFramework='';           // optional : defines the method to use for communication if the MediaFile is interactive. 
-};
-
-MediaFile delivery="progressive" type="video/x-flv" bitrate="500" width="400" height="300" scalable="true" maintainAspectRatio="true">http://cdnp.tremormedia.com/video/acudeo/Carrot_400x300_500kb.flv</MediaFile>
-apiFramework="" bitrate="" delivery="" height="" id="" maintainAspectRatio="" scalable="" type="" width=""
-*/
 
 
     _getMediafiles = function(theLinear) {
@@ -135,6 +164,7 @@ apiFramework="" bitrate="" delivery="" height="" id="" maintainAspectRatio="" sc
                 mediaFile.scalable = parser.getAttributeValue(mediaFileNode[i], 'scalable');
                 mediaFile.maintainAspectRatio = parser.getAttributeValue(mediaFileNode[i], 'maintainAspectRatio');
                 mediaFile.apiFramework = parser.getAttributeValue(mediaFileNode[i], 'apiFramework');
+                mediaFile.uri = mediaFileNode[i].innerHTML;
                 mediaFiles.push(mediaFile);
             }
         }
@@ -148,9 +178,9 @@ apiFramework="" bitrate="" delivery="" height="" id="" maintainAspectRatio="" sc
         if (linearNode) {
             linear.duration = ((node = parser.getChildNode(linearNode, 'Duration'))? node.innerHTML: '');
             linear.adParameters = ((node = parser.getChildNode(linearNode, 'AdParameters'))? node.innerHTML: '');
-            linear.trackingEvents = []; // TO DO
-            linear.videoClicks = null; // TO DO
-            linear.mediaFiles = _getMediafiles(linearNode);    
+            linear.mediaFiles = _getMediafiles(linearNode);  
+            linear.trackingEvents = _getTrackingEvents(linearNode);
+            linear.videoClicks = _getVideoClicks(linearNode);
             return linear;
         }
         return null;
