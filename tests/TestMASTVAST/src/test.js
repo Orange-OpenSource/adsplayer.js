@@ -16,22 +16,7 @@
 /*jshint -W020 */
 /*exported AdsPlayer*/
 
-(function(root, factory) {
-    if (typeof define === "function" && define.amd) {
-        define([], function() {
-            root.AdsPlayer = factory();
-            return root.AdsPlayer;
-        });
-    } else if (typeof exports === "object") {
-        module.exports = factory();
-    } else {
-        root.AdsPlayer = factory();
-    }
-})
 
-(this, function() {
-    'use strict';
-    var AdsPlayer = {};
 	
     AdsPlayer = function() {
    		var that = this;
@@ -41,8 +26,8 @@
 
    		this.fileLoader = new AdsPlayer.FileLoader();
       this.fileLoader.errorHandler = new AdsPlayer.ErrorHandler();
-      this.vastParser = new AdsPlayer.Vast.VastParser();
-      this.mastParser = new AdsPlayer.Mast.MastParser();
+      this.vastParser = new AdsPlayer.vast.VastParser();
+      this.mastParser = new AdsPlayer.mast.MastParser();
       this.eventBus = new AdsPlayer.EventBus();
       this.mastTriggers = [];
       this.vastAds = [];
@@ -75,7 +60,7 @@
               data : {}
             });
         },function(reason){
-            console.log(reason);
+            //console.log(reason);
             alert(reason.message);
         });
  //     that.fileLoader.abort();
@@ -84,6 +69,7 @@
      this.parseVastFile = function() {
           if(that.vastFileContent !== ''){
               that.vastAds=that.vastParser.parse(that.vastFileContent);
+              alert('parsing ok');
           }
       }
 
@@ -106,8 +92,8 @@
         });
  //     that.fileLoader.abort();
       }
-    // fin vast test
 
+    // fin vast test
     };
 
     AdsPlayer.prototype = {
@@ -116,16 +102,13 @@
 
 
 
-
-
-    AdsPlayer.Mast = {};
-    AdsPlayer.Mast.Trigger = {};
-    AdsPlayer.Mast.Trigger.Condition = {};
+    AdsPlayer.mast = {};
+    AdsPlayer.mast.model = {};
+    AdsPlayer.mast.model.Trigger = {};
+    AdsPlayer.mast.model.Trigger.Condition = {};
     AdsPlayer.dependencies = {};
     AdsPlayer.utils = {};
-    AdsPlayer.Vast = {};
-    return AdsPlayer;
-});
-
-
+    AdsPlayer.vast = {};
+    // AdsPlayer.vast.model = {};
+    // AdsPlayer.vast.model.Ad = {};
 
