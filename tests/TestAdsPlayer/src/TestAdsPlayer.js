@@ -21,13 +21,13 @@
 
 			 // video Players
 			var orangeHasPlayer = new OrangeHasPlayer; // main video Player
+			orangeHasPlayer.init(hasVideoPlayer);
 			var adsPlayer = new AdsPlayer; // Ads video Player
+			adsPlayer.init(hasVideoPlayer, adsVideoContainer);
 
 
 			 // init
 			var Init = function(videoUrl, mastUrl) {
-			    orangeHasPlayer.init(hasVideoPlayer);
-			    adsPlayer.init(hasVideoPlayer, adsVideoContainer);
 			    adsPlayer.addEventListener('mastLoaded', function() {
 			        console.log("<TestAdsPlayer:Init> Mast parsing completed");
 			        /*

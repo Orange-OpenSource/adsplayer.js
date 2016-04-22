@@ -17,7 +17,7 @@
 							</VideoClicks>
  -->							<MediaFiles>
                    <MediaFile id="video1" delivery="progressive" bitrate="500" width="50" height="50" type="video/mp4">
-                      <![CDATA[../medias/pubOasis.mp4]]>
+                      <![CDATA[http://localhost:8080/adsPlayer.js/demo/medias/pubOasis.mp4]]>
 								</MediaFile>
 							</MediaFiles>
 						</Linear>

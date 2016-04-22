@@ -19,7 +19,7 @@
 							<!--<MediaFile delivery="progressive" bitrate="150" width="50" height="25" type="video/mp4">
               </MediaFile>-->
                     <MediaFile id="video1" delivery="progressive" bitrate="500" width="50" height="50" type="video/mp4">
-                      <![CDATA[../medias/pubClipper.mp4]]>
+                      <![CDATA[http://localhost:8080/adsPlayer.js/demo/medias/pubClipper.mp4]]>
                     </MediaFile>
 
                   </MediaFiles>

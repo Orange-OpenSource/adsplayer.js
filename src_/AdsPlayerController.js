@@ -70,7 +70,7 @@ AdsPlayerController = function() {
 
         _analyseTriggers = function() { //    Look for preRoll ads triggers 
             var i, j;
-            var preRoll = 'false';
+            var preRoll = false;
 
             for (i = 0; i < _mastTriggers.length; i++) {
                 var trigger = _mastTriggers[i];
@@ -137,10 +137,56 @@ AdsPlayerController = function() {
 
             if (_mastTriggers !== []) {
                 // here goes the code parsing the triggers'sources if in vast format
+                var that = this;
+                var vastParser = new AdsPlayer.vast.VastParser();
+                var vastFileContent;
+                var i;
+                var ind,ind1;
 
-                createPreRollTriggers(_mastTriggers); // for test only
+                var parseVast = function() {
+                    console.log("ind = "+ind+" ind1 = "+ind1);
+                    vastParser.parse(vastFileContent);
+                    // store result in trigger[ind][ind1]
+                    ind1++;
+                    loadVast();
+                }
+                
+                _eventBus.addEventListener('vastFileLoaded',parseVast);
 
-                //_createCues();
+                var loadVast = function()  {
+
+                    if(ind >= _mastTriggers.length){
+                        // all triggers and all ads have been processed
+                        // we return;
+                        _eventBus.removeEventListener('vastFileLoaded',parseVast);
+                        //_createCues();
+                        return;
+                    }
+
+                    if(ind1>=_mastTriggers[ind].sources.length){
+                        // a triiger is completed, go to next one.
+                        ind++;
+                        ind1=0;
+                        loadVast();
+                    }
+
+                    var uri=_mastTriggers[ind].sources[ind1].uri;
+                    _fileLoader.load(uri).then(function(result) {
+                        vastFileContent = result.response;
+                        _eventBus.dispatchEvent({
+                            type: "vastFileLoaded",
+                            data: {}
+                        });
+                    }, function(reason) {
+                        //console.log(reason);
+                        alert(reason.message);
+                    });
+                }
+
+                ind=0;
+                ind1=0;
+                loadVast();
+                
             }
             _dispatchEvent("mastLoaded");
         },
