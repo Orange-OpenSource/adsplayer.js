@@ -142,13 +142,28 @@ AdsPlayerController = function() {
                 var vastFileContent;
                 var i;
                 var ind,ind1;
+                /*
+                var _getMediaUrl = function(vastObjest) {
+                    var tab = [];
+                    tab.push({'url' : 'tot.mp2', 'priority' : 1});
+                    tab.push({'url' : 'tot.mp3', 'priority' : 2, 'clic' : false});
+                     //tab.push('url test 2');
+                    return tab ;
+                };  */
 
                 var parseVast = function() {
+                    var mediaFiles = [];
                     console.log("ind = "+ind+" ind1 = "+ind1);
-                    vastParser.parse(vastFileContent);
+                    var vastResult = vastParser.parse(vastFileContent);
                     // store result in trigger[ind][ind1]
+                    _mastTriggers[ind].media.push(vastResult);
+
+
+
+
                     ind1++;
                     loadVast();
+
                 }
                 
                 _eventBus.addEventListener('vastFileLoaded',parseVast);

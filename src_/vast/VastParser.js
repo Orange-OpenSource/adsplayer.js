@@ -31,7 +31,7 @@ AdsPlayer.vast.VastParser = function () {
             if (impressionNodes){
                 for (var l = 0; l < impressionNodes.length; l++) {
                     var impression = new AdsPlayer.vast.model.Ad.Impressions();
-                    impression.uri = impressionNodes[l].innerHTML;
+                    impression.uri = impressionNodes[l].textContent;
                     impression.id = parser.getAttributeValue(impressionNodes[l], 'id');
                     impressions.push(impression);
                 }
@@ -48,7 +48,7 @@ AdsPlayer.vast.VastParser = function () {
             if (extensionNodes){
                 for (var l = 0; l < extensionNodes.length; l++) {
                     var extension = new AdsPlayer.vast.model.Ad.Extensions();
-                    extension.uri = extensionNodes[l].innerHTML;
+                    extension.uri = extensionNodes[l].textContent;
                     // to do a function in DOMParser which can get the names of the attributes and then we get attributeValue by the function getAttributeValue
                     //extension.id = parser.getAttributeValue(extensionNodes[l], 'id');
                     extension.other = '';                    
@@ -59,26 +59,26 @@ AdsPlayer.vast.VastParser = function () {
         }        
         return [];
     },
-
+/*
     _getMediafiles = function() {
                var linearNode = parser.getChildNode(creative, 'Linear');
         var linear = new AdsPlayer.vast.model.Ad.Creative.Linear();
 
-        linear.duration = (parser.getChildNode(linearNode, 'Duration')? linearNode.innerHTML: '');
-        linear.adParameters = (parser.getChildNode(linearNode, 'AdParameters')? linearNode.innerHTML: '');
+        linear.duration = (parser.getChildNode(linearNode, 'Duration')? linearNode.textContent: '');
+        linear.adParameters = (parser.getChildNode(linearNode, 'AdParameters')? linearNode.textContent: '');
         linear.trackingEvents = []; // TO DO
         linear.videoClicks = null; // TO DO
         linear.mediaFiles = _getMediafiles(linearNode);    
         return linear;
 
     },
-
+*/
     _getClickThrough = function(theVideoClicks) {
         var clickthroughNode = parser.getChildNode(theVideoClicks, 'ClickThrough'), // there is only one clickthrough node
-        clickThrough = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough(); 
+            clickThrough = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough(); 
         if (clickthroughNode) {
             clickThrough.id = parser.getAttributeValue(clickthroughNode, 'id');
-            clickThrough.uri = clickthroughNode.innerHTML;
+            clickThrough.uri = clickthroughNode.textContent;
         }
         return clickThrough;
     },
@@ -91,7 +91,7 @@ AdsPlayer.vast.VastParser = function () {
             for (i=0; i < clickTrackingsNode.length; i++){
                 var clickTracking = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking();
                 clickTracking.id = parser.getAttributeValue(clickTrackingsNode[i], 'id');
-                clickTracking.uri = clickTrackingsNode[i].innerHTML;
+                clickTracking.uri = clickTrackingsNode[i].textContent;
             }
             clickTrackings.push(clickTracking);
         }
@@ -106,7 +106,7 @@ AdsPlayer.vast.VastParser = function () {
             for (i=0; i < customClicksNode.length; i++){
                 var customClick = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.CustomClick();
                 customClick.id = parser.getAttributeValue(customClicksNode[i], 'id');
-                customClick.uri = customClicksNode[i].innerHTML;
+                customClick.uri = customClicksNode[i].textContent;
             }
             customClicks.push(customClick);
         }
@@ -133,7 +133,7 @@ AdsPlayer.vast.VastParser = function () {
             for (i = 0; i<trackingNode.length; i++) {
                 var TrackingEvent = new AdsPlayer.vast.model.Ad.TrackingEvent();
                 TrackingEvent.event = parser.getAttributeValue(trackingNode[i], 'event');
-                TrackingEvent.uri = trackingNode[i].innerHTML;
+                TrackingEvent.uri = trackingNode[i].textContent;
                 trackingEvents.push(TrackingEvent);
             }
         }
@@ -159,7 +159,7 @@ AdsPlayer.vast.VastParser = function () {
                 mediaFile.scalable = parser.getAttributeValue(mediaFileNode[i], 'scalable');
                 mediaFile.maintainAspectRatio = parser.getAttributeValue(mediaFileNode[i], 'maintainAspectRatio');
                 mediaFile.apiFramework = parser.getAttributeValue(mediaFileNode[i], 'apiFramework');
-                mediaFile.uri = mediaFileNode[i].innerHTML;
+                mediaFile.uri = mediaFileNode[i].textContent;
                 mediaFiles.push(mediaFile);
             }
         }
@@ -171,8 +171,8 @@ AdsPlayer.vast.VastParser = function () {
             linear = new AdsPlayer.vast.model.Ad.Creative.Linear(),
             node = null;
         if (linearNode) {
-            linear.duration = ((node = parser.getChildNode(linearNode, 'Duration'))? node.innerHTML: '');
-            linear.adParameters = ((node = parser.getChildNode(linearNode, 'AdParameters'))? node.innerHTML: '');
+            linear.duration = ((node = parser.getChildNode(linearNode, 'Duration'))? node.textContent: '');
+            linear.adParameters = ((node = parser.getChildNode(linearNode, 'AdParameters'))? node.textContent: '');
             linear.mediaFiles = _getMediafiles(linearNode);  
             linear.trackingEvents = _getTrackingEvents(linearNode);
             linear.videoClicks = _getVideoClicks(linearNode);
@@ -225,11 +225,11 @@ AdsPlayer.vast.VastParser = function () {
             var inLine = new AdsPlayer.vast.model.Ad.InLine();
             var inLineNode = parser.getChildNode(adsNode[i], 'InLine');
             //Get all inLine attributes 
-            inLine.adSystem = ((node = parser.getChildNode(inLineNode, 'AdSystem'))? node.innerHTML: '');
-            inLine.adTitle = ((node = parser.getChildNode(inLineNode, 'AdTitle'))? node.innerHTML: '');
-            inLine.description = ((node = parser.getChildNode(inLineNode, 'Description'))? node.innerHTML: '');
-            inLine.survey = ((node = parser.getChildNode(inLineNode, 'Survey'))? node.innerHTML: '');
-            inLine.error = ((node = parser.getChildNode(inLineNode, 'Error'))? node.innerHTML: '');
+            inLine.adSystem = ((node = parser.getChildNode(inLineNode, 'AdSystem'))? node.textContent: '');
+            inLine.adTitle = ((node = parser.getChildNode(inLineNode, 'AdTitle'))? node.textContent: '');
+            inLine.description = ((node = parser.getChildNode(inLineNode, 'Description'))? node.textContent: '');
+            inLine.survey = ((node = parser.getChildNode(inLineNode, 'Survey'))? node.textContent: '');
+            inLine.error = ((node = parser.getChildNode(inLineNode, 'Error'))? node.textContent: '');
             inLine.impression = _getImpression(inLineNode);
             inLine.creatives = _getCreatives(inLineNode);
             inLine.extentions = _getExtentions(inLineNode);
@@ -246,7 +246,24 @@ AdsPlayer.vast.VastParser = function () {
             vast.ads.push(myAd);
         } // end of for adsList
         console.log(vast) ; 
-        return vast;     
+        /* for this first version of vast parser we return only trhe likst of ads and their mediafil {url, mimtype} 
+        return vast;     // for future veersions, all vast object must be returned by this function
+       */
+        var listAds = [];
+        var i,j ;
+        for (i = 0; i < vast.ads.length; i++) {
+            for (j = 0; j < vast.ads[i].inLine.creatives.length; j++) {
+                if(vast.ads[i].inLine.creatives[j].linear){
+                    var linear = {};
+                    linear.id = vast.ads[i].id;
+                    linear.creativeId = vast.ads[i].inLine.creatives[j].id;
+                    linear.mediaFiles = vast.ads[i].inLine.creatives[j].linear.mediaFiles;
+                    linear.videoClicks = vast.ads[i].inLine.creatives[j].linear.videoClicks;
+                    listAds.push(linear);
+                }
+            }
+        }
+         return listAds;
     };
 
 
