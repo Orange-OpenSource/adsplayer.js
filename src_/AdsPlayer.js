@@ -26,7 +26,7 @@ AdsPlayer = function() {
         BUILD_DATE = "@@TIMESTAMP",
         _error = null,
         _warning = null,
-        adsPlayerController = new AdsPlayerController;
+        adsPlayerController = new AdsPlayerController();
 
     var _onError = function(e) {
             error = e.data;
