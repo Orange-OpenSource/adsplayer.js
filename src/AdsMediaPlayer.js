@@ -59,29 +59,36 @@ AdsMediaPlayer = function() {
 
         _onError = function(e) {
             var error = e.data;
-            adsVideoPlayer.removeEventListener("error", _onError);
-            var event = new CustomEvent('aborted');
-            adsVideoPlayer.dispatchEvent(event);
+            if (_medias.length) {
+                _playMedia();
+            } else {
+                adsVideoPlayer.removeEventListener("error", _onError);
+                var event = new CustomEvent('aborted');
+                adsVideoPlayer.dispatchEvent(event);
+            }
         },
+
+
+        _playMedia = function() {
+            if (_medias.length) {
+                var media = _medias.shift();               
+                if (media.type === "image/jpeg") {
+                    // to do
+                } else {
+                    adsVideoPlayer.src = media.uri;
+                    adsVideoPlayer.type = media.type;
+                    adsVideoPlayer.load();
+                }
+            }
+
+        };
+
 
         _playVideo = function(medias) {
             _medias = medias;
-            var i, source;
-            for (i = 0; i < _medias.length; i++) {
-               if (_medias[i].type === "image/jpeg") {
-                    adsVideoPlayer.poster = _medias[i].uri;
-               }            
-               else {
-                    source = document.createElement('source');
-                    source.src = _medias[i].uri;
-                    source.type = _medias[i].type;
-                    source.src = _medias[i].uri;
-                    adsVideoPlayer.appendChild(source);
-               }
-            }
             adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
             adsVideoPlayer.addEventListener("error", _onError);
-            adsVideoPlayer.load();
+            _playMedia();
         };
 
     return {
