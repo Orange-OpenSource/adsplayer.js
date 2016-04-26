@@ -69,7 +69,7 @@ AdsPlayerController = function() {
         },
 
         _analyseTriggers = function() { //    Look for preRoll ads triggers 
-            var i, j;
+            var i, j, k;
             var preRoll = false;
 
             for (i = 0; i < _mastTriggers.length; i++) {
@@ -77,23 +77,32 @@ AdsPlayerController = function() {
                 if (trigger.alreadyPlayed || trigger.startConditions == []) {
                     continue;
                 }
-                if (trigger.startConditions[0].type === ConditionType.EVENT && trigger.startConditions[0].name === ConditionName.ON_ITEM_START) {
-                    preRoll = true;
-                    for (j = 0; j < trigger.sources.length; j++) {
-                        _listVastAds.push(trigger.sources[j].uri)
+                var flag = false;
+                for (j = 0; j < trigger.startConditions.length; j++) {
+                    if (trigger.startConditions[j].type === ConditionType.EVENT && trigger.startConditions[j].name === ConditionName.ON_ITEM_START) {
+                        flag = true;
+                        break;
+                    } else if (trigger.startConditions[j].type === ConditionType.PROPERTY &&
+                        trigger.startConditions[j].name === ConditionName.POSITION &&
+                        trigger.startConditions[j].operator === ConditionOperator.GEQ &&
+                        trigger.startConditions[j].value === 0) {
+                        flag = true;
+                        break;
                     }
-                    trigger.alreadyPlayed = true;
-                } else if (trigger.startConditions[0].type === ConditionType.PROPERTY &&
-                    trigger.startConditions[0].name === ConditionName.POSITION &&
-                    trigger.startConditions[0].operator === ConditionOperator.GEQ &&
-                    trigger.startConditions[0].value === 0) {
+                }
+                if (flag) {
+                    var medias;
                     preRoll = true;
-                    for (j = 0; j < trigger.sources.length; j++) {
-                        _listVastAds.push(trigger.sources[j].uri)
+                    for (j = 0; j < trigger.media.length; j++) {
+                        for (k = 0; k < trigger.media[j].length; k++) {
+                            medias = trigger.media[j][k].mediaFiles;
+                            _listVastAds.push(medias)
+                        }
                     }
                     trigger.alreadyPlayed = true;
                 }
             }
+
             if (preRoll) {
                 console.log('PreRoll');
                 _dispatchEvent("adStart");
@@ -141,51 +150,35 @@ AdsPlayerController = function() {
                 var vastParser = new AdsPlayer.vast.VastParser();
                 var vastFileContent;
                 var i;
-                var ind,ind1;
-                /*
-                var _getMediaUrl = function(vastObjest) {
-                    var tab = [];
-                    tab.push({'url' : 'tot.mp2', 'priority' : 1});
-                    tab.push({'url' : 'tot.mp3', 'priority' : 2, 'clic' : false});
-                     //tab.push('url test 2');
-                    return tab ;
-                };  */
+                var ind, ind1;
 
                 var parseVast = function() {
-                    var mediaFiles = [];
-                    console.log("ind = "+ind+" ind1 = "+ind1);
+                    console.log("ind = " + ind + " ind1 = " + ind1);
                     var vastResult = vastParser.parse(vastFileContent);
                     // store result in trigger[ind][ind1]
                     _mastTriggers[ind].media.push(vastResult);
-
-
-
-
                     ind1++;
                     loadVast();
-
                 }
-                
-                _eventBus.addEventListener('vastFileLoaded',parseVast);
 
-                var loadVast = function()  {
 
-                    if(ind >= _mastTriggers.length){
+                var loadVast = function() {
+                    if (ind >= _mastTriggers.length) {
                         // all triggers and all ads have been processed
                         // we return;
-                        _eventBus.removeEventListener('vastFileLoaded',parseVast);
+                        _eventBus.removeEventListener('vastFileLoaded', parseVast);
                         //_createCues();
                         return;
                     }
 
-                    if(ind1>=_mastTriggers[ind].sources.length){
+                    if (ind1 >= _mastTriggers[ind].sources.length) {
                         // a triiger is completed, go to next one.
                         ind++;
-                        ind1=0;
+                        ind1 = 0;
                         loadVast();
                     }
 
-                    var uri=_mastTriggers[ind].sources[ind1].uri;
+                    var uri = _mastTriggers[ind].sources[ind1].uri;
                     _fileLoader.load(uri).then(function(result) {
                         vastFileContent = result.response;
                         _eventBus.dispatchEvent({
@@ -197,11 +190,10 @@ AdsPlayerController = function() {
                         alert(reason.message);
                     });
                 }
-
-                ind=0;
-                ind1=0;
+                _eventBus.addEventListener('vastFileLoaded', parseVast);
+                ind = 0;
+                ind1 = 0;
                 loadVast();
-                
             }
             _dispatchEvent("mastLoaded");
         },
@@ -239,8 +231,8 @@ AdsPlayerController = function() {
         _playAds = function() {
             var i;
             if (_listVastAds.length) {
-                var videoUrl = _listVastAds.shift();
-                _adsMediaPlayer.playVideo(videoUrl);
+                var videoUrls = _listVastAds.shift();
+                _adsMediaPlayer.playVideo(videoUrls);
             }
         };
 

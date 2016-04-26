@@ -21,6 +21,7 @@ AdsMediaPlayer = function() {
         overlay = null,
         playingAds = false,
         adsVideoPlayer = null,
+        _medias = [],
         _videoUrl = '',
 
         // functions
@@ -62,8 +63,9 @@ AdsMediaPlayer = function() {
             adsVideoPlayer.dispatchEvent(event);
         },
 
-        _playVideo = function(videoUrl) {
-            _videoUrl=videoUrl;
+        _playVideo = function(medias) {
+            _medias=medias;
+            _videoUrl=_medias[0].uri;
             adsVideoPlayer.src = _videoUrl;
             adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
             adsVideoPlayer.addEventListener("error", _onError);
