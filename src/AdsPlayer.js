@@ -21,12 +21,12 @@ AdsPlayer = function() {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
-    var VERSION = "1.0.0_dev",
+    var VERSION = "0.0.1_dev",
         GIT_TAG = "@@REVISION",
         BUILD_DATE = "@@TIMESTAMP",
         _error = null,
         _warning = null,
-        adsPlayerController = new AdsPlayerController;
+        adsPlayerController = new AdsPlayerController();
 
     var _onError = function(e) {
             error = e.data;
@@ -35,10 +35,6 @@ AdsPlayer = function() {
         _onWarning = function(e) {
             warning = e.data;
         };
-
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
     /////////// INITIALIZATION
 
@@ -162,6 +158,9 @@ AdsPlayer = function() {
     };
 
     return {
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+
         init: _init,
         reset: _reset,
         load: _load,
@@ -171,12 +170,19 @@ AdsPlayer = function() {
         getBuildDate: _getBuildDate,
         getError: _getError,
         getWarning: _getWarning
-    }
+    };
+};
+
+/**
+ * @class
+ * @classdesc AdsPlayer
+ */
+AdsPlayer.prototype = {
+    constructor: AdsPlayer
 };
 
 AdsPlayer.mast = {};
 AdsPlayer.mast.model = {};
 AdsPlayer.mast.model.Trigger = {};
 AdsPlayer.mast.model.Trigger.Condition = {};
-AdsPlayer.dependencies = {};
 AdsPlayer.utils = {};
