@@ -170,7 +170,15 @@ AdsPlayer = function() {
         getBuildDate: _getBuildDate,
         getError: _getError,
         getWarning: _getWarning
-    }
+    };
+};
+
+/**
+ * @class
+ * @classdesc AdsPlayer
+ */
+AdsPlayer.prototype = {
+    constructor: AdsPlayer
 };
 
 AdsPlayer.mast = {};
