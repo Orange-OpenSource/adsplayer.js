@@ -56,6 +56,7 @@ AdsMediaPlayer = function() {
             adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
         },
 
+
         _onError = function(e) {
             var error = e.data;
             adsVideoPlayer.removeEventListener("error", _onError);
@@ -64,9 +65,20 @@ AdsMediaPlayer = function() {
         },
 
         _playVideo = function(medias) {
-            _medias=medias;
-            _videoUrl=_medias[0].uri;
-            adsVideoPlayer.src = _videoUrl;
+            _medias = medias;
+            var i, source;
+            for (i = 0; i < _medias.length; i++) {
+               if (_medias[i].type === "image/jpeg") {
+                    adsVideoPlayer.poster = _medias[i].uri;
+               }            
+               else {
+                    source = document.createElement('source');
+                    source.src = _medias[i].uri;
+                    source.type = _medias[i].type;
+                    source.src = _medias[i].uri;
+                    adsVideoPlayer.appendChild(source);
+               }
+            }
             adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
             adsVideoPlayer.addEventListener("error", _onError);
             adsVideoPlayer.load();
