@@ -111,8 +111,11 @@ AdsPlayer = function(adsContainer) {
      * @memberof AdsPlayer#
      * @param {object} stream - the stream contaning all stream informations (url, protData, mastUrl)
      */
-    _load = function(stream) {
+    _load = function(stream, callback) {
         if (stream.mastUrl) {
+            adsPlayerController.addEventListener('mastLoaded', function () {
+                callback();
+            });
             adsPlayerController.load(stream.mastUrl);
         }
     },
