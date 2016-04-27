@@ -185,4 +185,7 @@ AdsPlayer.mast = {};
 AdsPlayer.mast.model = {};
 AdsPlayer.mast.model.Trigger = {};
 AdsPlayer.mast.model.Trigger.Condition = {};
+AdsPlayer.vast = {};
+AdsPlayer.vast.model = {};
+AdsPlayer.vast.model.Ad = {};
 AdsPlayer.utils = {};
