@@ -64,16 +64,9 @@ AdsPlayerController = function() {
             _mainVideo.pause();
         },
 
-        _dispatchEvent = function(type) {
-            _eventBus.dispatchEvent({
-                type: type,
-                data: {}
-            });
-        },
-
         _analyseTriggers = function() { //    Look for preRoll ads triggers 
-            var i, j, k;
-            var preRoll = false;
+            var i, j, k,
+                preRoll = false;
 
             for (i = 0; i < _mastTriggers.length; i++) {
                 var trigger = _mastTriggers[i];
@@ -99,7 +92,7 @@ AdsPlayerController = function() {
                     for (j = 0; j < trigger.media.length; j++) {
                         for (k = 0; k < trigger.media[j].length; k++) {
                             medias = trigger.media[j][k].mediaFiles;
-                            _listVastAds.push(medias)
+                            _listVastAds.push(medias);
                         }
                     }
                     trigger.alreadyPlayed = true;
@@ -124,13 +117,14 @@ AdsPlayerController = function() {
                     return 1;
                 else
                     return 0;
-            })
+            });
 
             // create cues according to the sorted ads
-            var cues = [];
-            var Cue = window.VTTCue || window.TextTrackCue;
+            var cues = [],
+                Cue = window.VTTCue || window.TextTrackCue,
+                i;
 
-            for (var i = 0; i < self.mastTriggers.length; i++) {
+            for (i = 0; i < self.mastTriggers.length; i++) {
                 var trigger = self.mastTriggers[i];
                 if (trigger.startConditions[0].type === ConditionType.PROPERTY &&
                     trigger.startConditions[0].name === ConditionName.POSITION &&
@@ -139,7 +133,7 @@ AdsPlayerController = function() {
                     cues.push(cue);
                 }
                 return cues;
-            };
+            }
         },
 
         _parseMastFile = function() {
@@ -149,6 +143,7 @@ AdsPlayerController = function() {
 
             if (_mastTriggers !== []) {
                 // here goes the code parsing the triggers'sources if in vast format
+
                 var that = this;
                 var vastParser = null;
                 var vastFileContent;
@@ -164,7 +159,7 @@ AdsPlayerController = function() {
                     _mastTriggers[ind].media.push(vastResult);
                     ind1++;
                     loadVast();
-                }
+                };
 
 
                 var loadVast = function() {
@@ -199,7 +194,7 @@ AdsPlayerController = function() {
                         //console.log(reason);
                         alert(reason.message);
                     });
-                }
+                };
                 _eventBus.addEventListener('vastFileLoaded', parseVast);
                 ind = 0;
                 ind1 = 0;
@@ -228,7 +223,7 @@ AdsPlayerController = function() {
                 _mainVideo.removeEventListener("playing", _onPlaying);
                 console.log('no more Ads to Play : dispatch "adEnd" towards the html Player');
                 _dispatchEvent("adEnd");
-                console.log('play main video')
+                console.log('play main video');
                 _mainVideo.play();
             }
         },
@@ -423,15 +418,9 @@ AdsPlayerController = function() {
         load: _load.bind(this),
         getError: _getError,
         getWarning: _getWarning
-    }
+    };
 
 };
-
-
-
-
-
-
 
 
 // create a preRoll Trigger for test    
@@ -471,7 +460,7 @@ var createPreRollTrigger = function(uri, uri2) {
     trigger.alreadyPlayed = false; // mainly in the seeked case : do not replay trigger allready played
 
     return trigger;
-}
+};
 
 var createMidRollTrigger = function(time, uri, uri2) {
     var trigger = new AdsPlayer.mast.model.Trigger();
@@ -509,7 +498,7 @@ var createMidRollTrigger = function(time, uri, uri2) {
     trigger.alreadyPlayed = false; // mainly in the seeked case : do not replay trigger allready played
 
     return trigger;
-}
+};
 
 var createPreRollTriggers = function(triggers) {
     var trigger;
@@ -524,4 +513,4 @@ var createPreRollTriggers = function(triggers) {
     triggers.push(trigger);
     trigger = createMidRollTrigger(20, 'http://localhost:8080/adsPlayer.js/demo/medias/pubLancome.mp4');
     triggers.push(trigger);
-}
+};

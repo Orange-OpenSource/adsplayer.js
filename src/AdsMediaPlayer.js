@@ -96,7 +96,7 @@ AdsMediaPlayer = function() {
         createVideoElt: _createVideoElt,
         playVideo: _playVideo,
         addlistener: _addlistener
-    }
+    };
 };
 
 AdsMediaPlayer.prototype = {
