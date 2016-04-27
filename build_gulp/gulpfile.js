@@ -9,13 +9,13 @@ var destination = '../dist'; // dossier à livrer
 
  
 gulp.task('lint', function() {
-  return gulp.src(source+'/*/*.js')
+  return gulp.src(source+'/**/*.js')
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'));
 });
  
 gulp.task('compress', function() {
-  return gulp.src(source+'/*/*.js')
+  return gulp.src(source+'/**/*.js')
     .pipe(uglify())
     .pipe(gulp.dest(destination));
 });
