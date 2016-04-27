@@ -12,8 +12,10 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-AdsPlayer.vast.VastParser = function() {
+AdsPlayer.vast.VastParser = function(vastBaseUrl) {
     "use strict";
+
+    var _vastBaseUrl = vastBaseUrl;
     var parser = new AdsPlayer.utils.DOMParser(),
         /*
     _getAdsList = function() {
@@ -23,17 +25,22 @@ AdsPlayer.vast.VastParser = function() {
         return [];
     },*/
 
-        // TO BE DONE
+        _checkUri = function (uri) {
+            if (uri.indexOf('http://') === -1) {
+                uri = _vastBaseUrl + uri;
+            }
+            return uri;
+        },
         _getImpression = function(theInLineNode) {
             if (theInLineNode) {
-                var node, 
+                var node,
                     impressions = [],
                     impressionNodes = parser.getChildNodes(theInLineNode, 'Impression'),
                     i;
                 if (impressionNodes) {
                     for (i = 0; i < impressionNodes.length; i++) {
                         var impression = new AdsPlayer.vast.model.Ad.Impressions();
-                        impression.uri = impressionNodes[i].textContent;
+                        impression.uri = _checkUri(impressionNodes[i].textContent);
                         impression.id = parser.getAttributeValue(impressionNodes[i], 'id');
                         impressions.push(impression);
                     }
@@ -52,7 +59,7 @@ AdsPlayer.vast.VastParser = function() {
                 if (extensionNodes) {
                     for (i = 0; i < extensionNodes.length; i++) {
                         var extension = new AdsPlayer.vast.model.Ad.Extensions();
-                        extension.uri = extensionNodes[i].textContent;
+                        extension.uri = _checkUri(extensionNodes[i].textContent);
                         // to do a function in DOMParser which can get the names of the attributes and then we get attributeValue by the function getAttributeValue
                         //extension.id = parser.getAttributeValue(extensionNodes[l], 'id');
                         extension.other = '';
@@ -82,7 +89,7 @@ AdsPlayer.vast.VastParser = function() {
                 clickThrough = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough();
             if (clickthroughNode) {
                 clickThrough.id = parser.getAttributeValue(clickthroughNode, 'id');
-                clickThrough.uri = clickthroughNode.textContent;
+                clickThrough.uri = _checkUri(clickthroughNode.textContent);
             }
             return clickThrough;
         },
@@ -96,7 +103,7 @@ AdsPlayer.vast.VastParser = function() {
                 for (i = 0; i < clickTrackingsNode.length; i++) {
                     clickTracking = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking();
                     clickTracking.id = parser.getAttributeValue(clickTrackingsNode[i], 'id');
-                    clickTracking.uri = clickTrackingsNode[i].textContent;
+                    clickTracking.uri = _checkUri(clickTrackingsNode[i].textContent);
                 }
                 clickTrackings.push(clickTracking);
             }
@@ -112,7 +119,7 @@ AdsPlayer.vast.VastParser = function() {
                 for (i = 0; i < customClicksNode.length; i++) {
                     customClick = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.CustomClick();
                     customClick.id = parser.getAttributeValue(customClicksNode[i], 'id');
-                    customClick.uri = customClicksNode[i].textContent;
+                    customClick.uri = _checkUri(customClicksNode[i].textContent);
                 }
                 customClicks.push(customClick);
             }
@@ -139,7 +146,7 @@ AdsPlayer.vast.VastParser = function() {
                 for (i = 0; i < trackingNode.length; i++) {
                     var TrackingEvent = new AdsPlayer.vast.model.Ad.TrackingEvent();
                     TrackingEvent.event = parser.getAttributeValue(trackingNode[i], 'event');
-                    TrackingEvent.uri = trackingNode[i].textContent;
+                    TrackingEvent.uri = _checkUri(trackingNode[i].textContent);
                     trackingEvents.push(TrackingEvent);
                 }
             }
@@ -165,7 +172,7 @@ AdsPlayer.vast.VastParser = function() {
                     mediaFile.scalable = parser.getAttributeValue(mediaFileNode[i], 'scalable');
                     mediaFile.maintainAspectRatio = parser.getAttributeValue(mediaFileNode[i], 'maintainAspectRatio');
                     mediaFile.apiFramework = parser.getAttributeValue(mediaFileNode[i], 'apiFramework');
-                    mediaFile.uri = mediaFileNode[i].textContent;
+                    mediaFile.uri = _checkUri(mediaFileNode[i].textContent);
                     mediaFiles.push(mediaFile);
                 }
             }
@@ -189,7 +196,7 @@ AdsPlayer.vast.VastParser = function() {
 
         _getCreatives = function(theInLineNode) {
             if (theInLineNode) {
-                var node, 
+                var node,
                     creatives = [],
                     creativeNodes = parser.getChildNodes(parser.getChildNode(theInLineNode, 'Creatives'), 'Creative'),
                     i;

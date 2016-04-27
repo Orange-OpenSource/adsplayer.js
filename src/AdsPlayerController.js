@@ -45,6 +45,7 @@ AdsPlayerController = function() {
         _self = this,
         _mastFileContent = "",
         _mastTriggers = [],
+        _mastBaseUrl = '',
         _listVastAds = [], // this table is used to track the (groups of) ads to be played
         _fileLoader = new AdsPlayer.FileLoader(),
         _errorHandler = adErrorHandler.getInstance,
@@ -149,12 +150,14 @@ AdsPlayerController = function() {
             if (_mastTriggers !== []) {
                 // here goes the code parsing the triggers'sources if in vast format
                 var that = this;
-                var vastParser = new AdsPlayer.vast.VastParser();
+                var vastParser = null;
                 var vastFileContent;
+                var vastBaseUrl;
                 var i;
                 var ind, ind1;
 
                 var parseVast = function() {
+                    vastParser = new AdsPlayer.vast.VastParser(vastBaseUrl);
                     console.log("ind = " + ind + " ind1 = " + ind1);
                     var vastResult = vastParser.parse(vastFileContent);
                     // store result in trigger[ind][ind1]
@@ -181,8 +184,13 @@ AdsPlayerController = function() {
                     }
 
                     var uri = _mastTriggers[ind].sources[ind1].uri;
+                    if (uri.indexOf('http://') === -1) {
+                        uri = _mastBaseUrl + uri;
+                    }
                     _fileLoader.load(uri).then(function(result) {
                         vastFileContent = result.response;
+                        vastBaseUrl = result.baseUrl;
+                        vastBaseUrl = "http://2is7server2.rd.francetelecom.com";
                         _eventBus.dispatchEvent({
                             type: "vastFileLoaded",
                             data: {}
@@ -308,6 +316,8 @@ AdsPlayerController = function() {
                 console.log("***************************************************");
                 console.log('');
                 _mastFileContent = result.response;
+                _mastBaseUrl = result.baseUrl;
+                _mastBaseUrl = "http://2is7server2.rd.francetelecom.com";
                 _dispatchEvent("mastFileLoaded");
             }, function(reason) {
                 console.log(reason);
