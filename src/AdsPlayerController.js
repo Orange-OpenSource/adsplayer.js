@@ -36,8 +36,10 @@
 
 AdsPlayerController = function() {
 
-    var _mainVideo,
-        _adsMediaPlayer = new AdsMediaPlayer,
+    var _mainPlayer = null,
+        _mainVideo = null,
+        _adsContainer = null,
+        _adsMediaPlayer = null,
         _error = null,
         _warning = null,
         _self = this,
@@ -249,15 +251,17 @@ AdsPlayerController = function() {
      * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
      */
 
-    var _init = function(mainVideo, adsContainer) {
-            if (!mainVideo || !adsContainer) {
-                throw new Error('AdsPlayerController.init(): Invalid Argument');
-            }
-            _mainVideo = mainVideo;
+    var _init = function(player, adsContainer) {
+
+            _mainPlayer = player;
+            _mainVideo = player.getVideoModel().getElement();
+            _adsContainer = adsContainer;
+
             _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart.bind(this));
 
-            _adsMediaPlayer.init()
-            _adsMediaPlayer.createVideoElt(adsContainer);
+            _adsMediaPlayer = new AdsMediaPlayer();
+            _adsMediaPlayer.init();
+            _adsMediaPlayer.createVideoElt(_adsContainer);
             _adsMediaPlayer.addlistener("ended", _onEnded);
             _adsMediaPlayer.addlistener("aborted", _onAborted);
         },
