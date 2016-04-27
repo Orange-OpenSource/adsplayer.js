@@ -34,7 +34,7 @@ AdsMediaPlayer = function() {
         },
 
         _createVideoElt = function(adsContainer) {
-            if (adsVideoPlayer == null) {
+            if (adsVideoPlayer === null) {
                 adsVideoPlayer = document.createElement('video');
                 adsVideoPlayer.autoplay = false;
                 adsVideoPlayer.id = 'adsVideoPlayer';
@@ -55,7 +55,6 @@ AdsMediaPlayer = function() {
             console.log('Play ad : ' + _videoUrl);
             adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
         },
-
 
         _onError = function(e) {
             var error = e.data;
