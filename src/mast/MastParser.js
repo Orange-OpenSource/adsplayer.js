@@ -113,7 +113,7 @@ AdsPlayer.mast.MastParser = function() {
                 parsedTime,
                 SECONDS_IN_HOUR = 60 * 60,
                 SECONDS_IN_MIN = 60;
-            if (timingStr == null) {
+            if (timingStr === null) {
                 return -1;
             }
             timeParts = timingStr.split(":");
