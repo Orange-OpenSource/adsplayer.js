@@ -16,17 +16,19 @@
  *
  */
 
-AdsPlayer = function() {
+AdsPlayer = function(adsContainer) {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
-    var VERSION = "0.0.1_dev",
+    var NAME = "AdsPlayer",
+        VERSION = "0.0.1_dev",
         GIT_TAG = "@@REVISION",
         BUILD_DATE = "@@TIMESTAMP",
         _error = null,
         _warning = null,
-        adsPlayerController = new AdsPlayerController();
+        _adsContainer = adsContainer,
+        adsPlayerController = null;
 
     var _onError = function(e) {
             error = e.data;
@@ -39,18 +41,17 @@ AdsPlayer = function() {
     /////////// INITIALIZATION
 
     /**
-     * Initialize the Ads player.
+     * Initialize the AdsPlayer.
      * @method init
      * @access public
      * @memberof AdsPlayer#
-     * @param {Object} mainVideo - the HTML5 video element used by the main media player
-     * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
+     * @param {Object} player - the MediaPlayer
+     * @param {function} callback - the callback function to invoke when initialization is done
      */
-    var _init = function(mainVideo, adsContainer) {
-        if (!mainVideo || !adsContainer) {
-            throw new Error('AdsPlayer.init(): Invalid Argument');
-        }
-        adsPlayerController.init(mainVideo, adsContainer);
+    var _init = function(player, callback) {
+        adsPlayerController = new AdsPlayerController();
+        adsPlayerController.init(player, _adsContainer);
+        callback();
     },
 
     /**
@@ -104,14 +105,26 @@ AdsPlayer = function() {
     ///////////
 
     /**
-     * Load/open a MAST file.
+     * Load/open a stream.
      * @method load
      * @access public
      * @memberof AdsPlayer#
-     * @param {string} mastUrl - the MAST file url
+     * @param {object} stream - the stream contaning all stream informations (url, protData, mastUrl)
      */
-    _load = function(mastUrl) {
-        adsPlayerController.load(mastUrl);
+    _load = function(stream) {
+        if (stream.mastUrl) {
+            adsPlayerController.load(stream.mastUrl);
+        }
+    },
+
+    /**
+     * Stops Ads player.
+     * @method reset
+     * @access public
+     * @memberof AdsPlayer#
+     */
+    _stop = function() {
+        //adsPlayerController.reset();
     },
 
     /**
@@ -161,12 +174,16 @@ AdsPlayer = function() {
         ///////////////////////////////////////////////////////////////////////////////////////////////
         ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
+        // Plugin API
+        getName: function () {return NAME;},
+        getVersion: _getVersion,
         init: _init,
-        reset: _reset,
         load: _load,
+        stop: _stop,
+        reset: _reset,
+
         addEventListener: _addEventListener,
         removeEventListener: _removeEventListener,
-        getVersion: _getVersion,
         getBuildDate: _getBuildDate,
         getError: _getError,
         getWarning: _getWarning
