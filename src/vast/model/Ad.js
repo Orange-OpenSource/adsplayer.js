@@ -44,7 +44,7 @@ var TrackingEvent={
     COLLAPSE: 'collapse', 
     ACCEPTINVITATION: 'acceptInvitation',
     CLOSE: 'close' 
-}
+};
 
 
 // Vast object

@@ -87,7 +87,7 @@ AdsPlayer.FileLoader = function() {
                     self.debug.log("[FileLoader] file downloaded");
 
                     // test if the file is in xml format.
-                    if (request.responseXML == null) {
+                    if (request.responseXML === null) {
                         needFailureReport = true;
                         return;
                     }
