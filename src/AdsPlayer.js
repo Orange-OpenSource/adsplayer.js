@@ -116,7 +116,13 @@ AdsPlayer = function(adsContainer) {
             adsPlayerController.addEventListener('mastLoaded', function () {
                 callback();
             });
+            adsPlayerController.addEventListener('mastNotLoaded', function () {
+ //               throw new Error("AdsPlayer.load(): couldn't load mast file");
+                callback();
+            });
             adsPlayerController.load(stream.mastUrl);
+        } else{
+            callback();
         }
     },
 

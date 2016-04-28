@@ -111,6 +111,15 @@ AdsPlayer.utils.DOMParser = function() {
             return element;
         },
 
+        getNodeValue: function(node) {
+            var cdataSection = this.getChildNode(node, '#cdata-section');
+            if (cdataSection) {
+                return cdataSection.nodeValue;
+            } else {
+                return node.nodeValue;
+            }
+        },
+
         createXmlTree: function(xmlDocStr) {
             if (window.DOMParser) {
                 try {

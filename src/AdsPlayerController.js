@@ -176,6 +176,7 @@ AdsPlayerController = function() {
                         ind++;
                         ind1 = 0;
                         loadVast();
+                        return;
                     }
 
                     var uri = _mastTriggers[ind].sources[ind1].uri;
@@ -315,8 +316,7 @@ AdsPlayerController = function() {
                 _mastBaseUrl = "http://2is7server2.rd.francetelecom.com";
                 _dispatchEvent("mastFileLoaded");
             }, function(reason) {
-                console.log(reason);
-                alert(reason.message);
+                _dispatchEvent("mastNotLoaded");       
             });
         },
 
