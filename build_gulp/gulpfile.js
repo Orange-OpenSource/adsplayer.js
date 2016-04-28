@@ -17,7 +17,8 @@ var path = {
   MINIFIED_OUT: 'adsplayer.min.js',
   CONCAT_OUT: 'adsplayer.js',
   DEST: '../dist',
-  LICENCE : '../LICENSE'
+  LICENCE : '../LICENSE',
+  DOC : '../dist/doc'
 };
  
 gulp.task('lint', function() {
@@ -54,6 +55,11 @@ gulp.task('clean', del.bind(null, [path.DEST], {
     dot: true,
 	force: true
 }));
+
+gulp.task('doc', function() {
+    return gulp.src(path.JS)
+	.pipe($.jsdoc(path.DOC))
+});
 
 gulp.task('build', function() {
 	runSequence('clean',['lint', 'gitRev'],'compress');
