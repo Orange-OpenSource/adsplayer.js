@@ -101,6 +101,7 @@ AdsPlayerController = function() {
 
             if (preRoll) {
                 console.log('PreRoll');
+                _adsMediaPlayer.setVisible();
                 _dispatchEvent("adStart");
                 _mainVideo.addEventListener("playing", _onPlaying);
                 _playAds();
@@ -224,6 +225,7 @@ AdsPlayerController = function() {
                 _mainVideo.removeEventListener("playing", _onPlaying);
                 console.log('no more Ads to Play : dispatch "adEnd" towards the html Player');
                 _dispatchEvent("adEnd");
+               _adsMediaPlayer.setHidden();
                 console.log('play main video');
                 _mainVideo.play();
             }

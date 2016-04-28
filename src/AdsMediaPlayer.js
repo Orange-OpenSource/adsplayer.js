@@ -83,19 +83,32 @@ AdsMediaPlayer = function() {
         };
 
 
-        _playVideo = function(medias) {
-            _medias = medias;
-            adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
-            adsVideoPlayer.addEventListener("error", _onError);
-            _playMedia();
-        };
+    _playVideo = function(medias) {
+        _medias = medias;
+        adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
+        adsVideoPlayer.addEventListener("error", _onError);
+        _playMedia();
+    };
+
+    _setVisible = function() {
+        if (adsVideoPlayer) {
+            adsVideoPlayer.style.visibility = 'visible';
+        }
+    }
+    _setHidden = function() {
+        if (adsVideoPlayer) {
+            adsVideoPlayer.style.visibility = 'hidden';
+        }
+    }
 
     return {
         init: _init,
         isPlayingAds: _isPlayingAds,
         createVideoElt: _createVideoElt,
         playVideo: _playVideo,
-        addlistener: _addlistener
+        addlistener: _addlistener,
+        setVisible: _setVisible,
+        setHidden: _setHidden
     };
 };
 
