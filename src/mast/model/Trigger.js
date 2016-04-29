@@ -44,8 +44,9 @@ var SourceFormat = {
     UIF: 'uif'
 };
 
-
-// Trigger object
+/**
+ * [Trigger description]
+ */
 AdsPlayer.mast.model.Trigger = function() {
     "use strict";
 
@@ -62,7 +63,9 @@ AdsPlayer.mast.model.Trigger.prototype = {
     constructor: AdsPlayer.mast.model.Trigger
 };
 
-// Condition object
+/**
+ * [Condition description]
+ */
 AdsPlayer.mast.model.Trigger.Condition = function() {
     "use strict";
 
@@ -77,7 +80,9 @@ AdsPlayer.mast.model.Trigger.Condition.prototype = {
     constructor: AdsPlayer.mast.model.Trigger.Condition
 };
 
-// Source object
+/**
+ * [Source description]
+ */
 AdsPlayer.mast.model.Trigger.Source = function() {
     "use strict";
 

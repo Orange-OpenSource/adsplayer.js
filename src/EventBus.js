@@ -43,6 +43,12 @@ AdsPlayer.EventBus = function() {
     init();
 
     return {
+        /**
+         * [addEventListener description]
+         * @param {[type]} type       [description]
+         * @param {[type]} listener   [description]
+         * @param {[type]} useCapture [description]
+         */
         addEventListener: function(type, listener, useCapture) {
             var listeners = getListeners(type, useCapture),
                 idx = listeners.indexOf(listener);
@@ -52,6 +58,13 @@ AdsPlayer.EventBus = function() {
             }
         },
 
+        /**
+         * [removeEventListener description]
+         * @param  {[type]} type       [description]
+         * @param  {[type]} listener   [description]
+         * @param  {[type]} useCapture [description]
+         * @return {[type]}            [description]
+         */
         removeEventListener: function(type, listener, useCapture) {
             var listeners = getListeners(type, useCapture),
                 idx = listeners.indexOf(listener);
@@ -61,6 +74,11 @@ AdsPlayer.EventBus = function() {
             }
         },
 
+        /**
+         * [dispatchEvent description]
+         * @param  {[type]} evt [description]
+         * @return {[type]}     [description]
+         */
         dispatchEvent: function(evt) {
             var listeners = getListeners(evt.type, false).slice(),
                 i = 0;

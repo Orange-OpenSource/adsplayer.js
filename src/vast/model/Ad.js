@@ -12,21 +12,29 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-
-// CreativeType
+/**
+ * [CreativeType description]
+ * @type {Object}
+ */
 var CreativeType = {
     LINEAR: 'linear',
     NON_LINEAR_ADS: 'NonLinearAds',
     COMPANION_ADS : 'CompanionAds'
 };
 
-// MediaFileDelivery
+/**
+ * [MediaFileDelivery description]
+ * @type {Object}
+ */
 var MediaFileDelivery = {
     STREAMING: 'streaming',
     PROGRESSIVE: 'progressive '
 };
 
-// TrackingEvent
+/**
+ * [TrackingEvent description]
+ * @type {Object}
+ */
 var TrackingEvent={
     CREATIVEVIEW:'creativeView',
     START:'start',
@@ -46,9 +54,10 @@ var TrackingEvent={
     CLOSE: 'close' 
 };
 
-
-// Vast object
-
+/**
+ * [vast description]
+ * @return {[type]} [description]
+ */
 AdsPlayer.vast = function () {
     "use strict";
 
@@ -58,14 +67,19 @@ AdsPlayer.vast = function () {
 
 };
 
+/**
+ * [model description]
+ * @return {[type]} [description]
+ */
 AdsPlayer.vast.model = function () {
     "use strict";
     this.Ad = {};
 
 };
 
-
-//      Ad object
+/**
+ * [Ad description]
+ */
 AdsPlayer.vast.model.Ad = function () {
     "use strict";
     
@@ -74,8 +88,9 @@ AdsPlayer.vast.model.Ad = function () {
     this.wrapper = null;     
 };
 
-
-// InLine object
+/**
+ * [InLine description]
+ */
 AdsPlayer.vast.model.Ad.InLine = function () {
     "use strict";
 
@@ -93,6 +108,9 @@ AdsPlayer.vast.model.Ad.InLine.prototype = {
     constructor: AdsPlayer.vast.model.Ad.InLine
 };
 
+/**
+ * [Impressions description]
+ */
 AdsPlayer.vast.model.Ad.Impressions = function () {
     "use strict";
     this.uri = '';                 // 
@@ -103,6 +121,9 @@ AdsPlayer.vast.model.Ad.Impressions.prototype = {
     constructor: AdsPlayer.vast.model.Ad.Impressions
 };
 
+/**
+ * [Extensions description]
+ */
 AdsPlayer.vast.model.Ad.Extensions = function () {
     "use strict";
     this.uri = '';                 // 
@@ -113,7 +134,9 @@ AdsPlayer.vast.model.Ad.Extensions.prototype = {
     constructor: AdsPlayer.vast.model.Ad.Extensions
 };
 
-// Creative object
+/**
+ * [Creative description]
+ */
 AdsPlayer.vast.model.Ad.Creative = function () {
     "use strict";
 
@@ -145,7 +168,9 @@ AdsPlayer.vast.model.Ad.Creative.Linear.prototype = {
 };
 
 
-//TrackingEvent object
+/**
+ * [TrackingEvent description]
+ */
 AdsPlayer.vast.model.Ad.TrackingEvent = function () {
     "use strict";
     this.event = '';   // 'creativeView'
@@ -156,7 +181,9 @@ AdsPlayer.vast.model.Ad.TrackingEvent.prototype = {
     constructor: AdsPlayer.vast.model.Ad.TrackingEvent
 };
 
-// MediaFile object
+/**
+ * [MediaFile description]
+ */
 AdsPlayer.vast.model.Ad.Creative.MediaFile = function () {
     "use strict";
 
@@ -176,7 +203,9 @@ AdsPlayer.vast.model.Ad.Creative.MediaFile.prototype = {
     constructor: AdsPlayer.vast.model.Ad.Creative.MediaFile
 };
  
-// VideoClicks object
+/**
+ * [VideoClicks description]
+ */
 AdsPlayer.vast.model.Ad.Creative.VideoClicks = function () {
     "use strict";
     this.clickThrough = null;                 // URI to open as destination page when user clicks on the video
@@ -188,9 +217,9 @@ AdsPlayer.vast.model.Ad.Creative.VideoClicks.prototype = {
     constructor: AdsPlayer.vast.model.Ad.Creative.VideoClicks
 };
 
-
-// ClickThrough object 
-
+/**
+ * [ClickThrough description]
+ */
 AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough = function () {
     "use strict";
     this.uri = '';                 // 
@@ -201,8 +230,9 @@ AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough.prototype = {
     constructor: AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough
 };
 
-// ClickTracking object 
-
+/**
+ * [ClickTracking description]
+ */
 AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking = function () {
     "use strict";
     this.uri = '';                 // URL to request for tracking purposes when user clicks on the video
@@ -213,8 +243,9 @@ AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking.prototype = {
     constructor: AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking
 };
 
-// CustomClick object 
-
+/**
+ * [CustomClick description]
+ */
 AdsPlayer.vast.model.Ad.Creative.VideoClicks.CustomClick = function () {
     "use strict";
     this.uri = '';                 // 
@@ -227,7 +258,9 @@ AdsPlayer.vast.model.Ad.Creative.VideoClicks.CustomClick.prototype = {
 
 
 //---------------------------ici -----------------------------
-// StaticResource Object
+/**
+ * [StaticResource description]
+ */
 AdsPlayer.vast.model.Ad.StaticResource = function () {
     "use strict";
     this.uRI = '';              // optional : URI to a static file, such as an image or SWF file 
@@ -238,8 +271,9 @@ AdsPlayer.vast.model.Ad.StaticResource.prototype = {
     constructor: AdsPlayer.vast.model.Ad.StaticResource
 };
 
-
-// Companion object
+/**
+ * [Companion description]
+ */
 AdsPlayer.vast.model.Ad.Companion = function () {
     "use strict";
     this.id = '';                       // optional : identifier
@@ -263,7 +297,9 @@ AdsPlayer.vast.model.Ad.Companion.prototype = {
 //      Non Linear Ads
 //
 
-// NonLinear object
+/**
+ * [NonLinear description]
+ */
 AdsPlayer.vast.model.Ad.NonLinear = function () {
     "use strict";
     this.id = '';                       // optional : identifier

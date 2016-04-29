@@ -152,6 +152,11 @@ AdsPlayer.FileLoader = function() {
         };
 
     return {
+        /**
+         * [load description]
+         * @param  {[type]} url [description]
+         * @return {[type]}     [description]
+         */
         load: function(url) {
             deferred = Q.defer();
             request = new XMLHttpRequest();
