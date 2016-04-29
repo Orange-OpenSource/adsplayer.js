@@ -2,6 +2,7 @@
 var gulp = require('gulp'),
 	$ = require('gulp-load-plugins')(),
 	del = require('del'),
+	pathModule = require('path'),
 	git = require('git-rev'),
 	runSequence = require('run-sequence'),
 	fs = require("fs");
@@ -13,6 +14,8 @@ var pkg = { revision : '',
 var comment = '<%= pkg.licence %>\n\n/* Last build : <%= pkg.timeStamp %> / git revision : <%= pkg.revision %> */\n\n';
 
 var path = {
+  NAME: "Adsplayer",
+  UMD : "umd.js",
   JS: ['../src/**/*.js'],
   MINIFIED_OUT: 'adsplayer.min.js',
   CONCAT_OUT: 'adsplayer.js',
@@ -30,18 +33,23 @@ gulp.task('lint', function() {
  gulp.task('gitRev', function() {
 	git.short(function (str) {
 		pkg.revision = str;
-	})
+	});
 	fs.readFile(path.LICENCE, null, function(err, _data) {
 		console.log('read licence file ');
 		pkg.licence = _data;
-    })
+    });
 	pkg.timeStamp = new Date().getDate()+"."+(new Date().getMonth()+1)+"."+(new Date().getFullYear())+"_"+(new Date().getHours())+":"+(new Date().getMinutes())+":"+(new Date().getSeconds());
  });
  
 gulp.task('compress', function() {
 	return gulp.src(path.JS)
     .pipe($.concat(path.CONCAT_OUT))
-	.pipe($.umd())
+	.pipe($.umd({
+		namespace:function(){
+			return path.NAME;
+		},
+		template:pathModule.join(__dirname, path.UMD)
+	}))
 	.pipe(gulp.dest(path.DEST))
     .pipe($.uglify())
 	.pipe($.banner(comment, {

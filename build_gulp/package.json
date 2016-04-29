@@ -35,6 +35,7 @@
     "gulp-umd": "^0.2.0",
     "jshint": "^2.9.2",
     "jshint-stylish": "^2.1.0",
+    "path": "^0.12.7",
     "run-sequence": "^1.1.5"
   }
 }
