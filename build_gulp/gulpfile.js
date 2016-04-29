@@ -58,7 +58,7 @@ gulp.task('clean', del.bind(null, [path.DEST], {
 
 gulp.task('doc', function() {
     return gulp.src(path.JS)
-	.pipe($.jsdoc(path.DOC))
+	.pipe($.jsdoc(path.DOC));
 });
 
 gulp.task('build', function() {
