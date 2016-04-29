@@ -41,6 +41,7 @@ gulp.task('lint', function() {
 gulp.task('compress', function() {
 	return gulp.src(path.JS)
     .pipe($.concat(path.CONCAT_OUT))
+	.pipe($.umd())
 	.pipe(gulp.dest(path.DEST))
     .pipe($.uglify())
 	.pipe($.banner(comment, {
