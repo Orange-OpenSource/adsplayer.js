@@ -14,7 +14,7 @@ var pkg = { revision : '',
 var comment = '<%= pkg.licence %>\n\n/* Last build : <%= pkg.timeStamp %> / git revision : <%= pkg.revision %> */\n\n';
 
 var path = {
-  NAME: "Adsplayer",
+  NAME: "AdsPlayer",
   UMD : "umd.js",
   JS: ['../src/**/*.js'],
   MINIFIED_OUT: 'adsplayer.min.js',

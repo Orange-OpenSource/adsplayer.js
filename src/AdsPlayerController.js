@@ -37,7 +37,7 @@
 /**
  * [AdsPlayerController description]
  */
-AdsPlayerController = function() {
+AdsPlayer.AdsPlayerController = function() {
 
     var _mainPlayer = null,
         _mainVideo = null,
@@ -436,3 +436,6 @@ AdsPlayerController = function() {
 
 };
 
+AdsPlayer.AdsPlayerController.prototype = {
+    constructor: AdsPlayer.AdsPlayerController
+};
