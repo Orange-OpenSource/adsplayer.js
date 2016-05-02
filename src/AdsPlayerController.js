@@ -42,7 +42,6 @@ AdsPlayerController = function() {
         _adsMediaPlayer = null,
         _error = null,
         _warning = null,
-        _self = this,
         _mastFileContent = "",
         _mastTriggers = [],
         _mastBaseUrl = '',
@@ -56,12 +55,14 @@ AdsPlayerController = function() {
 
 
     var _onMainVideoLoadStart = function() {
+            _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
             _analyseTriggers();
         },
 
         _onPlaying = function() {
             console.log('pause main video');
-            _mainVideo.pause();
+           _mainVideo.removeEventListener("playing", _onPlaying);
+           _mainVideo.pause();
         },
 
         _analyseTriggers = function() { //    Look for preRoll ads triggers 
@@ -130,7 +131,7 @@ AdsPlayerController = function() {
                 if (trigger.startConditions[0].type === ConditionType.PROPERTY &&
                     trigger.startConditions[0].name === ConditionName.POSITION &&
                     trigger.startConditions[0].operator === ConditionOperator.GEQ) {
-                    var newCue = new Cue(trigger.startConditions[0].value, trigger.startConditions[0].value + 1, i);
+                    var cue = new Cue(trigger.startConditions[0].value, trigger.startConditions[0].value + 1, i);
                     cues.push(cue);
                 }
                 return cues;
@@ -145,15 +146,12 @@ AdsPlayerController = function() {
             if (_mastTriggers !== []) {
                 // here goes the code parsing the triggers'sources if in vast format
 
-                var that = this;
-                var vastParser = null;
                 var vastFileContent;
                 var vastBaseUrl;
-                var i;
                 var ind, ind1;
 
                 var parseVast = function() {
-                    vastParser = new AdsPlayer.vast.VastParser(vastBaseUrl);
+                    var vastParser = new AdsPlayer.vast.VastParser(vastBaseUrl);
                     console.log("ind = " + ind + " ind1 = " + ind1);
                     var vastResult = vastParser.parse(vastFileContent);
                     // store result in trigger[ind][ind1]
@@ -167,8 +165,10 @@ AdsPlayerController = function() {
                     if (ind >= _mastTriggers.length) {
                         // all triggers and all ads have been processed
                         // we return;
-                        _eventBus.removeEventListener('vastFileLoaded', parseVast);
-                        //_createCues();
+                        _removeEventListener('vastFileLoaded', parseVast);
+                        _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
+                        _dispatchEvent("mastLoaded");
+                       //_createCues();
                         return;
                     }
 
@@ -197,21 +197,20 @@ AdsPlayerController = function() {
                         alert(reason.message);
                     });
                 };
-                _eventBus.addEventListener('vastFileLoaded', parseVast);
+                _addEventListener('vastFileLoaded', parseVast);
                 ind = 0;
                 ind1 = 0;
                 loadVast();
             }
-            _dispatchEvent("mastLoaded");
         },
 
 
         _onError = function(e) {
-            error = e.data;
+            _error = e.data;
         },
 
         _onWarning = function(e) {
-            warning = e.data;
+           _warning = e.data;
         },
 
         _onEnded = function(msg) {
@@ -237,7 +236,6 @@ AdsPlayerController = function() {
 
 
         _playAds = function() {
-            var i;
             if (_listVastAds.length) {
                 var videoUrls = _listVastAds.shift();
                 _adsMediaPlayer.playVideo(videoUrls);
@@ -262,9 +260,6 @@ AdsPlayerController = function() {
             _mainPlayer = player;
             _mainVideo = player.getVideoModel().getElement();
             _adsContainer = adsContainer;
-
-            _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart.bind(this));
-
             _adsMediaPlayer = new AdsMediaPlayer();
             _adsMediaPlayer.init();
             _adsMediaPlayer.createVideoElt(_adsContainer);
@@ -318,7 +313,7 @@ AdsPlayerController = function() {
                 _mastBaseUrl = "http://2is7server2.rd.francetelecom.com";
                 _dispatchEvent("mastFileLoaded");
             }, function(reason) {
-                _dispatchEvent("mastNotLoaded");       
+                _dispatchEvent("mastNotLoaded");
             });
         },
 
@@ -329,7 +324,13 @@ AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          */
         _reset = function() {
-            // TODO
+            _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
+            _mastTriggers = [];
+            _listVastAds = [];
+        },
+
+        _stop = function() {
+            _reset();
         },
 
         /////////// EVENTS
@@ -416,6 +417,7 @@ AdsPlayerController = function() {
 
     return {
         init: _init,
+        stop: _stop,
         addEventListener: _addEventListener,
         load: _load.bind(this),
         getError: _getError,
@@ -424,95 +426,3 @@ AdsPlayerController = function() {
 
 };
 
-
-// create a preRoll Trigger for test    
-
-var createPreRollTrigger = function(uri, uri2) {
-    var trigger = new AdsPlayer.mast.model.Trigger();
-    trigger.id = 'preRoll';
-    trigger.description = 0;
-    var condition = new AdsPlayer.mast.model.Trigger.Condition();
-    condition.type = 'event';
-    condition.name = 'OnItemStart';
-    condition.value = '';
-    condition.operator = '';
-    condition.conditions = [];
-
-    trigger.startConditions.push(condition);
-
-    trigger.endConditions = [];
-
-    var source = new AdsPlayer.mast.model.Trigger.Source();
-    source.uri = uri;
-    source.altReference = '';
-    source.format = '';
-    source.sources = [];
-
-    trigger.sources.push(source);
-
-    if (uri2) {
-        var source2 = new AdsPlayer.mast.model.Trigger.Source();
-        source2.uri = uri;
-        source2.altReference = '';
-        source2.format = '';
-        source2.sources = [];
-        source2.uri = uri2;
-        trigger.sources.push(source2);
-    }
-    trigger.alreadyPlayed = false; // mainly in the seeked case : do not replay trigger allready played
-
-    return trigger;
-};
-
-var createMidRollTrigger = function(time, uri, uri2) {
-    var trigger = new AdsPlayer.mast.model.Trigger();
-    trigger.id = 'preRoll';
-    trigger.description = 0;
-    var condition = new AdsPlayer.mast.model.Trigger.Condition();
-    condition.type = 'property';
-    condition.name = 'Position';
-    condition.value = time;
-    condition.operator = 'GEQ';
-    condition.conditions = [];
-
-    trigger.startConditions.push(condition);
-
-    trigger.endConditions = [];
-
-    source = new AdsPlayer.mast.model.Trigger.Source();
-    source.uri = uri;
-    source.altReference = '';
-    source.format = '';
-    source.sources = [];
-
-    trigger.sources.push(source); // pointer to a list of sources : AdsPlayer.mast.model.Trigger.Source
-
-    if (uri2) {
-        var source2 = new AdsPlayer.mast.model.Trigger.Source();
-        source2.uri = uri;
-        source2.altReference = '';
-        source2.format = '';
-        source2.sources = [];
-        source2.uri = uri2;
-        trigger.sources.push(source2);
-    }
-
-    trigger.alreadyPlayed = false; // mainly in the seeked case : do not replay trigger allready played
-
-    return trigger;
-};
-
-var createPreRollTriggers = function(triggers) {
-    var trigger;
-    trigger = createPreRollTrigger('http://localhost:8080/adsPlayer.js/demo/medias/pubOasis.mp4');
-    triggers.push(trigger);
-    trigger = createPreRollTrigger('http://localhost:8080/adsPlayer.js/demo/medias/pubLancome.mp4',
-        'http://localhost:8080/adsPlayer.js/demo/medias/pubClipper.mp4');
-    triggers.push(trigger);
-    trigger = createMidRollTrigger(0, 'http://localhost:8080/adsPlayer.js/demo/medias/pubLego.mp4');
-    triggers.push(trigger);
-    trigger = createMidRollTrigger(10, 'http://localhost:8080/adsPlayer.js/demo/medias/pubLego.mp4');
-    triggers.push(trigger);
-    trigger = createMidRollTrigger(20, 'http://localhost:8080/adsPlayer.js/demo/medias/pubLancome.mp4');
-    triggers.push(trigger);
-};

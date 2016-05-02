@@ -133,7 +133,7 @@ AdsPlayer = function(adsContainer) {
      * @memberof AdsPlayer#
      */
     _stop = function() {
-        //adsPlayerController.reset();
+        adsPlayerController.stop();
     },
 
     /**
