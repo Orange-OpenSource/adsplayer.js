@@ -17,7 +17,6 @@
 AdsMediaPlayer = function() {
 
     var self = this,
-        internalPlayer = null,
         overlay = null,
         playingAds = false,
         adsVideoPlayer = null,
@@ -70,7 +69,7 @@ AdsMediaPlayer = function() {
 
         _playMedia = function() {
             if (_medias.length) {
-                var media = _medias.shift();               
+                var media = _medias.shift();
                 if (media.type === "image/jpeg") {
                     // to do
                 } else {
@@ -80,26 +79,26 @@ AdsMediaPlayer = function() {
                 }
             }
 
+        },
+
+        _playVideo = function(medias) {
+            _medias = medias;
+            adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
+            adsVideoPlayer.addEventListener("error", _onError);
+            _playMedia();
+        },
+
+        _setVisible = function() {
+            if (adsVideoPlayer) {
+                adsVideoPlayer.style.visibility = 'visible';
+            }
+        },
+
+        _setHidden = function() {
+            if (adsVideoPlayer) {
+                adsVideoPlayer.style.visibility = 'hidden';
+            }
         };
-
-
-    _playVideo = function(medias) {
-        _medias = medias;
-        adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
-        adsVideoPlayer.addEventListener("error", _onError);
-        _playMedia();
-    };
-
-    _setVisible = function() {
-        if (adsVideoPlayer) {
-            adsVideoPlayer.style.visibility = 'visible';
-        }
-    };
-    _setHidden = function() {
-        if (adsVideoPlayer) {
-            adsVideoPlayer.style.visibility = 'hidden';
-        }
-    };
 
     return {
         init: _init,

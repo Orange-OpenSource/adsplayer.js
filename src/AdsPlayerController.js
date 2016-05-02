@@ -46,6 +46,7 @@ AdsPlayerController = function() {
         _error = null,
         _warning = null,
         _mastFileContent = "",
+        _listCues = [],
         _mastTriggers = [],
         _mastBaseUrl = '',
         _listVastAds = [], // this table is used to track the (groups of) ads to be played
@@ -68,8 +69,8 @@ AdsPlayerController = function() {
 
         _onPlaying = function() {
             console.log('pause main video');
-           _mainVideo.removeEventListener("playing", _onPlaying);
-           _mainVideo.pause();
+            _mainVideo.removeEventListener("playing", _onPlaying);
+            _mainVideo.pause();
         },
 
         _analyseTriggers = function() { //    Look for preRoll ads triggers 
@@ -103,8 +104,12 @@ AdsPlayerController = function() {
                             _listVastAds.push(medias);
                         }
                     }
-                    trigger.alreadyPlayed = true;
                 }
+            }
+
+            if (!_listVastAds.length) {
+                // means that no medias are available, e.g. if the vast files couldn't be loaded
+                preRoll = false;
             }
 
             if (preRoll) {
@@ -120,9 +125,9 @@ AdsPlayerController = function() {
 
             // sort elements by date
             _mastTriggers.sort(function(a, b) {
-                if (a.startTime < b.startTime)
+                if (a.startConditions[0].value < b.startConditions[0].value)
                     return -1;
-                else if (a.startTime > b.startTime)
+                else if (a.startConditions[0].value > b.startConditions[0].value)
                     return 1;
                 else
                     return 0;
@@ -135,17 +140,16 @@ AdsPlayerController = function() {
                 trigger = null,
                 newCue = null;
 
-            for (i = 0; i < self.mastTriggers.length; i++) {
-                trigger = self.mastTriggers[i];
+            for (i = 0; i < _mastTriggers.length; i++) {
+                trigger = _mastTriggers[i];
                 if (trigger.startConditions[0].type === ConditionType.PROPERTY &&
                     trigger.startConditions[0].name === ConditionName.POSITION &&
                     trigger.startConditions[0].operator === ConditionOperator.GEQ) {
-                    
                     var cue = new Cue(trigger.startConditions[0].value, trigger.startConditions[0].value + 1, i);
                     cues.push(cue);
                 }
-                return cues;
             }
+            _listCues = cues;
         },
 
         _parseMastFile = function() {
@@ -178,7 +182,7 @@ AdsPlayerController = function() {
                         _removeEventListener('vastFileLoaded', parseVast);
                         _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
                         _dispatchEvent("mastLoaded");
-                       //_createCues();
+                        _createCues();
                         return;
                     }
 
@@ -203,8 +207,10 @@ AdsPlayerController = function() {
                             data: {}
                         });
                     }, function(reason) {
-                        //console.log(reason);
-                        alert(reason.message);
+                        console.log(reason.message);
+                        // coudn't load the vast file, try next one
+                        ind1++;
+                        loadVast();
                     });
                 };
                 _addEventListener('vastFileLoaded', parseVast);
@@ -220,7 +226,7 @@ AdsPlayerController = function() {
         },
 
         _onWarning = function(e) {
-           _warning = e.data;
+            _warning = e.data;
         },
 
         _onEnded = function(msg) {
@@ -234,7 +240,7 @@ AdsPlayerController = function() {
                 _mainVideo.removeEventListener("playing", _onPlaying);
                 console.log('no more Ads to Play : dispatch "adEnd" towards the html Player');
                 _dispatchEvent("adEnd");
-               _adsMediaPlayer.setHidden();
+                _adsMediaPlayer.setHidden();
                 console.log('play main video');
                 _mainVideo.play();
             }
@@ -435,4 +441,3 @@ AdsPlayerController = function() {
     };
 
 };
-
