@@ -100,6 +100,10 @@ AdsPlayerController = function() {
                     for (j = 0; j < trigger.media.length; j++) {
                         for (k = 0; k < trigger.media[j].length; k++) {
                             medias = trigger.media[j][k].mediaFiles;
+                            medias.duration = trigger.media[j][k].duration;
+                            if (trigger.media[j][k].videoClicks.clickThrough != null) {
+                                medias.clickThrough = trigger.media[j][k].videoClicks.clickThrough.uri
+                            }
                             _listVastAds.push(medias);
                         }
                     }
@@ -247,9 +251,10 @@ AdsPlayerController = function() {
 
         _playAds = function() {
             if (_listVastAds.length) {
-                var videoUrls = _listVastAds.shift();
-                _adsMediaPlayer.playVideo(videoUrls);
-            }
+                var medias = _listVastAds.shift();
+                _adsMediaPlayer.playVideo(medias);
+        }
+
         };
 
 
@@ -273,6 +278,8 @@ AdsPlayerController = function() {
             _adsMediaPlayer = new AdsMediaPlayer();
             _adsMediaPlayer.init();
             _adsMediaPlayer.createVideoElt(_adsContainer);
+            _adsMediaPlayer.createImageElt(_adsContainer);
+            adsImageNode.visibility = "hidden";
             _adsMediaPlayer.addlistener("ended", _onEnded);
             _adsMediaPlayer.addlistener("aborted", _onAborted);
         },

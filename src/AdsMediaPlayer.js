@@ -21,6 +21,7 @@ AdsMediaPlayer = function() {
         overlay = null,
         playingAds = false,
         adsVideoPlayer = null,
+        adsImageNode = null,
         _medias = [],
         _videoUrl = '',
 
@@ -46,6 +47,20 @@ AdsMediaPlayer = function() {
             }
         },
 
+
+        _createImageElt = function(adsContainer) {
+            if (adsImageNode  === null) {
+                adsImageNode = document.createElement('img');
+                adsImageNode.autoplay = false;
+                adsImageNode.id = 'adsImageNode';
+                adsImageNode.style.position = 'absolute';
+                adsImageNode.style.top = 0;
+                adsImageNode.style.left = 0;
+                //adsImageNode.style.width = '100%';
+                adsContainer.appendChild(adsImageNode);
+            }
+        },        
+
         _addlistener = function(type, listener) {
             adsVideoPlayer.addEventListener(type, listener);
         },
@@ -67,17 +82,62 @@ AdsMediaPlayer = function() {
             }
         },
 
+        _onVideoClick = function () {
+            if (url = _medias.clickThrough) {
+                try{
+                    window.open(url,"Ads Windows");
+                }
+                catch (e)
+                {
+                    throw(e);
+                }
+            }
+        },
+
+
+        _supportedMedia = function (element, codec) {
+            "use strict";
+
+            if (!(element instanceof HTMLMediaElement)) {
+                throw "element must be of type HTMLMediaElement.";
+            }
+
+            var canPlay = element.canPlayType(codec);
+            return (canPlay === "probably" || canPlay === "maybe");
+        },
+
+
 
         _playMedia = function() {
             if (_medias.length) {
-                var media = _medias.shift();               
-                if (media.type === "image/jpeg") {
-                    // to do
+                var time = _medias.duration;
+                var media = _medias.shift();       
+
+                if ((media.type === "image/jpeg") || (media.type === "image/jpg")) {
+                    adsImageNode.visibility = "visible";
+
+                    adsImageNode.src = media.uri;
+                    setTimeout(function(){
+                        adsImageNode.src = '';
+                        adsImageNode.visibility = "hidden";
+                        var event = new CustomEvent('ended');
+                        adsVideoPlayer.dispatchEvent(event);
+                    }, time*1000);
+
+                      //  adsVideoPlayer.load(); // to do
                 } else {
-                    adsVideoPlayer.src = media.uri;
-                    adsVideoPlayer.type = media.type;
-                    adsVideoPlayer.load();
-                }
+                    if (_supportedMedia(adsVideoPlayer, media.type)) {
+                        adsVideoPlayer.src = media.uri;
+                        adsVideoPlayer.type = media.type;
+                        adsVideoPlayer.load();
+                    } else {
+
+                        _playMedia();
+                    }
+                }   
+            } else {
+                var event = new CustomEvent('aborted');
+                adsVideoPlayer.dispatchEvent(event);
             }
 
         };
@@ -87,6 +147,8 @@ AdsMediaPlayer = function() {
         _medias = medias;
         adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
         adsVideoPlayer.addEventListener("error", _onError);
+        adsVideoPlayer.addEventListener("click", _onVideoClick);
+        adsImageNode.addEventListener("click", _onVideoClick); 
         _playMedia();
     };
 
@@ -108,7 +170,8 @@ AdsMediaPlayer = function() {
         playVideo: _playVideo,
         addlistener: _addlistener,
         setVisible: _setVisible,
-        setHidden: _setHidden
+        setHidden: _setHidden,
+        createImageElt: _createImageElt
     };
 };
 

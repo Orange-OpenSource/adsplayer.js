@@ -31,6 +31,25 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
             }
             return uri;
         },
+
+        _convertTime = function(timingStr)
+        {
+            var timeParts,
+                parsedTime,
+                SECONDS_IN_HOUR = 60 * 60,
+                SECONDS_IN_MIN = 60;
+
+            timeParts = timingStr.split(":");
+
+            parsedTime = (parseFloat(timeParts[0]) * SECONDS_IN_HOUR +
+                parseFloat(timeParts[1]) * SECONDS_IN_MIN +
+                parseFloat(timeParts[2]));
+
+            return parsedTime;
+
+        },
+
+
         _getImpression = function(theInLineNode) {
             if (theInLineNode) {
                 var node,
@@ -89,7 +108,7 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                 clickThrough = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough();
             if (clickthroughNode) {
                 clickThrough.id = parser.getAttributeValue(clickthroughNode, 'id');
-                clickThrough.uri = _checkUri(parser.getNodeValue(clickthroughNode.textContent));
+                clickThrough.uri = _checkUri(parser.getNodeValue(clickthroughNode));
             }
             return clickThrough;
         },
@@ -184,7 +203,7 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                 linear = new AdsPlayer.vast.model.Ad.Creative.Linear(),
                 node = null;
             if (linearNode) {
-                linear.duration = ((node = parser.getChildNode(linearNode, 'Duration')) ? node.textContent : '');
+                linear.duration =  _convertTime(((node = parser.getChildNode(linearNode, 'Duration')) ? node.textContent : ''));
                 linear.adParameters = ((node = parser.getChildNode(linearNode, 'AdParameters')) ? node.textContent : '');
                 linear.mediaFiles = _getMediafiles(linearNode);
                 linear.trackingEvents = _getTrackingEvents(linearNode);
@@ -251,21 +270,14 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                 inLine.creatives = _getCreatives(inLineNode);
                 inLine.extentions = _getExtentions(inLineNode);
                 myAd.inLine = inLine;
-                // ************* END of InLine attributes and listes********************
-
-
-                // associate clickthrough, clicktraking and customClick to videolick
-                // associate mediafil and videolick to linear
-                // associate linear, compagnon and nonlinear to creative
-                // associate creative, impression and extentions to inLine
-                // associate linear and wrapper to ad
-                // associate ads to vast
                 vast.ads.push(myAd);
-            } // end of for adsList
-            console.log(vast);
-            /* for this first version of vast parser we return only trhe likst of ads and their mediafil {url, mimtype} 
-        return vast;     // for future veersions, all vast object must be returned by this function
-       */
+            } 
+
+            /* for this first version of vastParser we return only the list of ads and their mediafil {url, mimtype}.
+            Othewise, for future versions, all vast object must be returned by this function like :
+            return vast; 
+            */
+
             var listAds = [];
             for (i = 0; i < vast.ads.length; i++) {
                 for (j = 0; j < vast.ads[i].inLine.creatives.length; j++) {
@@ -273,6 +285,7 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                         var linear = {};
                         linear.id = vast.ads[i].id;
                         linear.creativeId = vast.ads[i].inLine.creatives[j].id;
+                        linear.duration = vast.ads[i].inLine.creatives[j].linear.duration
                         linear.mediaFiles = vast.ads[i].inLine.creatives[j].linear.mediaFiles;
                         linear.videoClicks = vast.ads[i].inLine.creatives[j].linear.videoClicks;
                         listAds.push(linear);

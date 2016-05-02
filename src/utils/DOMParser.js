@@ -146,9 +146,12 @@ AdsPlayer.utils.DOMParser = function() {
 
         getNodeValue: function(node) {
             var cdataSection = this.getChildNode(node, '#cdata-section');
+            var textSection = this.getChildNode(node, '#text');
             if (cdataSection) {
                 return cdataSection.nodeValue;
-            } else {
+            } else if (textSection) {
+                 return textSection.nodeValue;
+             }else {
                 return node.nodeValue;
             }
         },
