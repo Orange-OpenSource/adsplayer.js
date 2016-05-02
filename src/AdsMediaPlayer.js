@@ -94,12 +94,12 @@ AdsMediaPlayer = function() {
         if (adsVideoPlayer) {
             adsVideoPlayer.style.visibility = 'visible';
         }
-    }
+    };
     _setHidden = function() {
         if (adsVideoPlayer) {
             adsVideoPlayer.style.visibility = 'hidden';
         }
-    }
+    };
 
     return {
         init: _init,

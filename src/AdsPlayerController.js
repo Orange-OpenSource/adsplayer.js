@@ -12,7 +12,7 @@
  *
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * @constructs OrangeHasPlayer
+ *
  *
  */
 
@@ -34,6 +34,9 @@
  */
 
 
+/**
+ * [AdsPlayerController description]
+ */
 AdsPlayerController = function() {
 
     var _mainPlayer = null,
@@ -54,6 +57,10 @@ AdsPlayerController = function() {
     /////////// INITIALIZATION
 
 
+    /**
+     * [_onMainVideoLoadStart description]
+     * @return {[type]} [description]
+     */
     var _onMainVideoLoadStart = function() {
             _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
             _analyseTriggers();
@@ -124,13 +131,16 @@ AdsPlayerController = function() {
             // create cues according to the sorted ads
             var cues = [],
                 Cue = window.VTTCue || window.TextTrackCue,
-                i;
+                i,
+                trigger = null,
+                newCue = null;
 
             for (i = 0; i < self.mastTriggers.length; i++) {
-                var trigger = self.mastTriggers[i];
+                trigger = self.mastTriggers[i];
                 if (trigger.startConditions[0].type === ConditionType.PROPERTY &&
                     trigger.startConditions[0].name === ConditionName.POSITION &&
                     trigger.startConditions[0].operator === ConditionOperator.GEQ) {
+                    
                     var cue = new Cue(trigger.startConditions[0].value, trigger.startConditions[0].value + 1, i);
                     cues.push(cue);
                 }

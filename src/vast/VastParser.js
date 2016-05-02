@@ -282,19 +282,31 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
             return listAds;
         };
 
-
-
     return {
 
+        /**
+         * [init description]
+         * @return {[type]} [description]
+         */
         init: function() {
             // to be used later
         },
 
+        /**
+         * [parse description]
+         * @param  {[type]} vastDom [description]
+         * @return {[type]}         [description]
+         */
         parse: function(vastDom) {
 
             return _parse(vastDom);
         },
 
+        /**
+         * [load description]
+         * @param  {[type]} vastUrl [description]
+         * @return {[type]}         [description]
+         */
         load: function(vastUrl) {
             // this function must be handled by AdsPlayerController
 

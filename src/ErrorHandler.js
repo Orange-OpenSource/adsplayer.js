@@ -36,6 +36,13 @@ AdsPlayer.ErrorHandler = function() {
         eventBus: undefined,
         debug: undefined,
 
+        /**
+         * [sendWarning description]
+         * @param  {[type]} code    [description]
+         * @param  {[type]} message [description]
+         * @param  {[type]} data    [description]
+         * @return {[type]}         [description]
+         */
         sendWarning: function(code, message, data) {
             this.eventBus.dispatchEvent({
                 type: "warning",
@@ -48,6 +55,13 @@ AdsPlayer.ErrorHandler = function() {
             this.debug.warn("[Warn] Code: " + code + ", Message: " + message + ", Data: " + JSON.stringify(data, null, '\t'));
         },
 
+        /**
+         * [sendError description]
+         * @param  {[type]} code    [description]
+         * @param  {[type]} message [description]
+         * @param  {[type]} data    [description]
+         * @return {[type]}         [description]
+         */
         sendError: function(code, message, data) {
             this.eventBus.dispatchEvent({
                 type: "error",
