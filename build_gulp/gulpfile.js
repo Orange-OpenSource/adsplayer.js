@@ -5,7 +5,7 @@ var gulp = require('gulp'),
 	pathModule = require('path'),
 	git = require('git-rev'),
 	runSequence = require('run-sequence'),
-	fs = require("fs");
+	fs = require('fs');
 	
 var pkg = { revision : '',
 			timeStamp : '',
