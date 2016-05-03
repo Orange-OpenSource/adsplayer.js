@@ -28,7 +28,7 @@ AdsPlayer = function(adsContainer) {
         _error = null,
         _warning = null,
         _adsContainer = adsContainer,
-        _eventBus = _EventBus.getInstance(),
+        _eventBus = AdsPlayer.EventBus.getInstance(),
         _adsPlayerController = null;
 
 

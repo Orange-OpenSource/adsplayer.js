@@ -24,7 +24,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         _medias = [],
         _videoUrl = '',
         _adsContainer = null,
-        _eventBus = _EventBus.getInstance(),
+        _eventBus = AdsPlayer.EventBus.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
 
 

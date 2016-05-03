@@ -47,10 +47,10 @@ AdsPlayer.AdsPlayerController = function() {
         _mastTriggers = [],
         _listVastAds = [], // this table is used to track the (groups of) ads to be played
         _fileLoader = new AdsPlayer.FileLoader(),
-        _errorHandler = adErrorHandler.getInstance,
+        _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _mastParser = new AdsPlayer.mast.MastParser(),
         _debug = AdsPlayer.Debug.getInstance(),
-        _eventBus = _EventBus.getInstance();
+        _eventBus = AdsPlayer.EventBus.getInstance();
 
     /////////// INITIALIZATION
 
