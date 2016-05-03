@@ -206,14 +206,15 @@ AdsPlayer.Debug = (function() {
             log: function() {
                 _log.call(this, DEBUG, arguments);
             }
-        };    }
-
-        return {
-            getInstance: function() {
-                if (!instance) {
-                    instance = createInstance();
-                }
-                return instance;
-            }
         };
+    }
+
+    return {
+        getInstance: function() {
+            if (!instance) {
+                instance = createInstance();
+            }
+            return instance;
+        }
+    };
 })();
