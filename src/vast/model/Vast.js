@@ -35,12 +35,12 @@ var MediaFileDelivery = {
  * [TrackingEvent description]
  * @type {Object}
  */
-var TrackingEvent={
+var TrackingEvent = {
     CREATIVEVIEW:'creativeView',
     START:'start',
     MIDPOINT: 'midpoint',
     FIRSTQUARTILE: 'firstQuartile',
-    THIRDQUARTILE: 'thirdQuartile', 
+    THIRDQUARTILE: 'thirdQuartile',
     COMPLETE: 'complete',
     MUTE: 'mute',
     UNMUTE: 'unmute',
@@ -49,16 +49,16 @@ var TrackingEvent={
     RESUME: 'resume',
     FULLSCREEN: 'fullscreen',
     EXPAND: 'expand',
-    COLLAPSE: 'collapse', 
+    COLLAPSE: 'collapse',
     ACCEPTINVITATION: 'acceptInvitation',
-    CLOSE: 'close' 
+    CLOSE: 'close'
 };
 
 /**
  * [vast description]
  * @return {[type]} [description]
  */
-AdsPlayer.vast = function () {
+AdsPlayer.vast.model.Vast = function () {
     "use strict";
 
     this.version = '';
@@ -71,11 +71,11 @@ AdsPlayer.vast = function () {
  * [model description]
  * @return {[type]} [description]
  */
-AdsPlayer.vast.model = function () {
+/*AdsPlayer.vast.model = function () {
     "use strict";
     this.Ad = {};
 
-};
+};*/
 
 /**
  * [Ad description]
@@ -85,7 +85,7 @@ AdsPlayer.vast.model.Ad = function () {
     
     this.id = '';
     this.inLine = null;       // pointer to one InLine object
-    this.wrapper = null;     
+    this.wrapper = null;
 };
 
 /**

@@ -249,7 +249,7 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                 i;
             //_createXmlTree(vastDom);
             // VAST is the main node, it containes verstion (attribute) and list of Ad structure
-            var vast = new AdsPlayer.vast();
+            var vast = new AdsPlayer.vast.model.Vast();
             vast.version = parser.getAttributeValue(parser.getChildNode(vastDom, 'VAST'), 'version');
 
             // get Ad list to be associated to VAST

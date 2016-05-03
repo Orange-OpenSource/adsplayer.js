@@ -1,5 +1,5 @@
 
-adEventBus = (function() {
+_EventBus = (function() {
     var instance;
 
     function createInstance() {

@@ -24,17 +24,22 @@ AdsMediaPlayer = function() {
         adsImageNode = null,
         _medias = [],
         _videoUrl = '',
+        _adsContainer = null,
+        _eventBus = _EventBus.getInstance(),
+
 
         // functions
         _isPlayingAds = function() {
             return playingAds;
         },
 
-        _init = function() {
-
+        _init = function(adsContainer) {
+            _adsContainer = adsContainer;
+            _createVideoElt();
+            _createImageElt();
         },
 
-        _createVideoElt = function(adsContainer) {
+        _createVideoElt = function() {
             if (adsVideoPlayer === null) {
                 adsVideoPlayer = document.createElement('video');
                 adsVideoPlayer.autoplay = false;
@@ -43,12 +48,14 @@ AdsMediaPlayer = function() {
                 adsVideoPlayer.style.top = 0;
                 adsVideoPlayer.style.left = 0;
                 adsVideoPlayer.style.width = '100%';
-                adsContainer.appendChild(adsVideoPlayer);
+                _adsContainer.appendChild(adsVideoPlayer);
+                adsVideoPlayer.addEventListener("ended", function(){
+                    _eventBus.dispatchEvent({type:"adEnded",data :{}});
+                });
             }
         },
 
-
-        _createImageElt = function(adsContainer) {
+        _createImageElt = function() {
             if (adsImageNode  === null) {
                 adsImageNode = document.createElement('img');
                 adsImageNode.autoplay = false;
@@ -56,10 +63,11 @@ AdsMediaPlayer = function() {
                 adsImageNode.style.position = 'absolute';
                 adsImageNode.style.top = 0;
                 adsImageNode.style.left = 0;
+                adsImageNode.visibility = "hidden";
                 //adsImageNode.style.width = '100%';
-                adsContainer.appendChild(adsImageNode);
+                _adsContainer.appendChild(adsImageNode);
             }
-        },        
+        },
 
         _addlistener = function(type, listener) {
             adsVideoPlayer.addEventListener(type, listener);
@@ -83,7 +91,8 @@ AdsMediaPlayer = function() {
         },
 
         _onVideoClick = function () {
-            if (url = _medias.clickThrough) {
+            var url = _medias.clickThrough;
+            if (url) {
                 try{
                     window.open(url,"Ads Windows");
                 }
@@ -93,7 +102,6 @@ AdsMediaPlayer = function() {
                 }
             }
         },
-
 
         _supportedMedia = function (element, codec) {
             "use strict";
@@ -106,12 +114,10 @@ AdsMediaPlayer = function() {
             return (canPlay === "probably" || canPlay === "maybe");
         },
 
-
-
         _playMedia = function() {
             if (_medias.length) {
                 var time = _medias.duration;
-                var media = _medias.shift();       
+                var media = _medias.shift();
 
                 if ((media.type === "image/jpeg") || (media.type === "image/jpg")) {
                     adsImageNode.visibility = "visible";
@@ -120,8 +126,7 @@ AdsMediaPlayer = function() {
                     setTimeout(function(){
                         adsImageNode.src = '';
                         adsImageNode.visibility = "hidden";
-                        var event = new CustomEvent('ended');
-                        adsVideoPlayer.dispatchEvent(event);
+                        _eventBus.dispatchEvent({type:"adEnded",data :{}});
                     }, time*1000);
 
                       //  adsVideoPlayer.load(); // to do
@@ -134,7 +139,7 @@ AdsMediaPlayer = function() {
 
                         _playMedia();
                     }
-                }   
+                }
             } else {
                 var event = new CustomEvent('aborted');
                 adsVideoPlayer.dispatchEvent(event);
@@ -148,18 +153,13 @@ AdsMediaPlayer = function() {
         adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
         adsVideoPlayer.addEventListener("error", _onError);
         adsVideoPlayer.addEventListener("click", _onVideoClick);
-        adsImageNode.addEventListener("click", _onVideoClick); 
+        adsImageNode.addEventListener("click", _onVideoClick);
         _playMedia();
     };
 
-    _setVisible = function() {
+    _show = function(show) {
         if (adsVideoPlayer) {
-            adsVideoPlayer.style.visibility = 'visible';
-        }
-    };
-    _setHidden = function() {
-        if (adsVideoPlayer) {
-            adsVideoPlayer.style.visibility = 'hidden';
+            adsVideoPlayer.style.visibility = show ? 'visible' : 'hidden';
         }
     };
 
@@ -169,8 +169,7 @@ AdsMediaPlayer = function() {
         createVideoElt: _createVideoElt,
         playVideo: _playVideo,
         addlistener: _addlistener,
-        setVisible: _setVisible,
-        setHidden: _setHidden,
+        show: _show,
         createImageElt: _createImageElt
     };
 };

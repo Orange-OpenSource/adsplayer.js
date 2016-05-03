@@ -43,19 +43,15 @@ AdsPlayerController = function() {
         _mainVideo = null,
         _adsContainer = null,
         _adsMediaPlayer = null,
-        _error = null,
-        _warning = null,
-        _mastFileContent = "",
         _mastTriggers = [],
-        _mastBaseUrl = '',
         _listVastAds = [], // this table is used to track the (groups of) ads to be played
         _fileLoader = new AdsPlayer.FileLoader(),
         _errorHandler = adErrorHandler.getInstance,
         _mastParser = new AdsPlayer.mast.MastParser(),
-        _eventBus = adEventBus.getInstance();
+        _debug = _Debug.getInstance(),
+        _eventBus = _EventBus.getInstance();
 
     /////////// INITIALIZATION
-
 
     /**
      * [_onMainVideoLoadStart description]
@@ -101,8 +97,8 @@ AdsPlayerController = function() {
                         for (k = 0; k < trigger.media[j].length; k++) {
                             medias = trigger.media[j][k].mediaFiles;
                             medias.duration = trigger.media[j][k].duration;
-                            if (trigger.media[j][k].videoClicks.clickThrough != null) {
-                                medias.clickThrough = trigger.media[j][k].videoClicks.clickThrough.uri
+                            if (trigger.media[j][k].videoClicks.clickThrough !== null) {
+                                medias.clickThrough = trigger.media[j][k].videoClicks.clickThrough.uri;
                             }
                             _listVastAds.push(medias);
                         }
@@ -113,8 +109,8 @@ AdsPlayerController = function() {
 
             if (preRoll) {
                 console.log('PreRoll');
-                _adsMediaPlayer.setVisible();
-                _dispatchEvent("adStart");
+                 _adsMediaPlayer.show(true);
+                _eventBus.dispatchEvent({type:"adStart",data :{}});
                 _mainVideo.addEventListener("playing", _onPlaying);
                 _playAds();
             }
@@ -152,11 +148,9 @@ AdsPlayerController = function() {
             }
         },
 
-        _parseMastFile = function() {
-            if (_mastFileContent !== '') {
-                _mastTriggers = _mastParser.parse(_mastFileContent);
-            }
+        _parseMastFile = function(mastContent, mastBaseUrl) {
 
+            _mastTriggers = _mastParser.parse(mastContent);
             if (_mastTriggers !== []) {
                 // here goes the code parsing the triggers'sources if in vast format
 
@@ -179,9 +173,9 @@ AdsPlayerController = function() {
                     if (ind >= _mastTriggers.length) {
                         // all triggers and all ads have been processed
                         // we return;
-                        _removeEventListener('vastFileLoaded', parseVast);
+                        _eventBus.removeEventListener('vastFileLoaded', parseVast);
                         _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
-                        _dispatchEvent("mastLoaded");
+                        _eventBus.dispatchEvent({type:"mastLoaded",data :{}});
                        //_createCues();
                         return;
                     }
@@ -196,7 +190,7 @@ AdsPlayerController = function() {
 
                     var uri = _mastTriggers[ind].sources[ind1].uri;
                     if (uri.indexOf('http://') === -1) {
-                        uri = _mastBaseUrl + uri;
+                        uri = mastBaseUrl + uri;
                     }
                     _fileLoader.load(uri).then(function(result) {
                         vastFileContent = result.response;
@@ -211,7 +205,7 @@ AdsPlayerController = function() {
                         alert(reason.message);
                     });
                 };
-                _addEventListener('vastFileLoaded', parseVast);
+                _eventBus.addEventListener('vastFileLoaded', parseVast);
                 ind = 0;
                 ind1 = 0;
                 loadVast();
@@ -227,35 +221,34 @@ AdsPlayerController = function() {
            _warning = e.data;
         },
 
-        _onEnded = function(msg) {
-            if (!msg) {
+        _onAdEnded = function(/*msg*/) {
+            /*if (!msg) {
                 msg = 'ad video ended';
             }
-            console.log(msg);
-            if (_listVastAds.length) {
+            console.log(msg);*/
+            if (_listVastAds.length > 0) {
                 _playAds();
             } else {
                 _mainVideo.removeEventListener("playing", _onPlaying);
-                console.log('no more Ads to Play : dispatch "adEnd" towards the html Player');
-                _dispatchEvent("adEnd");
-               _adsMediaPlayer.setHidden();
-                console.log('play main video');
+                _debug.log('no more Ads to Play : dispatch "adEnd" towards the html Player');
+                _eventBus.dispatchEvent({type:"adEnd",data :{}});
+                _adsMediaPlayer.show(false);
+                _debug.log('play main video');
                 _mainVideo.play();
             }
         },
 
-        _onAborted = function() {
+        /*_onAborted = function() {
             _onEnded('ad video aborted due to error on the adsMediaPlayer, e.g. : file not found');
-        },
+        },*/
 
 
         _playAds = function() {
-            if (_listVastAds.length) {
+            if (_listVastAds.length > 0) {
                 var medias = _listVastAds.shift();
                 _adsMediaPlayer.playVideo(medias);
         }
-
-        };
+    };
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -275,37 +268,11 @@ AdsPlayerController = function() {
             _mainPlayer = player;
             _mainVideo = player.getVideoModel().getElement();
             _adsContainer = adsContainer;
+
             _adsMediaPlayer = new AdsMediaPlayer();
-            _adsMediaPlayer.init();
-            _adsMediaPlayer.createVideoElt(_adsContainer);
-            _adsMediaPlayer.createImageElt(_adsContainer);
-            adsImageNode.visibility = "hidden";
-            _adsMediaPlayer.addlistener("ended", _onEnded);
-            _adsMediaPlayer.addlistener("aborted", _onAborted);
-        },
+            _adsMediaPlayer.init(_adsContainer);
 
-
-
-        /////////// ERROR/WARNING
-
-        /**
-         * Returns the Error object for the most recent error
-         * @access public
-         * @memberof AdsPlayerController#
-         * @return {object} the Error object for the most recent error, or null if there has not been an error
-         */
-        _getError = function() {
-            return _error;
-        },
-
-        /**
-         * Returns the Warning object for the most recent warning
-         * @access public
-         * @memberof AdsPlayerController#
-         * @return {object} the Warning object for the most recent warning, or null if there has not been a warning
-         */
-        _getWarning = function() {
-            return _warning;
+            _eventBus.addEventListener("adEnded", _onAdEnded);
         },
 
 
@@ -317,21 +284,18 @@ AdsPlayerController = function() {
          * @param {string} mastUrl - the MAST file url
          */
         _load = function(url) {
-            _addEventListener("mastFileLoaded", _parseMastFile);
+            var deferred = Q.defer();
 
             _fileLoader.load(url).then(function(result) {
-                console.log("output from mast file loading : ");
-                console.log("***************************************************");
-                console.log(result.response);
-                console.log("***************************************************");
-                console.log('');
-                _mastFileContent = result.response;
-                _mastBaseUrl = result.baseUrl;
-                _mastBaseUrl = "http://2is7server2.rd.francetelecom.com";
-                _dispatchEvent("mastFileLoaded");
-            }, function(reason) {
-                _dispatchEvent("mastNotLoaded");
+                _debug.log("MAST file loaded");
+                _parseMastFile(result.response, /*result.baseUrl*/"http://2is7server2.rd.francetelecom.com");
+                deferred.resolve();
+            }, function(error) {
+                _({type: "error", data: error});
+                deferred.reject();
             });
+
+            return deferred.promise;
         },
 
         /**
@@ -348,97 +312,12 @@ AdsPlayerController = function() {
 
         _stop = function() {
             _reset();
-        },
-
-        /////////// EVENTS
-
-        /**
-         * Registers a listener on the specified event.
-         * The possible event types are:
-         * <li>'error' (see [error]{@link AdsPlayerController#event:error} event specification)
-         * <li>'warning' (see [warning]{@link AdsPlayerController#event:warning} event specification)
-         * <li>'adStart' (see [adStart]{@link AdsPlayerController#event:adStart} event specification)
-         * <li>'adEnd' (see [adEnd]{@link AdsPlayerController#event:adEnd} event specification)
-         * @method addEventListener
-         * @access public
-         * @memberof AdsPlayerController#
-         * @param {string} type - the event type for listen to
-         * @param {callback} listener - the callback which is called when an event of the specified type occurs
-         * @param {boolean} useCapture - see HTML DOM addEventListener() method specification
-         */
-        _addEventListener = function(type, listener, useCapture) {
-            _eventBus.addEventListener(type, listener);
-        },
-
-        /**
-         * dispatch the specified event
-         * The possible event types are:
-         * @method dispatchEvent
-         * @access public
-         * @memberof AdsPlayerController#
-         * @param {string} type - the event type for listen to
-         */
-        _dispatchEvent = function(type) {
-            _eventBus.dispatchEvent({
-                type: type,
-                data: {}
-            });
-        },
-
-
-        /**
-         * Unregisters the listener previously registered with the addEventListener() method.
-         * @method removeEventListener
-         * @access public
-         * @memberof AdsPlayerController#
-         * @see [addEventListener]{@link AdsPlayerController#addEventListener}
-         * @param {string} type - the event type on which the listener was registered
-         * @param {callback} listener - the callback which was registered to the event type
-         */
-        _removeEventListener = function(type, listener) {
-            _eventBus.removeEventListener(type, listener);
         };
-
-    /////////// EVENTS
-
-    /**
-     * The error event is fired when an error occurs.
-     * When the error event is fired, the application shall stop the player.
-     *
-     * @event AdsPlayerController#error
-     * @param {object} event - the event
-     * @param {object} event.type - the event type ('error')
-     * @param {object} event.data - the event data
-     * @param {string} event.data.code - error code
-     * @param {string} event.data.message - error message
-     * @param {object} event.data.data - error additionnal data
-     */
-
-    /**
-     * The warning event is fired when a warning occurs.
-     *
-     * @event AdsPlayerController#warning
-     * @param {object} event - the event
-     * @param {object} event.type - the event type ('warning')
-     * @param {object} event.data - the event data
-     * @param {string} event.data.code - warning code
-     * @param {string} event.data.message - warning message
-     * @param {object} event.data.data - warning additionnal data
-     */
-
-
-    _fileLoader.debug = {};
-    _fileLoader.debug.log = function(debugText) {
-        console.log(debugText);
-    };
 
     return {
         init: _init,
         stop: _stop,
-        addEventListener: _addEventListener,
-        load: _load.bind(this),
-        getError: _getError,
-        getWarning: _getWarning
+        load: _load.bind(this)
     };
 
 };

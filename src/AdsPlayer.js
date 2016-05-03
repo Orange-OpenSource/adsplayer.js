@@ -28,7 +28,9 @@ AdsPlayer = function(adsContainer) {
         _error = null,
         _warning = null,
         _adsContainer = adsContainer,
-        adsPlayerController = null;
+        _eventBus = _EventBus.getInstance(),
+        _adsPlayerController = null;
+
 
     var _onError = function(e) {
             error = e.data;
@@ -49,8 +51,11 @@ AdsPlayer = function(adsContainer) {
      * @param {function} callback - the callback function to invoke when initialization is done
      */
     var _init = function(player, callback) {
-        adsPlayerController = new AdsPlayerController();
-        adsPlayerController.init(player, _adsContainer);
+        _adsPlayerController = new AdsPlayerController();
+        _adsPlayerController.init(player, _adsContainer);
+        _eventBus.addEventListener('error', _onError);
+        _eventBus.addEventListener('warning', _onWarning);
+
         callback();
     },
 
@@ -113,15 +118,12 @@ AdsPlayer = function(adsContainer) {
      */
     _load = function(stream, callback) {
         if (stream.mastUrl) {
-            adsPlayerController.addEventListener('mastLoaded', function () {
+            _adsPlayerController.load(stream.mastUrl).then(function () {
+                callback();
+            }, function () {
                 callback();
             });
-            adsPlayerController.addEventListener('mastNotLoaded', function () {
- //               throw new Error("AdsPlayer.load(): couldn't load mast file");
-                callback();
-            });
-            adsPlayerController.load(stream.mastUrl);
-        } else{
+        } else {
             callback();
         }
     },
@@ -133,7 +135,7 @@ AdsPlayer = function(adsContainer) {
      * @memberof AdsPlayer#
      */
     _stop = function() {
-        adsPlayerController.stop();
+        _adsPlayerController.stop();
     },
 
     /**
@@ -143,7 +145,7 @@ AdsPlayer = function(adsContainer) {
      * @memberof AdsPlayer#
      */
     _reset = function() {
-        adsPlayerController.reset();
+        _adsPlayerController.reset();
     },
 
     /////////// EVENTS
@@ -163,7 +165,7 @@ AdsPlayer = function(adsContainer) {
      * @param {boolean} useCapture - see HTML DOM addEventListener() method specification
      */
     _addEventListener = function(type, listener, useCapture) {
-        adsPlayerController.addEventListener(type, listener, useCapture);
+        _eventBus.addEventListener(type, listener, useCapture);
     },
 
     /**
@@ -176,7 +178,7 @@ AdsPlayer = function(adsContainer) {
      * @param {callback} listener - the callback which was registered to the event type
      */
     _removeEventListener = function(type, listener) {
-        adsPlayerController.removeEventListener(type, listener);
+        _eventBus.removeEventListener(type, listener);
     };
 
     return {
@@ -213,5 +215,34 @@ AdsPlayer.mast.model.Trigger = {};
 AdsPlayer.mast.model.Trigger.Condition = {};
 AdsPlayer.vast = {};
 AdsPlayer.vast.model = {};
-AdsPlayer.vast.model.Ad = {};
+AdsPlayer.vast.model.Vast = {};
 AdsPlayer.utils = {};
+
+
+
+/////////// EVENTS
+
+/**
+ * The error event is fired when an error occurs.
+ * When the error event is fired, the application shall stop the player.
+ *
+ * @event AdsPlayerController#error
+ * @param {object} event - the event
+ * @param {object} event.type - the event type ('error')
+ * @param {object} event.data - the event data
+ * @param {string} event.data.code - error code
+ * @param {string} event.data.message - error message
+ * @param {object} event.data.data - error additionnal data
+ */
+
+/**
+ * The warning event is fired when a warning occurs.
+ *
+ * @event AdsPlayerController#warning
+ * @param {object} event - the event
+ * @param {object} event.type - the event type ('warning')
+ * @param {object} event.data - the event data
+ * @param {string} event.data.code - warning code
+ * @param {string} event.data.message - warning message
+ * @param {object} event.data.data - warning additionnal data
+ */
