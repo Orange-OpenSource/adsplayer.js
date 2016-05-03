@@ -14,7 +14,7 @@
   }
 }(this, function () {
   
-   var Adsplayer = {};
+   var AdsPlayer = {};
 <%= contents %>
 return <%= namespace %>;
 }));
