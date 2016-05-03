@@ -33,11 +33,11 @@ AdsPlayer = function(adsContainer) {
 
 
     var _onError = function(e) {
-            error = e.data;
+            _error = e.data;
         },
 
         _onWarning = function(e) {
-            warning = e.data;
+            _warning = e.data;
         };
 
     /////////// INITIALIZATION
@@ -51,7 +51,7 @@ AdsPlayer = function(adsContainer) {
      * @param {function} callback - the callback function to invoke when initialization is done
      */
     var _init = function(player, callback) {
-        _adsPlayerController = new AdsPlayerController();
+        _adsPlayerController = new AdsPlayer.AdsPlayerController();
         _adsPlayerController.init(player, _adsContainer);
         _eventBus.addEventListener('error', _onError);
         _eventBus.addEventListener('warning', _onWarning);
@@ -59,55 +59,53 @@ AdsPlayer = function(adsContainer) {
         callback();
     },
 
-    /**
-     * Returns the version of the Ads player.
-     * @method getVersion
-     * @access public
-     * @memberof AdsPlayer#
-     * @return {string} the version of the Ads player
-     */
-    _getVersion = function() {
-        return VERSION;
-    },
+        /**
+         * Returns the version of the Ads player.
+         * @method getVersion
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {string} the version of the Ads player
+         */
+        _getVersion = function() {
+            return VERSION;
+        },
 
-    /**
-     * Returns the build date of this Ads player.
-     * @method getBuildDate
-     * @access public
-     * @memberof AdsPlayer#
-     * @return {string} the build date of this Ads player
-     */
-    _getBuildDate = function() {
-        if (BUILD_DATE.indexOf("@@") === -1) {
-            return BUILD_DATE;
-        } else {
-            return 'Not a builded version';
-        }
-    },
+        /**
+         * Returns the build date of this Ads player.
+         * @method getBuildDate
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {string} the build date of this Ads player
+         */
+        _getBuildDate = function() {
+            if (BUILD_DATE.indexOf("@@") === -1) {
+                return BUILD_DATE;
+            } else {
+                return 'Not a builded version';
+            }
+        },
 
-    /////////// ERROR/WARNING
+        /////////// ERROR/WARNING
 
-    /**
-     * Returns the Error object for the most recent error
-     * @access public
-     * @memberof AdsPlayer#
-     * @return {object} the Error object for the most recent error, or null if there has not been an error
-     */
-    _getError = function() {
-        return error;
-    },
+        /**
+         * Returns the Error object for the most recent error
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {object} the Error object for the most recent error, or null if there has not been an error
+         */
+        _getError = function() {
+            return _error;
+        },
 
-    /**
-     * Returns the Warning object for the most recent warning
-     * @access public
-     * @memberof AdsPlayer#
-     * @return {object} the Warning object for the most recent warning, or null if there has not been a warning
-     */
-    _getWarning = function() {
-        return warning;
-    },
-
-    ///////////
+        /**
+         * Returns the Warning object for the most recent warning
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {object} the Warning object for the most recent warning, or null if there has not been a warning
+         */
+        _getWarning = function() {
+            return _warning;
+        },
 
     /**
      * Load/open a stream.
@@ -148,7 +146,6 @@ AdsPlayer = function(adsContainer) {
         _adsPlayerController.reset();
     },
 
-    /////////// EVENTS
 
     /**
      * Registers a listener on the specified event.
@@ -186,7 +183,9 @@ AdsPlayer = function(adsContainer) {
         ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
         // Plugin API
-        getName: function () {return NAME;},
+        getName: function() {
+            return NAME;
+        },
         getVersion: _getVersion,
         init: _init,
         load: _load,

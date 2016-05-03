@@ -37,12 +37,13 @@
 /**
  * [AdsPlayerController description]
  */
-AdsPlayerController = function() {
+AdsPlayer.AdsPlayerController = function() {
 
     var _mainPlayer = null,
         _mainVideo = null,
         _adsContainer = null,
         _adsMediaPlayer = null,
+        _listCues = [],
         _mastTriggers = [],
         _listVastAds = [], // this table is used to track the (groups of) ads to be played
         _fileLoader = new AdsPlayer.FileLoader(),
@@ -64,8 +65,8 @@ AdsPlayerController = function() {
 
         _onPlaying = function() {
             console.log('pause main video');
-           _mainVideo.removeEventListener("playing", _onPlaying);
-           _mainVideo.pause();
+            _mainVideo.removeEventListener("playing", _onPlaying);
+            _mainVideo.pause();
         },
 
         _analyseTriggers = function() { //    Look for preRoll ads triggers 
@@ -103,8 +104,12 @@ AdsPlayerController = function() {
                             _listVastAds.push(medias);
                         }
                     }
-                    trigger.alreadyPlayed = true;
                 }
+            }
+
+            if (!_listVastAds.length) {
+                // means that no medias are available, e.g. if the vast files couldn't be loaded
+                preRoll = false;
             }
 
             if (preRoll) {
@@ -120,9 +125,9 @@ AdsPlayerController = function() {
 
             // sort elements by date
             _mastTriggers.sort(function(a, b) {
-                if (a.startTime < b.startTime)
+                if (a.startConditions[0].value < b.startConditions[0].value)
                     return -1;
-                else if (a.startTime > b.startTime)
+                else if (a.startConditions[0].value > b.startConditions[0].value)
                     return 1;
                 else
                     return 0;
@@ -135,17 +140,16 @@ AdsPlayerController = function() {
                 trigger = null,
                 newCue = null;
 
-            for (i = 0; i < self.mastTriggers.length; i++) {
-                trigger = self.mastTriggers[i];
+            for (i = 0; i < _mastTriggers.length; i++) {
+                trigger = _mastTriggers[i];
                 if (trigger.startConditions[0].type === ConditionType.PROPERTY &&
                     trigger.startConditions[0].name === ConditionName.POSITION &&
                     trigger.startConditions[0].operator === ConditionOperator.GEQ) {
-                    
                     var cue = new Cue(trigger.startConditions[0].value, trigger.startConditions[0].value + 1, i);
                     cues.push(cue);
                 }
-                return cues;
             }
+            _listCues = cues;
         },
 
         _parseMastFile = function(mastContent, mastBaseUrl) {
@@ -176,7 +180,7 @@ AdsPlayerController = function() {
                         _eventBus.removeEventListener('vastFileLoaded', parseVast);
                         _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
                         _eventBus.dispatchEvent({type:"mastLoaded",data :{}});
-                       //_createCues();
+                        _createCues();
                         return;
                     }
 
@@ -201,8 +205,10 @@ AdsPlayerController = function() {
                             data: {}
                         });
                     }, function(reason) {
-                        //console.log(reason);
-                        alert(reason.message);
+                        console.log(reason.message);
+                        // coudn't load the vast file, try next one
+                        ind1++;
+                        loadVast();
                     });
                 };
                 _eventBus.addEventListener('vastFileLoaded', parseVast);
@@ -218,7 +224,7 @@ AdsPlayerController = function() {
         },
 
         _onWarning = function(e) {
-           _warning = e.data;
+            _warning = e.data;
         },
 
         _onAdEnded = function(/*msg*/) {
@@ -230,6 +236,7 @@ AdsPlayerController = function() {
                 _playAds();
             } else {
                 _mainVideo.removeEventListener("playing", _onPlaying);
+
                 _debug.log('no more Ads to Play : dispatch "adEnd" towards the html Player');
                 _eventBus.dispatchEvent({type:"adEnd",data :{}});
                 _adsMediaPlayer.show(false);
@@ -264,12 +271,11 @@ AdsPlayerController = function() {
      */
 
     var _init = function(player, adsContainer) {
-
             _mainPlayer = player;
             _mainVideo = player.getVideoModel().getElement();
             _adsContainer = adsContainer;
 
-            _adsMediaPlayer = new AdsMediaPlayer();
+            _adsMediaPlayer = new AdsPlayer.AdsMediaPlayer();
             _adsMediaPlayer.init(_adsContainer);
 
             _eventBus.addEventListener("adEnded", _onAdEnded);
@@ -322,3 +328,6 @@ AdsPlayerController = function() {
 
 };
 
+AdsPlayer.AdsPlayerController.prototype = {
+    constructor: AdsPlayer.AdsPlayerController
+};

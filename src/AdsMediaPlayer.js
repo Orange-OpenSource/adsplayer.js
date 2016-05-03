@@ -14,10 +14,9 @@
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-AdsMediaPlayer = function() {
+AdsPlayer.AdsMediaPlayer = function() {
 
     var self = this,
-        internalPlayer = null,
         overlay = null,
         playingAds = false,
         adsVideoPlayer = null,
@@ -116,7 +115,7 @@ AdsMediaPlayer = function() {
 
         _playMedia = function() {
             if (_medias.length) {
-                var time = _medias.duration;
+               var time = _medias.duration;
                 var media = _medias.shift();
 
                 if ((media.type === "image/jpeg") || (media.type === "image/jpg")) {
@@ -145,8 +144,7 @@ AdsMediaPlayer = function() {
                 adsVideoPlayer.dispatchEvent(event);
             }
 
-        };
-
+        },
 
     _playVideo = function(medias) {
         _medias = medias;
@@ -174,6 +172,6 @@ AdsMediaPlayer = function() {
     };
 };
 
-AdsMediaPlayer.prototype = {
-    constructor: AdsMediaPlayer
+AdsPlayer.AdsMediaPlayer.prototype = {
+    constructor: AdsPlayer.AdsMediaPlayer
 };
