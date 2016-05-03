@@ -49,7 +49,7 @@ AdsPlayer = function(adsContainer) {
      * @param {function} callback - the callback function to invoke when initialization is done
      */
     var _init = function(player, callback) {
-            adsPlayerController = new AdsPlayerController();
+            adsPlayerController = new AdsPlayer.AdsPlayerController();
             adsPlayerController.init(player, _adsContainer);
             callback();
         },

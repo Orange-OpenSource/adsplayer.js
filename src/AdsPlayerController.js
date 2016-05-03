@@ -276,7 +276,7 @@ AdsPlayer.AdsPlayerController = function() {
             _mainPlayer = player;
             _mainVideo = player.getVideoModel().getElement();
             _adsContainer = adsContainer;
-            _adsMediaPlayer = new AdsMediaPlayer();
+            _adsMediaPlayer = new AdsPlayer.AdsMediaPlayer();
             _adsMediaPlayer.init();
             _adsMediaPlayer.createVideoElt(_adsContainer);
             _adsMediaPlayer.addlistener("ended", _onEnded);
