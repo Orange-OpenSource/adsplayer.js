@@ -22,6 +22,8 @@
   "author": "Orange",
   "license": "BSD",
   "devDependencies": {
+    "browser-sync": "^2.12.5",
+    "browserify": "^13.0.0",
     "del": "^2.2.0",
     "git-rev": "^0.2.1",
     "gulp": "^3.9.1",
@@ -36,6 +38,7 @@
     "jshint": "^2.9.2",
     "jshint-stylish": "^2.1.0",
     "path": "^0.12.7",
-    "run-sequence": "^1.1.5"
+    "run-sequence": "^1.1.5",
+    "vinyl-source-stream": "^1.1.0"
   }
 }

@@ -5,7 +5,11 @@ var gulp = require('gulp'),
 	pathModule = require('path'),
 	git = require('git-rev'),
 	runSequence = require('run-sequence'),
-	fs = require('fs');
+	fs = require('fs'),
+	browserSync = require('browser-sync'),
+	browserify = require('browserify'),
+	reload = browserSync.reload,
+	source = require('vinyl-source-stream');
 	
 var pkg = { revision : '',
 			timeStamp : '',
@@ -23,9 +27,36 @@ var path = {
   LICENCE : '../LICENSE',
   DOC : '../dist/doc'
 };
+
+/*** UMD TEST ****/
+gulp.task('umdTest_serve', function() {
+    browserSync({
+        notify: false,
+        server: path.DEST
+    });
+    gulp.watch([path.DEST+'**/*'], reload);
+});
+
+gulp.task('umdTest_copy_index', function() {
+    return gulp.src(['./UMD_test/index.html'])
+	.pipe(gulp.dest(path.DEST));
+});
+
+gulp.task('umdTest_build', function() {
+	return browserify({ entries: ['./UMD_test/browserify_test.js'] })
+	.bundle()
+	.pipe(source('bundle.js'))
+    .pipe(gulp.dest(path.DEST));
+});
+
+gulp.task('umd_test', function() {
+	runSequence('clean',['lint', 'gitRev'],'compress',['umdTest_copy_index', 'umdTest_build'],'umdTest_serve');
+});
+
+/*** UMD TEST ****/
  
 gulp.task('lint', function() {
-  return gulp.src(path.JS)
+	return gulp.src(path.JS)
     .pipe($.jshint())
     .pipe($.jshint.reporter('jshint-stylish'));
 });
