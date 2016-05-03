@@ -49,7 +49,7 @@ AdsPlayer.AdsPlayerController = function() {
         _fileLoader = new AdsPlayer.FileLoader(),
         _errorHandler = adErrorHandler.getInstance,
         _mastParser = new AdsPlayer.mast.MastParser(),
-        _debug = _Debug.getInstance(),
+        _debug = AdsPlayer.Debug.getInstance(),
         _eventBus = _EventBus.getInstance();
 
     /////////// INITIALIZATION
