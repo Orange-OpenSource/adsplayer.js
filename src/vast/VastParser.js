@@ -285,7 +285,7 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                         var linear = {};
                         linear.id = vast.ads[i].id;
                         linear.creativeId = vast.ads[i].inLine.creatives[j].id;
-                        linear.duration = vast.ads[i].inLine.creatives[j].linear.duration
+                        linear.duration = vast.ads[i].inLine.creatives[j].linear.duration;
                         linear.mediaFiles = vast.ads[i].inLine.creatives[j].linear.mediaFiles;
                         linear.videoClicks = vast.ads[i].inLine.creatives[j].linear.videoClicks;
                         listAds.push(linear);
