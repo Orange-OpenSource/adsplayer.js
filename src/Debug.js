@@ -102,7 +102,7 @@ AdsPlayer.Debug = (function() {
             },
 
             _prepareLog = function(logLevel, args) {
-                var message = "[AdsPlayer]",
+                var message = "",
                     logTime = null;
 
                 if (showTimestamp) {
@@ -117,6 +117,8 @@ AdsPlayer.Debug = (function() {
                 if (showElapsedTime) {
                     message += "[" + new Date(logTime - startTime).MMSSmmm() + "]";
                 }
+
+                message += "[AdsPlayer] ";
 
                 Array.apply(null, args).forEach(function(item) {
                     message += item + " ";
