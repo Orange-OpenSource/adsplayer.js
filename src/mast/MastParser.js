@@ -168,13 +168,16 @@ AdsPlayer.mast.MastParser = function() {
         */
         _parse = function(mastDom) {
             // Mast client
+
             var triggers = [], // will contain a description of each trigger contained in the mast file under consideration
-                triggersList = [];
+                triggersList = [],
+                mast = new AdsPlayer.mast.model.Mast();
 
             triggersList = _getTriggersList(mastDom);
             triggers = _parseTriggersList(triggersList);
+            mast.triggers = triggers;
 
-            return triggers;
+            return mast;
         };
 
     return {

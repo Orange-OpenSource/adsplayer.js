@@ -205,10 +205,10 @@ AdsPlayer.AdsPlayerController = function() {
                 i,
                 deferLoadTriggers;
 
-            // mast = _mastParser.parse(mastContent);
-            // _mastTriggers = mast.triggers;
+             mast = _mastParser.parse(mastContent);
+             _mastTriggers = mast.triggers;
 
-            _mastTriggers = _mastParser.parse(mastContent);
+            //_mastTriggers = _mastParser.parse(mastContent);
 
             if (_mastTriggers.length === 0) {
                 return Q.when();

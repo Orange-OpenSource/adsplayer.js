@@ -45,6 +45,15 @@ var SourceFormat = {
 };
 
 /**
+ * [Mast description]
+ */
+AdsPlayer.mast.model.Mast = function () {
+    "use strict";
+    this.triggers = [];     // pointer to any number of Ad objects
+
+};
+
+/**
  * [Trigger description]
  */
 AdsPlayer.mast.model.Trigger = function() {
