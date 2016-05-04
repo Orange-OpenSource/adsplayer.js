@@ -155,6 +155,7 @@ AdsPlayer.FileLoader = function() {
         load: function(url) {
             deferred = Q.defer();
             request = new XMLHttpRequest();
+            request.timeout = 500; // time in milliseconds
             _load.call(this, url);
             return deferred.promise;
         },
