@@ -47,8 +47,8 @@ AdsPlayer.AdsPlayerController = function() {
         _mastTriggers = [],
         _listVastAds = [], // this table is used to track the (groups of) ads to be played
         _fileLoader = new AdsPlayer.FileLoader(),
-        _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _mastParser = new AdsPlayer.mast.MastParser(),
+        _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
         _eventBus = AdsPlayer.EventBus.getInstance();
 
@@ -155,70 +155,82 @@ AdsPlayer.AdsPlayerController = function() {
             _listCues = cues;
         },
 
-        _parseMastFile = function(mastContent, mastBaseUrl) {
 
-            _mastTriggers = _mastParser.parse(mastContent);
-            if (_mastTriggers !== []) {
-                var i,
-                    loadTriggerVastDiffer = [],
+        _loadVast = function(mastTrigger, vastUrl) {
+            var deferred = Q.defer(),
+                fileLoader = new AdsPlayer.FileLoader(),
+                vastParser = null,
+                vast = null;
 
-                    parseVast = function(mastTrigger, vastUrl) {
-                        var myFileLoader = new AdsPlayer.FileLoader();
-                        var _vastUrl = vastUrl;
-                        var deferred = Q.defer();
-                        myFileLoader.load(vastUrl).then(
-                            function(result) {
-                                var vastParser = new AdsPlayer.vast.VastParser(result.baseUrl);
-                                var vastResult = vastParser.parse(result.response);
-                                mastTrigger.media.push(vastResult);
-                                console.log('vast file parsed :' + _vastUrl);
-                                deferred.resolve();
-                                 return deferred.promise;
-                            },
-                            function(reason) {
-                                deferred.resolve();
-                                 return deferred.promise;
-                            }
-                        );
-                        return deferred.promise;
-                    },
-                    loadTriggerVast = function(mastTrigger) {
-                        var j,
-                            loadVastDiffer = [];
-                            var deferred = Q.defer();
-                        for (j = 0; j < mastTrigger.sources.length; j++) {
-
-                            var uri = mastTrigger.sources[j].uri;
-                            if (uri.indexOf('http://') === -1) {
-                                uri = mastBaseUrl + uri;
-                            }
-                            loadVastDiffer.push(parseVast(mastTrigger, uri));
-                        };
-                        Q.all(loadVastDiffer).then(function() {
-                            deferred.resolve();
-                             return deferred.promise;
-                        });
-                        return deferred.promise;
-                    };
-
-
-                for (i = 0; i < _mastTriggers.length; i++) {
-                    loadTriggerVastDiffer.push(loadTriggerVast(_mastTriggers[i]));
+            fileLoader.load(vastUrl).then(
+                function(result) {
+                    vastParser = new AdsPlayer.vast.VastParser(result.baseUrl);
+                    vast = vastParser.parse(result.response);
+                    mastTrigger.media.push(vast);
+                    _debug.log('vast file parsed :' + vastUrl);
+                    deferred.resolve();
+                },
+                function(error) {
+                    _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_VAST_FAILED, "Failed to load VAST file", error);
+                    deferred.resolve();
                 }
-
-                Q.all(loadTriggerVastDiffer).then(function() {
-                    _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
-                    _eventBus.dispatchEvent({
-                        type: "mastLoaded",
-                        data: {}
-                    });
-                    _createCues();
-                    return;
-                });
-            }
+            );
+            return deferred.promise;
         },
 
-        _parseMastFile_old = function(mastContent, mastBaseUrl) {
+        _loadTrigger = function(mastTrigger) {
+            var i,
+                deferLoadVasts = [],
+                uri;
+                var deferred = Q.defer();
+
+            for (i = 0; i < mastTrigger.sources.length; i++) {
+                uri = mastTrigger.sources[i].uri;
+                if (uri.indexOf('http://') === -1) {
+                    uri = mastBaseUrl + uri;
+                }
+                deferLoadVasts.push(_loadVast(mastTrigger, uri));
+            }
+
+            Q.all(deferLoadVasts).then(function() {
+                deferred.resolve();
+            });
+
+            return deferred.promise;
+        },
+
+        _parseMastFile = function(mastContent, mastBaseUrl) {
+            var deferred = null,
+                mast,
+                i,
+                deferLoadTriggers;
+
+            // mast = _mastParser.parse(mastContent);
+            // _mastTriggers = mast.triggers;
+
+            _mastTriggers = _mastParser.parse(mastContent);
+
+            if (_mastTriggers.length === 0) {
+                return Q.when();
+            }
+
+            deferred = Q.defer();
+            deferLoadTriggers = [];
+
+            for (i = 0; i < _mastTriggers.length; i++) {
+                deferLoadTriggers.push(_loadTrigger(_mastTriggers[i]));
+            }
+
+            Q.all(deferLoadTriggers).then(function() {
+                _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
+                _createCues();
+                deferred.resolve();
+            });
+
+            return deferred.promise;
+        },
+
+        /*_parseMastFile_old = function(mastContent, mastBaseUrl) {
 
             _mastTriggers = _mastParser.parse(mastContent);
             if (_mastTriggers !== []) {
@@ -285,7 +297,7 @@ AdsPlayer.AdsPlayerController = function() {
                 ind1 = 0;
                 loadVast();
             }
-        },
+        },*/
 
         _onError = function(e) {
             _error = e.data;
@@ -350,6 +362,8 @@ AdsPlayer.AdsPlayerController = function() {
             _adsMediaPlayer.init(_adsContainer);
 
             _eventBus.addEventListener("adEnded", _onAdEnded);
+
+            _debug.setLevel(4);
         },
 
 
@@ -365,13 +379,14 @@ AdsPlayer.AdsPlayerController = function() {
 
             _fileLoader.load(url).then(function(result) {
                 _debug.log("MAST file loaded");
-                _parseMastFile(result.response, /*result.baseUrl*/ "http://2is7server2.rd.francetelecom.com");
-                deferred.resolve();
+                _parseMastFile(result.response, /*result.baseUrl*/ "http://2is7server2.rd.francetelecom.com").then(function() {
+                    deferred.resolve();
+                });
             }, function(error) {
-                _({
+                /*_({
                     type: "error",
                     data: error
-                });
+                });*/
                 deferred.reject();
             });
 
