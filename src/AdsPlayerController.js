@@ -164,7 +164,7 @@ AdsPlayer.AdsPlayerController = function() {
 
             fileLoader.load(vastUrl).then(
                 function(result) {
-                    vastParser = new AdsPlayer.vast.VastParser(result.baseUrl);
+                    vastParser = new AdsPlayer.vast.VastParser(/*result.baseUrl*/"http://2is7server2.rd.francetelecom.com");
                     vast = vastParser.parse(result.response);
                     mastTrigger.media.push(vast);
                     _debug.log('vast file parsed :' + vastUrl);
@@ -178,7 +178,7 @@ AdsPlayer.AdsPlayerController = function() {
             return deferred.promise;
         },
 
-        _loadTrigger = function(mastTrigger) {
+        _loadTrigger = function(mastTrigger,mastBaseUrl) {
             var i,
                 deferLoadVasts = [],
                 uri;
@@ -218,7 +218,7 @@ AdsPlayer.AdsPlayerController = function() {
             deferLoadTriggers = [];
 
             for (i = 0; i < _mastTriggers.length; i++) {
-                deferLoadTriggers.push(_loadTrigger(_mastTriggers[i]));
+                deferLoadTriggers.push(_loadTrigger(_mastTriggers[i],/*mastBaseUrl*/"http://2is7server2.rd.francetelecom.com"));
             }
 
             Q.all(deferLoadTriggers).then(function() {
