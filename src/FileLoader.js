@@ -16,6 +16,7 @@ AdsPlayer.FileLoader = function() {
 
     var deferred = null,
         request = null,
+        _debug = AdsPlayer.Debug.getInstance(),
 
         _getDecodedResponseText = function(text) {
             var fixedCharCodes = '',
@@ -61,7 +62,7 @@ AdsPlayer.FileLoader = function() {
 
         _abort = function() {
             if (request !== null && request.readyState > 0 && request.readyState < 4) {
-                this.debug.log("[FileLoader] File download abort.");
+                _debug.log("[FileLoader] File download abort.");
                 request.abort();
             }
         },
@@ -84,7 +85,7 @@ AdsPlayer.FileLoader = function() {
                 }
 
                 if (request.status === 200 && request.readyState === 4) {
-                    self.debug.log("[FileLoader] file downloaded");
+                    _debug.log("[FileLoader] file downloaded");
 
                     // test if the file is in xml format.
                     if (request.responseXML === null) {
@@ -94,7 +95,7 @@ AdsPlayer.FileLoader = function() {
 
                     // Get the redirection URL and use it as base URL
                     if (request.responseURL) {
-                        self.debug.log("[FileLoader] Redirect URL: " + request.responseURL);
+                        _debug.log("[FileLoader] Redirect URL: " + request.responseURL);
                         baseUrl = _parseBaseUrl(request.responseURL);
                     }
 
