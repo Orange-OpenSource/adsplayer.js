@@ -114,8 +114,11 @@ AdsPlayer.AdsPlayerController = function() {
 
             if (preRoll) {
                 console.log('PreRoll');
-                 _adsMediaPlayer.show(true);
-                _eventBus.dispatchEvent({type:"adStart",data :{}});
+                _adsMediaPlayer.show(true);
+                _eventBus.dispatchEvent({
+                    type: "adStart",
+                    data: {}
+                });
                 _mainVideo.addEventListener("playing", _onPlaying);
                 _playAds();
             }
@@ -156,6 +159,69 @@ AdsPlayer.AdsPlayerController = function() {
 
             _mastTriggers = _mastParser.parse(mastContent);
             if (_mastTriggers !== []) {
+                var i,
+                    loadTriggerVastDiffer = [],
+
+                    parseVast = function(mastTrigger, vastUrl) {
+                        var myFileLoader = new AdsPlayer.FileLoader();
+                        var _vastUrl = vastUrl;
+                        var deferred = Q.defer();
+                        myFileLoader.load(vastUrl).then(
+                            function(result) {
+                                var vastParser = new AdsPlayer.vast.VastParser(result.baseUrl);
+                                var vastResult = vastParser.parse(result.response);
+                                mastTrigger.media.push(vastResult);
+                                console.log('vast file parsed :' + _vastUrl);
+                                deferred.resolve();
+                                 return deferred.promise;
+                            },
+                            function(reason) {
+                                deferred.resolve();
+                                 return deferred.promise;
+                            }
+                        );
+                        return deferred.promise;
+                    },
+                    loadTriggerVast = function(mastTrigger) {
+                        var j,
+                            loadVastDiffer = [];
+                            var deferred = Q.defer();
+                        for (j = 0; j < mastTrigger.sources.length; j++) {
+
+                            var uri = mastTrigger.sources[j].uri;
+                            if (uri.indexOf('http://') === -1) {
+                                uri = mastBaseUrl + uri;
+                            }
+                            loadVastDiffer.push(parseVast(mastTrigger, uri));
+                        };
+                        Q.all(loadVastDiffer).then(function() {
+                            deferred.resolve();
+                             return deferred.promise;
+                        });
+                        return deferred.promise;
+                    };
+
+
+                for (i = 0; i < _mastTriggers.length; i++) {
+                    loadTriggerVastDiffer.push(loadTriggerVast(_mastTriggers[i]));
+                }
+
+                Q.all(loadTriggerVastDiffer).then(function() {
+                    _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
+                    _eventBus.dispatchEvent({
+                        type: "mastLoaded",
+                        data: {}
+                    });
+                    _createCues();
+                    return;
+                });
+            }
+        },
+
+        _parseMastFile_old = function(mastContent, mastBaseUrl) {
+
+            _mastTriggers = _mastParser.parse(mastContent);
+            if (_mastTriggers !== []) {
                 // here goes the code parsing the triggers'sources if in vast format
 
                 var vastFileContent;
@@ -179,7 +245,10 @@ AdsPlayer.AdsPlayerController = function() {
                         // we return;
                         _eventBus.removeEventListener('vastFileLoaded', parseVast);
                         _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
-                        _eventBus.dispatchEvent({type:"mastLoaded",data :{}});
+                        _eventBus.dispatchEvent({
+                            type: "mastLoaded",
+                            data: {}
+                        });
                         _createCues();
                         return;
                     }
@@ -218,7 +287,6 @@ AdsPlayer.AdsPlayerController = function() {
             }
         },
 
-
         _onError = function(e) {
             _error = e.data;
         },
@@ -227,7 +295,7 @@ AdsPlayer.AdsPlayerController = function() {
             _warning = e.data;
         },
 
-        _onAdEnded = function(/*msg*/) {
+        _onAdEnded = function( /*msg*/ ) {
             /*if (!msg) {
                 msg = 'ad video ended';
             }
@@ -238,7 +306,10 @@ AdsPlayer.AdsPlayerController = function() {
                 _mainVideo.removeEventListener("playing", _onPlaying);
 
                 _debug.log('no more Ads to Play : dispatch "adEnd" towards the html Player');
-                _eventBus.dispatchEvent({type:"adEnd",data :{}});
+                _eventBus.dispatchEvent({
+                    type: "adEnd",
+                    data: {}
+                });
                 _adsMediaPlayer.show(false);
                 _debug.log('play main video');
                 _mainVideo.play();
@@ -254,8 +325,8 @@ AdsPlayer.AdsPlayerController = function() {
             if (_listVastAds.length > 0) {
                 var medias = _listVastAds.shift();
                 _adsMediaPlayer.playVideo(medias);
-        }
-    };
+            }
+        };
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -294,10 +365,13 @@ AdsPlayer.AdsPlayerController = function() {
 
             _fileLoader.load(url).then(function(result) {
                 _debug.log("MAST file loaded");
-                _parseMastFile(result.response, /*result.baseUrl*/"http://2is7server2.rd.francetelecom.com");
+                _parseMastFile(result.response, /*result.baseUrl*/ "http://2is7server2.rd.francetelecom.com");
                 deferred.resolve();
             }, function(error) {
-                _({type: "error", data: error});
+                _({
+                    type: "error",
+                    data: error
+                });
                 deferred.reject();
             });
 
