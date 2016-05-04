@@ -26,6 +26,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         _adsContainer = null,
         _eventBus = AdsPlayer.EventBus.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
+        _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
 
 
         // functions
@@ -80,13 +81,12 @@ AdsPlayer.AdsMediaPlayer = function() {
         },
 
         _onError = function(e) {
-            var error = e.data;
+           _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_MEDIA_FAILED, "Failed to load media file", e.target);
             if (_medias.length) {
                 _playMedia();
             } else {
                 adsVideoPlayer.removeEventListener("error", _onError);
-                var event = new CustomEvent('aborted');
-                adsVideoPlayer.dispatchEvent(event);
+                _eventBus.dispatchEvent({type:"adEnded",data :{}});
             }
         },
 
