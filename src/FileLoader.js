@@ -121,16 +121,15 @@ AdsPlayer.FileLoader = function() {
                 } else if (request.responseXML === null) {
                     // status not useful
                     deferred.reject({
-                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_NOTXML,
+                        name: AdsPlayer.ErrorHandler.DOWNLOAD_ERR_NOTXML,
                         message: "the downloaded file format is not xml",
                         data: {
-                            url: url,
-                            status: request.status
+                            url: url
                         }
                     });
                 } else {
                     deferred.reject({
-                        name: AdsPlayer.ErrorHandler.prototype.DOWNLOAD_ERR_FILES,
+                        name: AdsPlayer.ErrorHandler.DOWNLOAD_ERR_FILES,
                         message: "Failed to download file",
                         data: {
                             url: url,
