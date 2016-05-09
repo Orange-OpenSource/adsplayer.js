@@ -38,36 +38,6 @@ AdsPlayer = function(adsContainer) {
 
         _onWarning = function(e) {
             _warning = e.data;
-        };
-
-    /////////// INITIALIZATION
-
-    /**
-     * Initialize the AdsPlayer.
-     * @method init
-     * @access public
-     * @memberof AdsPlayer#
-     * @param {Object} player - the MediaPlayer
-     * @param {function} callback - the callback function to invoke when initialization is done
-     */
-    var _init = function(player, callback) {
-            _adsPlayerController = new AdsPlayer.AdsPlayerController();
-            _adsPlayerController.init(player, _adsContainer);
-            _eventBus.addEventListener('error', _onError);
-            _eventBus.addEventListener('warning', _onWarning);
-
-            callback();
-        },
-
-        /**
-         * Returns the version of the Ads player.
-         * @method getVersion
-         * @access public
-         * @memberof AdsPlayer#
-         * @return {string} the version of the Ads player
-         */
-        _getVersion = function() {
-            return VERSION;
         },
 
         /**
@@ -83,38 +53,61 @@ AdsPlayer = function(adsContainer) {
             } else {
                 return 'Not a builded version';
             }
-        },
+        };
 
-        /////////// ERROR/WARNING
+    return {
+        ///////////////////////////////////////////////////////////////////////////////////////////////
+        ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+
+        // Plugin API
 
         /**
-         * Returns the Error object for the most recent error
+         * Returns the plugin name.
+         * @method getName
          * @access public
          * @memberof AdsPlayer#
-         * @return {object} the Error object for the most recent error, or null if there has not been an error
+         * @return {string} the plugin name
          */
-        _getError = function() {
-            return _error;
+        getName: function() {
+            return NAME;
         },
 
         /**
-         * Returns the Warning object for the most recent warning
+         * Returns the plugin version.
+         * @method getVersion
          * @access public
          * @memberof AdsPlayer#
-         * @return {object} the Warning object for the most recent warning, or null if there has not been a warning
+         * @return {string} the plugin version
          */
-        _getWarning = function() {
-            return _warning;
+        getVersion: function() {
+            return VERSION;
         },
 
         /**
-         * Load/open a stream.
+         * Initialize the plugin.
+         * @method init
+         * @access public
+         * @memberof AdsPlayer#
+         * @param {Object} player - the MediaPlayer
+         * @param {function} callback - the callback function to invoke when initialization is done
+         */
+        init: function(player, callback) {
+            _adsPlayerController = new AdsPlayer.AdsPlayerController();
+            _adsPlayerController.init(player, _adsContainer);
+            _eventBus.addEventListener('error', _onError);
+            _eventBus.addEventListener('warning', _onWarning);
+
+            callback();
+        },
+
+        /**
+         * This method is invoked when a new stream is to be loaded/opened.
          * @method load
          * @access public
          * @memberof AdsPlayer#
          * @param {object} stream - the stream contaning all stream informations (url, protData, mastUrl)
          */
-        _load = function(stream, callback) {
+        load: function(stream, callback) {
             if (stream.mastUrl) {
                 _adsPlayerController.load(stream.mastUrl).then(function () {
                     callback();
@@ -127,25 +120,27 @@ AdsPlayer = function(adsContainer) {
         },
 
         /**
-         * Stops Ads player.
-         * @method reset
+         * This method is invoked when the current stream is to be stopped.
+         * @method stop
          * @access public
          * @memberof AdsPlayer#
          */
-        _stop = function() {
+        stop: function() {
             _adsPlayerController.stop();
         },
 
         /**
-         * Stops and resets the Ads player.
+         * This method is invoked when the player is to be reset.
          * @method reset
          * @access public
          * @memberof AdsPlayer#
          */
-        _reset = function() {
+        reset: function() {
             _adsPlayerController.reset();
         },
 
+
+        // AdsPlayer additionnal API
 
         /**
          * Registers a listener on the specified event.
@@ -161,7 +156,7 @@ AdsPlayer = function(adsContainer) {
          * @param {callback} listener - the callback which is called when an event of the specified type occurs
          * @param {boolean} useCapture - see HTML DOM addEventListener() method specification
          */
-        _addEventListener = function(type, listener, useCapture) {
+        addEventListener: function(type, listener, useCapture) {
             _eventBus.addEventListener(type, listener, useCapture);
         },
 
@@ -174,29 +169,29 @@ AdsPlayer = function(adsContainer) {
          * @param {string} type - the event type on which the listener was registered
          * @param {callback} listener - the callback which was registered to the event type
          */
-        _removeEventListener = function(type, listener) {
+        removeEventListener: function(type, listener) {
             _eventBus.removeEventListener(type, listener);
-        };
-
-    return {
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
-
-        // Plugin API
-        getName: function() {
-            return NAME;
         },
-        getVersion: _getVersion,
-        init: _init,
-        load: _load,
-        stop: _stop,
-        reset: _reset,
 
-        addEventListener: _addEventListener,
-        removeEventListener: _removeEventListener,
-        getBuildDate: _getBuildDate,
-        getError: _getError,
-        getWarning: _getWarning
+        /**
+         * Returns the Error object for the most recent error
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {object} the Error object for the most recent error, or null if there has not been an error
+         */
+        getError: function() {
+            return _error;
+        },
+
+        /**
+         * Returns the Warning object for the most recent warning
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {object} the Warning object for the most recent warning, or null if there has not been a warning
+         */
+        getWarning: function() {
+            return _warning;
+        }
     };
 };
 
