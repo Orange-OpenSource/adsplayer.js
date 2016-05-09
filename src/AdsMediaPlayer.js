@@ -165,11 +165,9 @@ AdsPlayer.AdsMediaPlayer = function() {
     return {
         init: _init,
         isPlayingAds: _isPlayingAds,
-        createVideoElt: _createVideoElt,
         playVideo: _playVideo,
         addlistener: _addlistener,
-        show: _show,
-        createImageElt: _createImageElt
+        show: _show
     };
 };
 
