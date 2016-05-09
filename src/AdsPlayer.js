@@ -55,9 +55,10 @@ AdsPlayer = function(adsContainer) {
             }
         };
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+
     return {
-        ///////////////////////////////////////////////////////////////////////////////////////////////
-        ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
         // Plugin API
 
@@ -84,7 +85,7 @@ AdsPlayer = function(adsContainer) {
         },
 
         /**
-         * Initialize the plugin.
+         * Initializes the plugin.
          * @method init
          * @access public
          * @memberof AdsPlayer#
@@ -174,7 +175,7 @@ AdsPlayer = function(adsContainer) {
         },
 
         /**
-         * Returns the Error object for the most recent error
+         * Returns the Error object for the most recent error.
          * @access public
          * @memberof AdsPlayer#
          * @return {object} the Error object for the most recent error, or null if there has not been an error
@@ -184,7 +185,7 @@ AdsPlayer = function(adsContainer) {
         },
 
         /**
-         * Returns the Warning object for the most recent warning
+         * Returns the Warning object for the most recent warning.
          * @access public
          * @memberof AdsPlayer#
          * @return {object} the Warning object for the most recent warning, or null if there has not been a warning
