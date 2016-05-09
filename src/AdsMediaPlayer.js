@@ -50,14 +50,17 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsVideoPlayer.style.left = 0;
                 adsVideoPlayer.style.width = '100%';
                 _adsContainer.appendChild(adsVideoPlayer);
-                adsVideoPlayer.addEventListener("ended", function(){
-                    _eventBus.dispatchEvent({type:"adEnded",data :{}});
+                adsVideoPlayer.addEventListener("ended", function() {
+                    _eventBus.dispatchEvent({
+                        type: "adEnded",
+                        data: {}
+                    });
                 });
             }
         },
 
         _createImageElt = function() {
-            if (adsImageNode  === null) {
+            if (adsImageNode === null) {
                 adsImageNode = document.createElement('img');
                 adsImageNode.autoplay = false;
                 adsImageNode.id = 'adsImageNode';
@@ -81,29 +84,30 @@ AdsPlayer.AdsMediaPlayer = function() {
         },
 
         _onError = function(e) {
-           _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_MEDIA_FAILED, "Failed to load media file", e.target);
+            _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_MEDIA_FAILED, "Failed to load media file", e.target);
             if (_medias.length) {
                 _playMedia();
             } else {
                 adsVideoPlayer.removeEventListener("error", _onError);
-                _eventBus.dispatchEvent({type:"adEnded",data :{}});
+                _eventBus.dispatchEvent({
+                    type: "adEnded",
+                    data: {}
+                });
             }
         },
 
-        _onVideoClick = function () {
+        _onVideoClick = function() {
             var url = _medias.clickThrough;
             if (url) {
-                try{
-                    window.open(url,"Ads Windows");
-                }
-                catch (e)
-                {
-                    throw(e);
+                try {
+                    window.open(url, "Ads Windows");
+                } catch (e) {
+                    throw (e);
                 }
             }
         },
 
-        _supportedMedia = function (element, codec) {
+        _supportedMedia = function(element, codec) {
             "use strict";
 
             if (!(element instanceof HTMLMediaElement)) {
@@ -116,20 +120,23 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         _playMedia = function() {
             if (_medias.length) {
-               var time = _medias.duration;
+                var time = _medias.duration;
                 var media = _medias.shift();
 
                 if ((media.type === "image/jpeg") || (media.type === "image/jpg")) {
                     adsImageNode.visibility = "visible";
 
                     adsImageNode.src = media.uri;
-                    setTimeout(function(){
+                    setTimeout(function() {
                         adsImageNode.src = '';
                         adsImageNode.visibility = "hidden";
-                        _eventBus.dispatchEvent({type:"adEnded",data :{}});
-                    }, time*1000);
+                        _eventBus.dispatchEvent({
+                            type: "adEnded",
+                            data: {}
+                        });
+                    }, time * 1000);
 
-                      //  adsVideoPlayer.load(); // to do
+                    //  adsVideoPlayer.load(); // to do
                 } else {
                     if (_supportedMedia(adsVideoPlayer, media.type)) {
                         adsVideoPlayer.src = media.uri;
@@ -147,41 +154,39 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         },
 
-    _playVideo = function(medias) {
-        _medias = medias;
-        adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
-        adsVideoPlayer.addEventListener("error", _onError);
-        adsVideoPlayer.addEventListener("click", _onVideoClick);
-        adsImageNode.addEventListener("click", _onVideoClick);
-        _playMedia();
-    };
+        _playVideo = function(medias) {
+            _medias = medias;
+            adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
+            adsVideoPlayer.addEventListener("error", _onError);
+            adsVideoPlayer.addEventListener("click", _onVideoClick);
+            adsImageNode.addEventListener("click", _onVideoClick);
+            _playMedia();
+        },
 
-    _show = function(show) {
-        if (adsVideoPlayer) {
-            adsVideoPlayer.style.visibility = show ? 'visible' : 'hidden';
-        }
-     };
+        _show = function(show) {
+            if (adsVideoPlayer) {
+                adsVideoPlayer.style.visibility = show ? 'visible' : 'hidden';
+            }
+        },
 
-    _reset = function() {
-        if (adsImageNode) {
-             adsVideoPlayer.src = '';
-            adsImageNode.visibility ='hidden';
-        }
-        adsVideoPlayer.pause();
-        adsVideoPlayer.src = '';
-        _show(false);
-    };
+        _reset = function() {
+            if (adsImageNode) {
+                adsVideoPlayer.src = '';
+                adsImageNode.visibility = 'hidden';
+            }
+            adsVideoPlayer.pause();
+            adsVideoPlayer.src = '';
+            _show(false);
+        };
 
 
     return {
         init: _init,
         reset: _reset,
         isPlayingAds: _isPlayingAds,
-        createVideoElt: _createVideoElt,
         playVideo: _playVideo,
         addlistener: _addlistener,
-        show: _show,
-        createImageElt: _createImageElt
+        show: _show
     };
 };
 
