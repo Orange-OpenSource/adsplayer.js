@@ -217,10 +217,26 @@ AdsPlayer.utils = {};
 /////////// EVENTS
 
 /**
+ * The 'adStart' event is fired when the playback of an ad is starting.
+ * When the 'adStart' event is fired, the application shall hide the main player component.
+ *
+ * @event AdsPlayer#adStart
+ * @param {object} event - the event
+ */
+
+/**
+ * The 'adStop' event is fired when the playback of an ad has ended.
+ * When the 'adStop' event is fired, the application shall show the main player component.
+ *
+ * @event AdsPlayer#adStop
+ * @param {object} event - the event
+ */
+
+/**
  * The error event is fired when an error occurs.
  * When the error event is fired, the application shall stop the player.
  *
- * @event AdsPlayerController#error
+ * @event AdsPlayer#error
  * @param {object} event - the event
  * @param {object} event.type - the event type ('error')
  * @param {object} event.data - the event data
@@ -232,7 +248,7 @@ AdsPlayer.utils = {};
 /**
  * The warning event is fired when a warning occurs.
  *
- * @event AdsPlayerController#warning
+ * @event AdsPlayer#warning
  * @param {object} event - the event
  * @param {object} event.type - the event type ('warning')
  * @param {object} event.data - the event data
