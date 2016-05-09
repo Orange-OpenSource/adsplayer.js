@@ -330,6 +330,7 @@ AdsPlayer.AdsPlayerController = function() {
 
         _stop = function() {
             _reset();
+            _adsMediaPlayer.reset();
         };
 
     return {

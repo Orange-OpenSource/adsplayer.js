@@ -160,10 +160,22 @@ AdsPlayer.AdsMediaPlayer = function() {
         if (adsVideoPlayer) {
             adsVideoPlayer.style.visibility = show ? 'visible' : 'hidden';
         }
+     };
+
+    _reset = function() {
+        if (adsImageNode) {
+             adsVideoPlayer.src = '';
+            adsImageNode.visibility ='hidden';
+        }
+        adsVideoPlayer.pause();
+        adsVideoPlayer.src = '';
+        _show(false);
     };
+
 
     return {
         init: _init,
+        reset: _reset,
         isPlayingAds: _isPlayingAds,
         createVideoElt: _createVideoElt,
         playVideo: _playVideo,
