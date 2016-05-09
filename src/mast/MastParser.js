@@ -15,8 +15,8 @@
 //AdsPlayer.mast.MastParser = function () {
 AdsPlayer.mast.MastParser = function() {
     "use strict";
-    var _parser = new AdsPlayer.utils.DOMParser();
-    var that = this;
+    var _parser = new AdsPlayer.utils.DOMParser(),
+        _debug = AdsPlayer.Debug.getInstance();
 
 
     var _getTriggersList = function(mastDom) {
@@ -42,7 +42,7 @@ AdsPlayer.mast.MastParser = function() {
                 triggers = [];
 
             for (i = 0; i < triggersList.length; i++) {
-                console.log('trigger #' + i + ':');
+                _debug.log('trigger #' + i + ':');
                 var trigger = new AdsPlayer.mast.model.Trigger();
 
                 trigger.id = _parser.getAttributeValue(triggersList[i], 'id');
@@ -57,8 +57,8 @@ AdsPlayer.mast.MastParser = function() {
                 var sources = _getTriggerValues(triggersList[i], 'sources', 'source');
                 trigger.sources = _getSources(sources);
 
-                console.log(trigger);
-                console.log('');
+                _debug.log(trigger);
+                _debug.log('');
                 triggers.push(trigger);
             }
 

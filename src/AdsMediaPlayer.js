@@ -79,7 +79,7 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         _isLoaded = function() {
             adsVideoPlayer.play();
-            console.log('Play ad : ' + _videoUrl);
+            _debug.log('Play ad : ' + adsVideoPlayer.src);
             adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
         },
 

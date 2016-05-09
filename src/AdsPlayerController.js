@@ -64,7 +64,7 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _onPlaying = function() {
-            console.log('pause main video');
+            _debug.log('pause main video');
             _mainVideo.removeEventListener("playing", _onPlaying);
             _mainVideo.pause();
         },
@@ -113,7 +113,7 @@ AdsPlayer.AdsPlayerController = function() {
             }
 
             if (preRoll) {
-                console.log('PreRoll');
+                _debug.log('PreRoll');
                 _adsMediaPlayer.show(true);
                 _eventBus.dispatchEvent({
                     type: "adStart",
