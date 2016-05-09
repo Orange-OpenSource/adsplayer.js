@@ -161,13 +161,13 @@ AdsPlayer.AdsMediaPlayer = function() {
             adsVideoPlayer.addEventListener("click", _onVideoClick);
             adsImageNode.addEventListener("click", _onVideoClick);
             _playMedia();
-        };
+        },
 
-    _show = function(show) {
-        if (adsVideoPlayer) {
-            adsVideoPlayer.style.visibility = show ? 'visible' : 'hidden';
-        }
-    };
+        _show = function(show) {
+            if (adsVideoPlayer) {
+                adsVideoPlayer.style.visibility = show ? 'visible' : 'hidden';
+            }
+        };
 
     return {
         init: _init,
