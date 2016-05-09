@@ -230,14 +230,6 @@ AdsPlayer.AdsPlayerController = function() {
             return deferred.promise;
         },
 
-        _onError = function(e) {
-            _error = e.data;
-        },
-
-        _onWarning = function(e) {
-            _warning = e.data;
-        },
-
         _onAdEnded = function( /*msg*/ ) {
             /*if (!msg) {
                 msg = 'ad video ended';
@@ -343,7 +335,7 @@ AdsPlayer.AdsPlayerController = function() {
     return {
         init: _init,
         stop: _stop,
-        load: _load.bind(this)
+        load: _load
     };
 
 };

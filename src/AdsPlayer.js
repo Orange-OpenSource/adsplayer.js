@@ -51,13 +51,13 @@ AdsPlayer = function(adsContainer) {
      * @param {function} callback - the callback function to invoke when initialization is done
      */
     var _init = function(player, callback) {
-        _adsPlayerController = new AdsPlayer.AdsPlayerController();
-        _adsPlayerController.init(player, _adsContainer);
-        _eventBus.addEventListener('error', _onError);
-        _eventBus.addEventListener('warning', _onWarning);
+            _adsPlayerController = new AdsPlayer.AdsPlayerController();
+            _adsPlayerController.init(player, _adsContainer);
+            _eventBus.addEventListener('error', _onError);
+            _eventBus.addEventListener('warning', _onWarning);
 
-        callback();
-    },
+            callback();
+        },
 
         /**
          * Returns the version of the Ads player.
@@ -107,76 +107,76 @@ AdsPlayer = function(adsContainer) {
             return _warning;
         },
 
-    /**
-     * Load/open a stream.
-     * @method load
-     * @access public
-     * @memberof AdsPlayer#
-     * @param {object} stream - the stream contaning all stream informations (url, protData, mastUrl)
-     */
-    _load = function(stream, callback) {
-        if (stream.mastUrl) {
-            _adsPlayerController.load(stream.mastUrl).then(function () {
+        /**
+         * Load/open a stream.
+         * @method load
+         * @access public
+         * @memberof AdsPlayer#
+         * @param {object} stream - the stream contaning all stream informations (url, protData, mastUrl)
+         */
+        _load = function(stream, callback) {
+            if (stream.mastUrl) {
+                _adsPlayerController.load(stream.mastUrl).then(function () {
+                    callback();
+                }, function () {
+                    callback();
+                });
+            } else {
                 callback();
-            }, function () {
-                callback();
-            });
-        } else {
-            callback();
-        }
-    },
+            }
+        },
 
-    /**
-     * Stops Ads player.
-     * @method reset
-     * @access public
-     * @memberof AdsPlayer#
-     */
-    _stop = function() {
-        _adsPlayerController.stop();
-    },
+        /**
+         * Stops Ads player.
+         * @method reset
+         * @access public
+         * @memberof AdsPlayer#
+         */
+        _stop = function() {
+            _adsPlayerController.stop();
+        },
 
-    /**
-     * Stops and resets the Ads player.
-     * @method reset
-     * @access public
-     * @memberof AdsPlayer#
-     */
-    _reset = function() {
-        _adsPlayerController.reset();
-    },
+        /**
+         * Stops and resets the Ads player.
+         * @method reset
+         * @access public
+         * @memberof AdsPlayer#
+         */
+        _reset = function() {
+            _adsPlayerController.reset();
+        },
 
 
-    /**
-     * Registers a listener on the specified event.
-     * The possible event types are:
-     * <li>'error' (see [error]{@link AdsPlayer#event:error} event specification)
-     * <li>'warning' (see [warning]{@link AdsPlayer#event:warning} event specification)
-     * <li>'adStart' (see [adStart]{@link AdsPlayer#event:adStart} event specification)
-     * <li>'adEnd' (see [adEnd]{@link AdsPlayer#event:adEnd} event specification)
-     * @method addEventListener
-     * @access public
-     * @memberof AdsPlayer#
-     * @param {string} type - the event type for listen to
-     * @param {callback} listener - the callback which is called when an event of the specified type occurs
-     * @param {boolean} useCapture - see HTML DOM addEventListener() method specification
-     */
-    _addEventListener = function(type, listener, useCapture) {
-        _eventBus.addEventListener(type, listener, useCapture);
-    },
+        /**
+         * Registers a listener on the specified event.
+         * The possible event types are:
+         * <li>'error' (see [error]{@link AdsPlayer#event:error} event specification)
+         * <li>'warning' (see [warning]{@link AdsPlayer#event:warning} event specification)
+         * <li>'adStart' (see [adStart]{@link AdsPlayer#event:adStart} event specification)
+         * <li>'adEnd' (see [adEnd]{@link AdsPlayer#event:adEnd} event specification)
+         * @method addEventListener
+         * @access public
+         * @memberof AdsPlayer#
+         * @param {string} type - the event type for listen to
+         * @param {callback} listener - the callback which is called when an event of the specified type occurs
+         * @param {boolean} useCapture - see HTML DOM addEventListener() method specification
+         */
+        _addEventListener = function(type, listener, useCapture) {
+            _eventBus.addEventListener(type, listener, useCapture);
+        },
 
-    /**
-     * Unregisters the listener previously registered with the addEventListener() method.
-     * @method removeEventListener
-     * @access public
-     * @memberof AdsPlayer#
-     * @see [addEventListener]{@link AdsPlayer#addEventListener}
-     * @param {string} type - the event type on which the listener was registered
-     * @param {callback} listener - the callback which was registered to the event type
-     */
-    _removeEventListener = function(type, listener) {
-        _eventBus.removeEventListener(type, listener);
-    };
+        /**
+         * Unregisters the listener previously registered with the addEventListener() method.
+         * @method removeEventListener
+         * @access public
+         * @memberof AdsPlayer#
+         * @see [addEventListener]{@link AdsPlayer#addEventListener}
+         * @param {string} type - the event type on which the listener was registered
+         * @param {callback} listener - the callback which was registered to the event type
+         */
+        _removeEventListener = function(type, listener) {
+            _eventBus.removeEventListener(type, listener);
+        };
 
     return {
         ///////////////////////////////////////////////////////////////////////////////////////////////
