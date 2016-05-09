@@ -57,8 +57,6 @@ AdsPlayer.mast.MastParser = function() {
                 var sources = _getTriggerValues(triggersList[i], 'sources', 'source');
                 trigger.sources = _getSources(sources);
 
-                _debug.log(trigger);
-                _debug.log('');
                 triggers.push(trigger);
             }
 
