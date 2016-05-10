@@ -173,13 +173,31 @@ AdsPlayer.AdsMediaPlayer = function() {
         },
 
         _reset = function() {
-            if (adsImageNode) {
-                adsVideoPlayer.src = '';
+            if(adsImageTimeOut){
+                clearTimeout (adsImageTimeOut);
+                adsImageTimeOut = null;
+                adsImageNode.src = '';
                 adsImageNode.visibility = 'hidden';
+                _eventBus.dispatchEvent({
+                    type: "adEnded",
+                    data: {}
+                });
+                _show(false);
             }
-            adsVideoPlayer.pause();
-            adsVideoPlayer.src = '';
-            _show(false);
+
+            if(!adsVideoPlayer.paused){
+                adsVideoPlayer.pause();
+                adsVideoPlayer.currentTime = 0;
+                adsVideoPlayer.src = '';
+                _show(false);
+                _eventBus.dispatchEvent({
+                    type: "adEnded",
+                    data: {}
+                });
+               adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
+               adsVideoPlayer.removeEventListener("error", _onError);
+
+            }            
         };
 
 
