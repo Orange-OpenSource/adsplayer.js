@@ -21,6 +21,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         playingAds = false,
         adsVideoPlayer = null,
         adsImageNode = null,
+        adsImageTimeOut = null,
         _medias = [],
         _videoUrl = '',
         _adsContainer = null,
@@ -125,11 +126,11 @@ AdsPlayer.AdsMediaPlayer = function() {
 
                 if ((media.type === "image/jpeg") || (media.type === "image/jpg")) {
                     adsImageNode.visibility = "visible";
-
                     adsImageNode.src = media.uri;
-                    setTimeout(function() {
+                    adsImageTimeOut = setTimeout(function() {
                         adsImageNode.src = '';
                         adsImageNode.visibility = "hidden";
+                        adsImageTimeOut = null;
                         _eventBus.dispatchEvent({
                             type: "adEnded",
                             data: {}
