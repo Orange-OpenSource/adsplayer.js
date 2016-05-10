@@ -52,6 +52,8 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsVideoPlayer.style.width = '100%';
                 _adsContainer.appendChild(adsVideoPlayer);
                 adsVideoPlayer.addEventListener("ended", function() {
+                    adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
+                    adsVideoPlayer.removeEventListener("error", _onError);
                     _eventBus.dispatchEvent({
                         type: "adEnded",
                         data: {}
