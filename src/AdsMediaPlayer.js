@@ -71,7 +71,8 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsImageNode.style.top = 0;
                 adsImageNode.style.left = 0;
                 adsImageNode.visibility = "hidden";
-                //adsImageNode.style.width = '100%';
+                adsImageNode.style.height = '100%';
+                adsImageNode.style.width = '100%';
                 _adsContainer.appendChild(adsImageNode);
             }
         },
