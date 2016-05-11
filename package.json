@@ -1,6 +1,6 @@
 {
   "name": "adsplayer.js",
-  "version": "0.0.1_dev",
+  "version": "0.0.1",
   "description": "plugin used to play advertising in hasplayer.js",
   "directories": {
     "doc": "doc",
