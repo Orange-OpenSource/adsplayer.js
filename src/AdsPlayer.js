@@ -86,13 +86,13 @@ AdsPlayer = function(adsContainer) {
 
         /**
          * [getBuildDate description]
-         * @type {[type]}
+         * @type {string}
          */
         getBuildDate: _getBuildDate,
 
         /**
          * [getVersionFull description]
-         * @return {[type]} [description]
+         * @return {string} [description]
          */
         getVersionFull: function () {
             if (GIT_TAG.indexOf("@@") === -1) {
