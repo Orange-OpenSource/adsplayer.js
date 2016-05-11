@@ -128,7 +128,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                 var time = _medias.duration;
                 var media = _medias.shift();
 
-                if ((time>0) && ((media.type === "image/jpeg") || (media.type === "image/png") ||  (media.type === "image/gif")) {
+                if ((time>0) && ((media.type === "image/jpeg") || (media.type === "image/png") ||  (media.type === "image/gif"))) {
                     adsImageNode.visibility = "visible";
                     adsImageNode.src = media.uri;
                     adsImageTimeOut = setTimeout(function() {
