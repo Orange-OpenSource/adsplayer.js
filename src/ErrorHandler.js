@@ -84,5 +84,6 @@ AdsPlayer.ErrorHandler.DOWNLOAD_ERR_NOT_XML = "DOWNLOAD_ERR_NOT_XML";
 AdsPlayer.ErrorHandler.LOAD_VAST_FAILED = "LOAD_VAST_FAILED";
 
 // Media Player errors
+AdsPlayer.ErrorHandler.NO_VALID_MEDIA_FOUND = "NO_VALID_MEDIA_FOUND";
 AdsPlayer.ErrorHandler.LOAD_MEDIA_FAILED = "LOAD_MEDIA_FAILED";
 

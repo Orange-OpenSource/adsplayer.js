@@ -128,7 +128,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                 var time = _medias.duration;
                 var media = _medias.shift();
 
-                if ((time>0) && ((media.type === "image/jpeg") || (media.type === "image/png") ||  (media.type === "image/gif"))) {
+                if ((time > 0) && ((media.type === "image/jpeg") || (media.type === "image/png") || (media.type === "image/gif"))) {
                     adsImageNode.visibility = "visible";
                     adsImageNode.src = media.uri;
                     adsImageTimeOut = setTimeout(function() {
@@ -153,8 +153,11 @@ AdsPlayer.AdsMediaPlayer = function() {
                     }
                 }
             } else {
-                var event = new CustomEvent('aborted');
-                adsVideoPlayer.dispatchEvent(event);
+                _errorHandler.sendWarning(AdsPlayer.ErrorHandler.NO_VALID_MEDIA_FOUND, "Failed to found a valid image or video", null);
+                _eventBus.dispatchEvent({
+                    type: "adEnded",
+                    data: {}
+                });
             }
 
         },
@@ -175,8 +178,8 @@ AdsPlayer.AdsMediaPlayer = function() {
         },
 
         _reset = function() {
-            if(adsImageTimeOut){
-                clearTimeout (adsImageTimeOut);
+            if (adsImageTimeOut) {
+                clearTimeout(adsImageTimeOut);
                 adsImageTimeOut = null;
                 adsImageNode.src = '';
                 adsImageNode.visibility = 'hidden';
@@ -187,7 +190,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                 _show(false);
             }
 
-            if(!adsVideoPlayer.paused){
+            if (!adsVideoPlayer.paused) {
                 adsVideoPlayer.pause();
                 adsVideoPlayer.currentTime = 0;
                 adsVideoPlayer.src = '';
@@ -196,10 +199,10 @@ AdsPlayer.AdsMediaPlayer = function() {
                     type: "adEnded",
                     data: {}
                 });
-               adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
-               adsVideoPlayer.removeEventListener("error", _onError);
+                adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
+                adsVideoPlayer.removeEventListener("error", _onError);
 
-            }            
+            }
         };
 
 
