@@ -96,13 +96,14 @@ gulp.task('build', ['clean', 'package-info', 'lint'], function() {
         .pipe(gulp.dest(config.distDir));
 });
  
-gulp.task('clean', function() {
-    return function(done) {
-        del([config.distDir], {
+gulp.task('clean', function(done) {
+    return (function() {
+        del([config.distDir + '**/*'], {
             force: true,
             dot: true
-        }, done);
-    };
+        });
+        done();
+    })();
 });
 
 gulp.task('releases-notes', function() {
