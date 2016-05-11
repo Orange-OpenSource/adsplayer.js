@@ -12,7 +12,7 @@ var gulp = require('gulp'),
     pkg = require('../package.json'),
     source = require('vinyl-source-stream'),
     sources = require('./sources.json');
-    
+
 var comment = '<%= pkg.copyright %>\n\n/* Last build : <%= pkg.date %>_<%= pkg.time %> / git revision : <%= pkg.revision %> */\n\n';
 
 var config = {
@@ -54,7 +54,7 @@ gulp.task('umd_test', function() {
 });
 
 /*** UMD TEST ****/
- 
+
 gulp.task('package-info', function() {
     git.short(function(str) {
         pkg.revision = str;
@@ -73,6 +73,7 @@ gulp.task('lint', function() {
 });
 
 gulp.task('build', ['clean', 'package-info', 'lint'], function() {
+    sourcesGlob = sources.libs.concat(sourcesGlob);
     return gulp.src(sourcesGlob)
         .pipe($.concat(pkg.name))
         .pipe($.umd({
@@ -95,7 +96,7 @@ gulp.task('build', ['clean', 'package-info', 'lint'], function() {
         .pipe($.rename(pkg.name.replace('.js', '.min.js')))
         .pipe(gulp.dest(config.distDir));
 });
- 
+
 gulp.task('clean', function(done) {
     return (function() {
         del([config.distDir + '**/*'], {

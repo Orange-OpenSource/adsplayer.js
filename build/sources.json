@@ -1,5 +1,9 @@
 {
     "default": [
+        "../src/AdsPlayer.js",
         "../src/**/*.js"
+    ],
+    "libs":[
+        "../lib/**/*"
     ]
 }

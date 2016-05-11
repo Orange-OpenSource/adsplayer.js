@@ -13,8 +13,9 @@
    root['<%= namespace %>'] = factory();
   }
 }(this, function () {
-  
-   var AdsPlayer = {};
+
+   var AdsPlayer = {},
+       Q;
 <%= contents %>
 return <%= namespace %>;
 }));
