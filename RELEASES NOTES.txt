@@ -1,4 +1,6 @@
-### Release Notes v1.0.0 (2016/05/11)
+### Release Notes v1.0.0 (2016/05/11) 
 * Based on Mast specification 0.9 and Vast specification 2.0
-* Implements preroll digital video advertising 
-* Support for image (jpeg) and/or video (mp4) ads
+* Implements preroll digital video advertising. Can play several successive ads supplied by one or several Vast.
+* Supports ads video format which can be handled by the browser like mp4
+* Supports also ads image formats jpeg, gif and png
+* Can consider the clickthrough link allowing user click on ad (video or image)
