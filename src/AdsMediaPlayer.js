@@ -115,7 +115,8 @@ AdsPlayer.AdsMediaPlayer = function() {
             "use strict";
 
             if (!(element instanceof HTMLMediaElement)) {
-                throw "element must be of type HTMLMediaElement.";
+                //throw "element must be of type HTMLMediaElement";
+                _debug.log('element must be of type HTMLMediaElement');
             }
 
             var canPlay = element.canPlayType(codec);
@@ -127,7 +128,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                 var time = _medias.duration;
                 var media = _medias.shift();
 
-                if ((media.type === "image/jpeg") || (media.type === "image/jpg")) {
+                if ((time>0) && ((media.type === "image/jpeg") || (media.type === "image/png") ||  (media.type === "image/gif")) {
                     adsImageNode.visibility = "visible";
                     adsImageNode.src = media.uri;
                     adsImageTimeOut = setTimeout(function() {

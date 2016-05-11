@@ -51,10 +51,9 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
 
 
         _getImpression = function(theInLineNode) {
+            var impressions = [];
             if (theInLineNode) {
-                var node,
-                    impressions = [],
-                    impressionNodes = parser.getChildNodes(theInLineNode, 'Impression'),
+                var impressionNodes = parser.getChildNodes(theInLineNode, 'Impression'),
                     i;
                 if (impressionNodes) {
                     for (i = 0; i < impressionNodes.length; i++) {
@@ -63,31 +62,27 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                         impression.id = parser.getAttributeValue(impressionNodes[i], 'id');
                         impressions.push(impression);
                     }
-                    return impressions;
                 }
             }
-            return [];
+            return impressions;
         },
 
         _getExtentions = function(theInLineNode) {
+            var extensions = [];
             if (theInLineNode) {
-                var node,
-                    extensions = [],
-                    i,
+                var i,
                     extensionNodes = parser.getChildNodes(theInLineNode, 'Extensions');
                 if (extensionNodes) {
                     for (i = 0; i < extensionNodes.length; i++) {
                         var extension = new AdsPlayer.vast.model.Ad.Extensions();
                         extension.uri = _checkUri(parser.getNodeValue(extensionNodes[i]));
-                        // to do a function in DOMParser which can get the names of the attributes and then we get attributeValue by the function getAttributeValue
-                        //extension.id = parser.getAttributeValue(extensionNodes[l], 'id');
+                        // dor "other" It must add a function in DOMParser which can get the names of the attributes and then we get attributeValue by the function getAttributeValue
                         extension.other = '';
                         extensions.push(extension);
                     }
-                    return extensions;
                 }
             }
-            return [];
+            return extensions;
         },
         /*
     _getMediafiles = function() {
@@ -115,32 +110,31 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
 
         _getClickTracking = function(theVideoClicks) {
             var clickTrackings = [],
-                clickTracking = null,
                 i,
+                clickTracking,
                 clickTrackingsNode = parser.getChildNodes(theVideoClicks, 'ClickTracking');
             if (clickTrackingsNode) {
                 for (i = 0; i < clickTrackingsNode.length; i++) {
                     clickTracking = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking();
                     clickTracking.id = parser.getAttributeValue(clickTrackingsNode[i], 'id');
                     clickTracking.uri = _checkUri(parser.getNodeValue(clickTrackingsNode[i]));
+                    clickTrackings.push(clickTracking);
                 }
-                clickTrackings.push(clickTracking);
             }
             return clickTrackings;
         },
 
         _getCustomClick = function(theVideoClicks) {
             var customClicks = [],
-                customClick = null,
-                i,
+                i,customClick,
                 customClicksNode = parser.getChildNodes(theVideoClicks, 'CustomClick');
             if (customClicksNode) {
                 for (i = 0; i < customClicksNode.length; i++) {
                     customClick = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.CustomClick();
                     customClick.id = parser.getAttributeValue(customClicksNode[i], 'id');
                     customClick.uri = _checkUri(parser.getNodeValue(customClicksNode[i]));
+                    customClicks.push(customClick);
                 }
-                customClicks.push(customClick);
             }
             return customClicks;
         },
@@ -159,11 +153,12 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
         _getTrackingEvents = function(theLinear) {
             var trackingNode = parser.getChildNode(theLinear, 'TrackingEvents'),
                 trackingEvents = [],
+                TrackingEvent,
                 i;
             if (trackingNode) {
                 trackingNode = parser.getChildNodes(trackingNode, 'Tracking');
                 for (i = 0; i < trackingNode.length; i++) {
-                    var TrackingEvent = new AdsPlayer.vast.model.Ad.TrackingEvent();
+                    TrackingEvent = new AdsPlayer.vast.model.Ad.TrackingEvent();
                     TrackingEvent.event = parser.getAttributeValue(trackingNode[i], 'event');
                     TrackingEvent.uri = _checkUri(parser.getNodeValue(trackingNode[i]));
                     trackingEvents.push(TrackingEvent);
@@ -176,11 +171,12 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
         _getMediafiles = function(theLinear) {
             var mediaFilesNode = parser.getChildNode(theLinear, 'MediaFiles'),
                 mediaFiles = [],
+                mediaFile,
                 i = 0;
             if (mediaFilesNode) {
                 var mediaFileNode = parser.getChildNodes(mediaFilesNode, 'MediaFile');
                 for (i = 0; i < mediaFileNode.length; i++) {
-                    var mediaFile = new AdsPlayer.vast.model.Ad.Creative.MediaFile();
+                    mediaFile = new AdsPlayer.vast.model.Ad.Creative.MediaFile();
 
                     mediaFile.id = parser.getAttributeValue(mediaFileNode[i], 'id');
                     mediaFile.delivery = parser.getAttributeValue(mediaFileNode[i], 'delivery');
@@ -200,11 +196,10 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
 
         _getLinearObject = function(creative) {
             var linearNode = parser.getChildNode(creative, 'Linear'),
-                linear = new AdsPlayer.vast.model.Ad.Creative.Linear(),
-                node = null;
+                linear = new AdsPlayer.vast.model.Ad.Creative.Linear();
             if (linearNode) {
-                linear.duration =  _convertTime(((node = parser.getChildNode(linearNode, 'Duration')) ? node.textContent : ''));
-                linear.adParameters = ((node = parser.getChildNode(linearNode, 'AdParameters')) ? node.textContent : '');
+                linear.duration =  _convertTime(parser.getNodeValue(parser.getChildNode(linearNode, 'Duration')));
+                linear.adParameters = parser.getNodeValue(parser.getChildNode(linearNode, 'AdParameters'));
                 linear.mediaFiles = _getMediafiles(linearNode);
                 linear.trackingEvents = _getTrackingEvents(linearNode);
                 linear.videoClicks = _getVideoClicks(linearNode);
@@ -214,15 +209,14 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
         },
 
         _getCreatives = function(theInLineNode) {
+            var creatives = [],
+                creative,
+                creativeNodes = parser.getChildNodes(parser.getChildNode(theInLineNode, 'Creatives'), 'Creative'),
+                i;
             if (theInLineNode) {
-                var node,
-                    creatives = [],
-                    creativeNodes = parser.getChildNodes(parser.getChildNode(theInLineNode, 'Creatives'), 'Creative'),
-                    i;
-                //var creativeNodes = parser.getChildNode(theInLineNode, 'Creatives');
                 if (creativeNodes) {
                     for (i = 0; i < creativeNodes.length; i++) {
-                        var creative = new AdsPlayer.vast.model.Ad.Creative();
+                        creative = new AdsPlayer.vast.model.Ad.Creative();
                         creative.id = parser.getAttributeValue(creativeNodes[i], 'id');
                         creative.adId = parser.getAttributeValue(creativeNodes[i], 'AdID');
                         creative.sequence = parser.getAttributeValue(creativeNodes[i], 'sequence');
@@ -232,9 +226,8 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                         creatives.push(creative);
                     }
                 }
-                return creatives;
             }
-            return [];
+            return creatives;
         },
 
 
@@ -244,12 +237,9 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
 
             //CompanionAds 
             //nonLinearAds
-            var node,
-                j,
-                i;
-            //_createXmlTree(vastDom);
-            // VAST is the main node, it containes verstion (attribute) and list of Ad structure
-            var vast = new AdsPlayer.vast.model.Vast();
+            var j,
+                i,
+                vast = new AdsPlayer.vast.model.Vast();
             vast.version = parser.getAttributeValue(parser.getChildNode(vastDom, 'VAST'), 'version');
 
             // get Ad list to be associated to VAST
@@ -261,23 +251,23 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                 var inLine = new AdsPlayer.vast.model.Ad.InLine();
                 var inLineNode = parser.getChildNode(adsNode[i], 'InLine');
                 //Get all inLine attributes 
-                inLine.adSystem = ((node = parser.getChildNode(inLineNode, 'AdSystem')) ? node.textContent : '');
-                inLine.adTitle = ((node = parser.getChildNode(inLineNode, 'AdTitle')) ? node.textContent : '');
-                inLine.description = ((node = parser.getChildNode(inLineNode, 'Description')) ? node.textContent : '');
-                inLine.survey = ((node = parser.getChildNode(inLineNode, 'Survey')) ? node.textContent : '');
-                inLine.error = ((node = parser.getChildNode(inLineNode, 'Error')) ? node.textContent : '');
+                inLine.adSystem = parser.getNodeValue(parser.getChildNode(inLineNode, 'AdSystem'));
+                inLine.adTitle = parser.getNodeValue(parser.getChildNode(inLineNode, 'AdTitle'));
+                inLine.adTitle = parser.getNodeValue(parser.getChildNode(inLineNode, 'Description'));
+                inLine.adTitle = parser.getNodeValue(parser.getChildNode(inLineNode, 'Survey'));
+                inLine.adTitle = parser.getNodeValue(parser.getChildNode(inLineNode, 'Error'));
                 inLine.impression = _getImpression(inLineNode);
                 inLine.creatives = _getCreatives(inLineNode);
                 inLine.extentions = _getExtentions(inLineNode);
                 myAd.inLine = inLine;
                 vast.ads.push(myAd);
-            } 
+            }
 
             /* for this first version of vastParser we return only the list of ads and their mediafil {url, mimtype}.
             Othewise, for future versions, all vast object must be returned by this function like :
             return vast; 
             */
-
+            //console.log(vast);
             var listAds = [];
             for (i = 0; i < vast.ads.length; i++) {
                 for (j = 0; j < vast.ads[i].inLine.creatives.length; j++) {
