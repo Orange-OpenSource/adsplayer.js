@@ -85,6 +85,24 @@ AdsPlayer = function(adsContainer) {
         },
 
         /**
+         * [getBuildDate description]
+         * @type {[type]}
+         */
+        getBuildDate: _getBuildDate,
+
+        /**
+         * [getVersionFull description]
+         * @return {[type]} [description]
+         */
+        getVersionFull: function () {
+            if (GIT_TAG.indexOf("@@") === -1) {
+                return VERSION + '_' + GIT_TAG;
+            } else {
+                return VERSION;
+            }
+        },
+
+        /**
          * Initializes the plugin.
          * @method init
          * @access public
