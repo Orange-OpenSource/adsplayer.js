@@ -106,7 +106,8 @@ AdsPlayer.AdsMediaPlayer = function() {
                 try {
                     window.open(url, "Ads Windows");
                 } catch (e) {
-                    throw (e);
+                    //throw (e);
+                    _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNAVAILABLE_LINK, "Unvailable link ou inaccessible server", e.target);
                 }
             }
         },
@@ -127,28 +128,30 @@ AdsPlayer.AdsMediaPlayer = function() {
             if (_medias.length) {
                 var time = _medias.duration;
                 var media = _medias.shift();
-
-                if ((time > 0) && ((media.type === "image/jpeg") || (media.type === "image/png") || (media.type === "image/gif"))) {
-                    adsImageNode.visibility = "visible";
-                    adsImageNode.src = media.uri;
-                    adsImageTimeOut = setTimeout(function() {
-                        adsImageNode.src = '';
-                        adsImageNode.visibility = "hidden";
-                        adsImageTimeOut = null;
-                        _eventBus.dispatchEvent({
-                            type: "adEnded",
-                            data: {}
-                        });
-                    }, time * 1000);
-
-                    //  adsVideoPlayer.load(); // to do
+                if (media.type.indexOf('image/') != -1) {
+                    if ((media.type === "image/jpeg") || (media.type === "image/png") ||  (media.type === "image/gif")) {
+                        adsImageNode.visibility = "visible";
+                        adsImageNode.src = media.uri;
+                        adsImageTimeOut = setTimeout(function() {
+                            adsImageNode.src = '';
+                            adsImageNode.visibility = "hidden";
+                            adsImageTimeOut = null;
+                            _eventBus.dispatchEvent({
+                                type: "adEnded",
+                                data: {}
+                            });
+                        }, time * 1000);
+                    } else {
+                        _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE, "Unsupported image format", media.type);
+                         _playMedia();
+                    }
                 } else {
                     if (_supportedMedia(adsVideoPlayer, media.type)) {
                         adsVideoPlayer.src = media.uri;
                         adsVideoPlayer.type = media.type;
                         adsVideoPlayer.load();
                     } else {
-
+                        _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE, "Unsupported video format", media.type);
                         _playMedia();
                     }
                 }
