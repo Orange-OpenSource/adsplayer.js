@@ -38,22 +38,8 @@ AdsPlayer = function(adsContainer) {
 
         _onWarning = function(e) {
             _warning = e.data;
-        },
-
-        /**
-         * Returns the build date of this Ads player.
-         * @method getBuildDate
-         * @access public
-         * @memberof AdsPlayer#
-         * @return {string} the build date of this Ads player
-         */
-        _getBuildDate = function() {
-            if (BUILD_DATE.indexOf("@@") === -1) {
-                return BUILD_DATE;
-            } else {
-                return 'Not a builded version';
-            }
         };
+
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
@@ -85,12 +71,6 @@ AdsPlayer = function(adsContainer) {
         },
 
         /**
-         * [getBuildDate description]
-         * @type {string}
-         */
-        getBuildDate: _getBuildDate,
-
-        /**
          * [getVersionFull description]
          * @return {string} [description]
          */
@@ -99,6 +79,21 @@ AdsPlayer = function(adsContainer) {
                 return VERSION + '_' + GIT_TAG;
             } else {
                 return VERSION;
+            }
+        },
+
+        /**
+         * Returns the build date of this Ads player.
+         * @method getBuildDate
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {string} the build date of this Ads player
+         */
+        getBuildDate: function() {
+            if (BUILD_DATE.indexOf("@@") === -1) {
+                return BUILD_DATE;
+            } else {
+                return 'Not a builded version';
             }
         },
 
