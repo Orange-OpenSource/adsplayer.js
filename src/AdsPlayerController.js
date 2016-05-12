@@ -60,6 +60,7 @@ AdsPlayer.AdsPlayerController = function() {
      */
     var _onMainVideoLoadStart = function() {
             _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
+            _addTextTrackCues();
             _analyseTriggers();
         },
 
@@ -124,7 +125,54 @@ AdsPlayer.AdsPlayerController = function() {
             }
         },
 
-        _createCues = function() {
+        _analyseTrigger = function(id) { //    get ads of the trigger indexed by id
+            var j, k;
+
+            if (id < 0 || id >= _mastTriggers.length)
+                return;
+
+            var trigger = _mastTriggers[id];
+            if (trigger.alreadyPlayed || trigger.startConditions == []) {
+                return;
+            }
+
+            var medias;
+            preRoll = true;
+            for (j = 0; j < trigger.media.length; j++) {
+                for (k = 0; k < trigger.media[j].length; k++) {
+                    medias = trigger.media[j][k].mediaFiles;
+                    medias.duration = trigger.media[j][k].duration;
+                    if (trigger.media[j][k].videoClicks.clickThrough !== null) {
+                        medias.clickThrough = trigger.media[j][k].videoClicks.clickThrough.uri;
+                    }
+                    _listVastAds.push(medias);
+                }
+            }
+        },
+
+        _startPlayAds = function(msg) {
+            if (!_listVastAds.length) {
+                return;
+            }
+            _debug.log(msg);
+            _adsMediaPlayer.show(true);
+            _eventBus.dispatchEvent({
+                type: "adStart",
+                data: {}
+            });
+            _debug.log('pause main video');
+            _mainVideo.pause();
+            _playAds();
+        },
+
+        _onCueEnter = function(e) {
+            var ind;
+            ind = parseInt(e.target.text,10);
+            _analyseTrigger(ind);
+            _startPlayAds('midRoll');
+        },
+
+        _createCues = function(listener) {
 
             // sort elements by date
             _mastTriggers.sort(function(a, b) {
@@ -149,12 +197,37 @@ AdsPlayer.AdsPlayerController = function() {
                     trigger.startConditions[0].name === ConditionName.POSITION &&
                     trigger.startConditions[0].operator === ConditionOperator.GEQ) {
                     var cue = new Cue(trigger.startConditions[0].value, trigger.startConditions[0].value + 1, i);
+                    cue.onenter = listener;
                     cues.push(cue);
                 }
             }
             _listCues = cues;
         },
 
+        _addTextTrackCues = function() {
+            var i,
+                len = _listCues.length;
+            if (len === 0) {
+                return;
+            }
+
+            var track = _mainVideo.addTextTrack("chapters", "ads", "none");
+            for (i = 0; i < len; i++)
+                track.addCue(_listCues[i]);
+        },
+
+        _clearTextTrackCues = function() {
+            var textTracks = _mainVideo.textTracks; // one for each track element
+            for (var c = 0; c < textTracks.length; c++) {
+                var textTrack = textTracks[c];
+                if (textTrack.label == 'ads') {
+                    var cues = textTrack.cues;
+                    for (var i = cues.length - 1; i >= 0; i--) {
+                        textTrack.removeCue(cues[i]);
+                    }
+                }
+            }
+        },
 
         _loadVast = function(mastTrigger, vastUrl) {
             var deferred = Q.defer(),
@@ -178,11 +251,11 @@ AdsPlayer.AdsPlayerController = function() {
             return deferred.promise;
         },
 
-        _loadTrigger = function(mastTrigger,mastBaseUrl) {
+        _loadTrigger = function(mastTrigger, mastBaseUrl) {
             var i,
                 deferLoadVasts = [],
                 uri;
-                var deferred = Q.defer();
+            var deferred = Q.defer();
 
             for (i = 0; i < mastTrigger.sources.length; i++) {
                 uri = mastTrigger.sources[i].uri;
@@ -205,8 +278,8 @@ AdsPlayer.AdsPlayerController = function() {
                 i,
                 deferLoadTriggers;
 
-             mast = _mastParser.parse(mastContent);
-             _mastTriggers = mast.triggers;
+            mast = _mastParser.parse(mastContent);
+            _mastTriggers = mast.triggers;
 
             //_mastTriggers = _mastParser.parse(mastContent);
 
@@ -218,12 +291,12 @@ AdsPlayer.AdsPlayerController = function() {
             deferLoadTriggers = [];
 
             for (i = 0; i < _mastTriggers.length; i++) {
-                deferLoadTriggers.push(_loadTrigger(_mastTriggers[i],mastBaseUrl));
+                deferLoadTriggers.push(_loadTrigger(_mastTriggers[i], mastBaseUrl));
             }
 
             Q.all(deferLoadTriggers).then(function() {
                 _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
-                _createCues();
+                _createCues(_onCueEnter);
                 deferred.resolve();
             });
 
@@ -302,7 +375,7 @@ AdsPlayer.AdsPlayerController = function() {
 
             _fileLoader.load(url).then(function(result) {
                 _debug.log("MAST file loaded");
-                _parseMastFile(result.response,result.baseUrl).then(function() {
+                _parseMastFile(result.response, result.baseUrl).then(function() {
                     deferred.resolve();
                 });
             }, function(error) {
@@ -323,6 +396,7 @@ AdsPlayer.AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          */
         _reset = function() {
+            _clearTextTrackCues();
             _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
             _mastTriggers = [];
             _listVastAds = [];
