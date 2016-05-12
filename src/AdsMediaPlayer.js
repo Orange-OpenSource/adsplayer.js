@@ -41,6 +41,28 @@ AdsPlayer.AdsMediaPlayer = function() {
             _createImageElt();
         },
 
+        _addListeners = function() {
+            adsVideoPlayer.addEventListener("click", _onVideoClick);
+            adsImageNode.addEventListener("click", _onVideoClick);
+            adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
+            adsVideoPlayer.addEventListener("error", _onError);
+        },
+
+        _removeListeners = function () {
+            adsVideoPlayer.removeEventListener("click", _onVideoClick);
+            adsImageNode.removeEventListener("click", _onVideoClick);
+            adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
+            adsVideoPlayer.removeEventListener("error", _onError);
+        },
+
+        _adEnded = function () {
+            _removeListeners();
+            _eventBus.dispatchEvent({
+                type: "adEnded",
+                data: {}
+            });
+        },
+
         _createVideoElt = function() {
             if (adsVideoPlayer === null) {
                 adsVideoPlayer = document.createElement('video');
@@ -51,14 +73,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsVideoPlayer.style.left = 0;
                 adsVideoPlayer.style.width = '100%';
                 _adsContainer.appendChild(adsVideoPlayer);
-                adsVideoPlayer.addEventListener("ended", function() {
-                    adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
-                    adsVideoPlayer.removeEventListener("error", _onError);
-                    _eventBus.dispatchEvent({
-                        type: "adEnded",
-                        data: {}
-                    });
-                });
+                adsVideoPlayer.addEventListener("ended", _adEnded);
             }
         },
 
@@ -92,11 +107,7 @@ AdsPlayer.AdsMediaPlayer = function() {
             if (_medias.length) {
                 _playMedia();
             } else {
-                adsVideoPlayer.removeEventListener("error", _onError);
-                _eventBus.dispatchEvent({
-                    type: "adEnded",
-                    data: {}
-                });
+                _adEnded();
             }
         },
 
@@ -136,10 +147,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                             adsImageNode.src = '';
                             adsImageNode.visibility = "hidden";
                             adsImageTimeOut = null;
-                            _eventBus.dispatchEvent({
-                                type: "adEnded",
-                                data: {}
-                            });
+                             _adEnded();
                         }, time * 1000);
                     } else {
                         _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE, "Unsupported image format", media.type);
@@ -157,20 +165,14 @@ AdsPlayer.AdsMediaPlayer = function() {
                 }
             } else {
                 _errorHandler.sendWarning(AdsPlayer.ErrorHandler.NO_VALID_MEDIA_FOUND, "Failed to found a valid image or video", null);
-                _eventBus.dispatchEvent({
-                    type: "adEnded",
-                    data: {}
-                });
+                _adEnded();
             }
 
         },
 
         _playVideo = function(medias) {
             _medias = medias;
-            adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
-            adsVideoPlayer.addEventListener("error", _onError);
-            adsVideoPlayer.addEventListener("click", _onVideoClick);
-            adsImageNode.addEventListener("click", _onVideoClick);
+            _addListeners();
             _playMedia();
         },
 
@@ -186,11 +188,8 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsImageTimeOut = null;
                 adsImageNode.src = '';
                 adsImageNode.visibility = 'hidden';
-                _eventBus.dispatchEvent({
-                    type: "adEnded",
-                    data: {}
-                });
                 _show(false);
+                _adEnded();
             }
 
             if (!adsVideoPlayer.paused) {
@@ -198,13 +197,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsVideoPlayer.currentTime = 0;
                 adsVideoPlayer.src = '';
                 _show(false);
-                _eventBus.dispatchEvent({
-                    type: "adEnded",
-                    data: {}
-                });
-                adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
-                adsVideoPlayer.removeEventListener("error", _onError);
-
+                 _adEnded();
             }
         };
 
