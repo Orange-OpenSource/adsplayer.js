@@ -102,13 +102,21 @@ AdsPlayer.AdsMediaPlayer = function() {
             adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
         },
 
-        _onError = function(e) {
-            _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_MEDIA_FAILED, "Failed to load media file", e.target);
+        _playNextMedia = function() {
+            var media;
+
             if (_medias.length) {
-                _playMedia();
+                media = _medias.shift();
+                _play(media);
             } else {
+                _errorHandler.sendWarning(AdsPlayer.ErrorHandler.NO_VALID_MEDIA_FOUND, "Failed to found a valid image or video", null);
                 _adEnded();
             }
+        },
+
+        _onError = function(e) {
+            _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_MEDIA_FAILED, "Failed to load media file", e.target);
+            _playNextMedia();
         },
 
         _onVideoClick = function() {
@@ -135,45 +143,38 @@ AdsPlayer.AdsMediaPlayer = function() {
             return (canPlay === "probably" || canPlay === "maybe");
         },
 
-        _playMedia = function() {
-            if (_medias.length) {
-                var time = _medias.duration;
-                var media = _medias.shift();
-                if (media.type.indexOf('image/') != -1) {
-                    if ((media.type === "image/jpeg") || (media.type === "image/png") ||  (media.type === "image/gif")) {
-                        adsImageNode.visibility = "visible";
-                        adsImageNode.src = media.uri;
-                        adsImageTimeOut = setTimeout(function() {
-                            adsImageNode.src = '';
-                            adsImageNode.visibility = "hidden";
-                            adsImageTimeOut = null;
-                             _adEnded();
-                        }, time * 1000);
-                    } else {
-                        _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE, "Unsupported image format", media.type);
-                         _playMedia();
-                    }
+        _play = function(media) {
+            var time = _medias.duration;
+            if (media.type.indexOf('image/') != -1) {
+                if ((media.type === "image/jpeg") || (media.type === "image/png") || (media.type === "image/gif")) {
+                    adsImageNode.visibility = "visible";
+                    adsImageNode.src = media.uri;
+                    adsImageTimeOut = setTimeout(function() {
+                        adsImageNode.src = '';
+                        adsImageNode.visibility = "hidden";
+                        adsImageTimeOut = null;
+                        _adEnded();
+                    }, time * 1000);
                 } else {
-                    if (_supportedMedia(adsVideoPlayer, media.type)) {
-                        adsVideoPlayer.src = media.uri;
-                        adsVideoPlayer.type = media.type;
-                        adsVideoPlayer.load();
-                    } else {
-                        _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE, "Unsupported video format", media.type);
-                        _playMedia();
-                    }
+                    _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE, "Unsupported image format", media.type);
+                    _playNextMedia();
                 }
             } else {
-                _errorHandler.sendWarning(AdsPlayer.ErrorHandler.NO_VALID_MEDIA_FOUND, "Failed to found a valid image or video", null);
-                _adEnded();
+                if (_supportedMedia(adsVideoPlayer, media.type)) {
+                    adsVideoPlayer.src = media.uri;
+                    adsVideoPlayer.type = media.type;
+                    adsVideoPlayer.load();
+                } else {
+                    _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE, "Unsupported video format", media.type);
+                    _playNextMedia();
+                }
             }
-
         },
 
         _playVideo = function(medias) {
             _medias = medias;
             _addListeners();
-            _playMedia();
+            _playNextMedia();
         },
 
         _show = function(show) {
