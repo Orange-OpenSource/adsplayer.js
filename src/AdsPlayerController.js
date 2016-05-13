@@ -71,8 +71,11 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _analyseTriggers = function() { //    Look for preRoll ads triggers 
-            var i, j, k,
-                preRoll = false;
+            var i,
+                j,
+                k;
+
+            _listVastAds = [];
 
             for (i = 0; i < _mastTriggers.length; i++) {
                 var trigger = _mastTriggers[i];
@@ -82,51 +85,37 @@ AdsPlayer.AdsPlayerController = function() {
                 var flag = false;
                 for (j = 0; j < trigger.startConditions.length; j++) {
                     if (trigger.startConditions[j].type === ConditionType.EVENT && trigger.startConditions[j].name === ConditionName.ON_ITEM_START) {
-                        flag = true;
+                        _analyseTrigger(i);
                         break;
                     } else if (trigger.startConditions[j].type === ConditionType.PROPERTY &&
                         trigger.startConditions[j].name === ConditionName.POSITION &&
                         trigger.startConditions[j].operator === ConditionOperator.GEQ &&
                         trigger.startConditions[j].value === 0) {
-                        flag = true;
+                        _analyseTrigger(i);
                         break;
                     }
                 }
-                if (flag) {
-                    var medias;
-                    preRoll = true;
-                    for (j = 0; j < trigger.media.length; j++) {
-                        for (k = 0; k < trigger.media[j].length; k++) {
-                            medias = trigger.media[j][k].mediaFiles;
-                            medias.duration = trigger.media[j][k].duration;
-                            if (trigger.media[j][k].videoClicks.clickThrough !== null) {
-                                medias.clickThrough = trigger.media[j][k].videoClicks.clickThrough.uri;
-                            }
-                            _listVastAds.push(medias);
-                        }
-                    }
-                }
             }
 
-            if (!_listVastAds.length) {
+            if (_listVastAds.length === 0) {
                 // means that no medias are available, e.g. if the vast files couldn't be loaded
-                preRoll = false;
+                return;
             }
 
-            if (preRoll) {
-                _debug.log('PreRoll');
-                _adsMediaPlayer.show(true);
-                _eventBus.dispatchEvent({
-                    type: "adStart",
-                    data: {}
-                });
-                _mainVideo.addEventListener("playing", _onPlaying);
-                _playAds();
-            }
+            _debug.log('PreRoll');
+            _adsMediaPlayer.show(true);
+            _eventBus.dispatchEvent({
+                type: "adStart",
+                data: {}
+            });
+            _mainVideo.addEventListener("playing", _onPlaying);
+            _playAds();
         },
 
         _analyseTrigger = function(id) { //    get ads of the trigger indexed by id
-            var j, k;
+            var medias,
+                j,
+                k;
 
             if (id < 0 || id >= _mastTriggers.length)
                 return;
@@ -136,8 +125,6 @@ AdsPlayer.AdsPlayerController = function() {
                 return;
             }
 
-            var medias;
-            preRoll = true;
             for (j = 0; j < trigger.media.length; j++) {
                 for (k = 0; k < trigger.media[j].length; k++) {
                     medias = trigger.media[j][k].mediaFiles;
@@ -167,8 +154,8 @@ AdsPlayer.AdsPlayerController = function() {
 
         _onCueEnter = function(e) {
             var ind;
-            ind = parseInt(e.target.text,10);
-            _debug.log('_onCueEnter :'+ind );
+            ind = parseInt(e.target.text, 10);
+            _debug.log('_onCueEnter :' + ind);
             _analyseTrigger(ind);
             _startPlayAds('midRoll');
         },
