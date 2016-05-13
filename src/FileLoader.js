@@ -118,6 +118,15 @@ AdsPlayer.FileLoader = function() {
 
                 if (request.aborted) {
                     deferred.reject();
+                } else if (request.status < 200 || request.status > 299) {
+                    deferred.reject({
+                        name: AdsPlayer.ErrorHandler.DOWNLOAD_ERR_FILES,
+                        message: "Failed to download file",
+                        data: {
+                            url: url,
+                            status: request.status
+                        }
+                    });
                 } else if (request.responseXML === null) {
                     // status not useful
                     deferred.reject({
@@ -125,15 +134,6 @@ AdsPlayer.FileLoader = function() {
                         message: "the downloaded file format is not xml",
                         data: {
                             url: url
-                        }
-                    });
-                } else {
-                    deferred.reject({
-                        name: AdsPlayer.ErrorHandler.DOWNLOAD_ERR_FILES,
-                        message: "Failed to download file",
-                        data: {
-                            url: url,
-                            status: request.status
                         }
                     });
                 }
