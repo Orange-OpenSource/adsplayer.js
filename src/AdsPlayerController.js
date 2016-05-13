@@ -168,6 +168,7 @@ AdsPlayer.AdsPlayerController = function() {
         _onCueEnter = function(e) {
             var ind;
             ind = parseInt(e.target.text,10);
+            _debug.log('_onCueEnter :'+ind );
             _analyseTrigger(ind);
             _startPlayAds('midRoll');
         },
