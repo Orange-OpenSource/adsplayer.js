@@ -23,6 +23,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         adsImageNode = null,
         adsImageTimeOut = null,
         _medias = [],
+        _ind = -1;
         _videoUrl = '',
         _adsContainer = null,
         _eventBus = AdsPlayer.EventBus.getInstance(),
@@ -105,8 +106,9 @@ AdsPlayer.AdsMediaPlayer = function() {
         _playNextMedia = function() {
             var media;
 
-            if (_medias.length) {
-                media = _medias.shift();
+            if (_ind<_medias.length) {
+                media = _medias[_ind];
+                _ind++;
                 _play(media);
             } else {
                 _errorHandler.sendWarning(AdsPlayer.ErrorHandler.NO_VALID_MEDIA_FOUND, "Failed to found a valid image or video", null);
@@ -174,6 +176,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         _playVideo = function(medias) {
             _medias = medias;
             _addListeners();
+            _ind = 0;
             _playNextMedia();
         },
 
