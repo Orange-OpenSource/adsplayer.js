@@ -79,7 +79,7 @@ AdsPlayer.AdsPlayerController = function() {
 
             for (i = 0; i < _mastTriggers.length; i++) {
                 var trigger = _mastTriggers[i];
-                if (trigger.alreadyPlayed || trigger.startConditions == []) {
+                if (trigger.alreadyProcessed || trigger.startConditions == []) {
                     continue;
                 }
                 var flag = false;
@@ -124,7 +124,7 @@ AdsPlayer.AdsPlayerController = function() {
             if (trigger.alreadyPlayed || trigger.startConditions == []) {
                 return;
             }
-
+            trigger.alreadyProcessed = true;
             for (j = 0; j < trigger.media.length; j++) {
                 for (k = 0; k < trigger.media[j].length; k++) {
                     medias = trigger.media[j][k].mediaFiles;
@@ -200,6 +200,7 @@ AdsPlayer.AdsPlayerController = function() {
             }
 
             var track = _mainVideo.addTextTrack("chapters", "ads", "none");
+            track.mode = "showing";
             for (i = 0; i < len; i++)
                 track.addCue(_listCues[i]);
         },
@@ -215,6 +216,31 @@ AdsPlayer.AdsPlayerController = function() {
                     }
                 }
             }
+        },
+
+        _onSeeked = function() {
+            var seekedTime;
+            seekedTime = _mainVideo.currentTime;
+            if (seekedTime === 0) {
+                return; // to avoid overlapp with preRoll
+            }
+            _debug.log('seeked at  :' + seekedTime);
+            for (i = 0; i < _mastTriggers.length; i++) {
+                var trigger = _mastTriggers[i];
+                if (trigger.alreadyProcessed || trigger.startConditions == []) {
+                    continue;
+                }
+                for (j = 0; j < trigger.startConditions.length; j++) {
+                    if (trigger.startConditions[j].type === ConditionType.PROPERTY &&
+                        trigger.startConditions[j].name === ConditionName.POSITION &&
+                        trigger.startConditions[j].operator === ConditionOperator.GEQ &&
+                        trigger.startConditions[j].value < seekedTime) {
+                        _analyseTrigger(i);
+                        break;
+                    }
+                }
+            }
+            _startPlayAds('seeked');
         },
 
         _loadVast = function(mastTrigger, vastUrl) {
@@ -346,6 +372,10 @@ AdsPlayer.AdsPlayerController = function() {
             _adsMediaPlayer.init(_adsContainer);
 
             _eventBus.addEventListener("adEnded", _onAdEnded);
+
+            _mainVideo.onseeked = function() {
+                _onSeeked()
+            };
 
             _debug.setLevel(4);
         },
