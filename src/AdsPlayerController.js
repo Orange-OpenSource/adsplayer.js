@@ -121,7 +121,7 @@ AdsPlayer.AdsPlayerController = function() {
                 return;
 
             var trigger = _mastTriggers[id];
-            if (trigger.alreadyPlayed || trigger.startConditions == []) {
+            if (trigger.alreadyProcessed || trigger.startConditions == []) {
                 return;
             }
             trigger.alreadyProcessed = true;
