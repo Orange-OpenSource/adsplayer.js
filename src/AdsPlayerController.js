@@ -60,7 +60,11 @@ AdsPlayer.AdsPlayerController = function() {
      */
     var _onMainVideoLoadStart = function() {
             _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
-            _addTextTrackCues();
+            if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+                _mainVideo.addEventListener('timeupdate', _onTimeChange);
+            } else {
+                _addTextTrackCues();
+            }
             _analyseTriggers();
         },
 
@@ -156,6 +160,7 @@ AdsPlayer.AdsPlayerController = function() {
             var ind;
             ind = parseInt(e.target.text, 10);
             _debug.log('_onCueEnter :' + ind);
+            _debug.log('video timestamp :' + _mainVideo.currentTime);
             _analyseTrigger(ind);
             _startPlayAds('midRoll');
         },
@@ -217,6 +222,31 @@ AdsPlayer.AdsPlayerController = function() {
                 }
             }
         },
+
+        _onTimeChange = function() {
+            var changedTime = _mainVideo.currentTime;
+            if (changedTime === 0) {
+                return; // to avoid overlapp with preRoll
+            }
+            _debug.log('timeChange at  :' + changedTime);
+            for (i = 0; i < _mastTriggers.length; i++) {
+                var trigger = _mastTriggers[i];
+                if (trigger.alreadyProcessed || trigger.startConditions == []) {
+                    continue;
+                }
+                for (j = 0; j < trigger.startConditions.length; j++) {
+                    if (trigger.startConditions[j].type === ConditionType.PROPERTY &&
+                        trigger.startConditions[j].name === ConditionName.POSITION &&
+                        trigger.startConditions[j].operator === ConditionOperator.GEQ &&
+                        trigger.startConditions[j].value < changedTime) {
+                        _analyseTrigger(i);
+                        break;
+                    }
+                }
+            }
+            _startPlayAds('_onTimeChange');
+        },
+
 
         _onSeeked = function() {
             var seekedTime;
@@ -414,7 +444,11 @@ AdsPlayer.AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          */
         _reset = function() {
-            _clearTextTrackCues();
+            if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+                _mainVideo.removeEventListener('timeupdate', _onTimeChange);
+            } else {
+                _clearTextTrackCues();
+            }
             _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
             _mastTriggers = [];
             _listVastAds = [];
