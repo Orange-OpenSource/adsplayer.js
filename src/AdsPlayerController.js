@@ -273,6 +273,24 @@ AdsPlayer.AdsPlayerController = function() {
             _startPlayAds('seeked');
         },
 
+        _getVastInfo = function(vast) {
+            var listAds = [];
+            for (i = 0; i < vast.ads.length; i++) {
+                for (j = 0; j < vast.ads[i].inLine.creatives.length; j++) {
+                    if (vast.ads[i].inLine.creatives[j].linear) {
+                        var linear = {};
+                        linear.id = vast.ads[i].id;
+                        linear.creativeId = vast.ads[i].inLine.creatives[j].id;
+                        linear.duration = vast.ads[i].inLine.creatives[j].linear.duration;
+                        linear.mediaFiles = vast.ads[i].inLine.creatives[j].linear.mediaFiles;
+                        linear.videoClicks = vast.ads[i].inLine.creatives[j].linear.videoClicks;
+                        listAds.push(linear);
+                    }
+                }
+            }
+            return listAds;
+        },
+
         _loadVast = function(mastTrigger, vastUrl) {
             var deferred = Q.defer(),
                 fileLoader = new AdsPlayer.FileLoader(),
@@ -283,7 +301,7 @@ AdsPlayer.AdsPlayerController = function() {
                 function(result) {
                     vastParser = new AdsPlayer.vast.VastParser(result.baseUrl);
                     vast = vastParser.parse(result.response);
-                    mastTrigger.media.push(vast);
+                    mastTrigger.media.push(_getVastInfo(vast));
                     _debug.log('vast file parsed :' + vastUrl);
                     deferred.resolve();
                 },

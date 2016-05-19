@@ -262,28 +262,8 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                 myAd.inLine = inLine;
                 vast.ads.push(myAd);
             }
-
-            /* for this first version of vastParser we return only the list of ads and their mediafil {url, mimtype}.
-            Othewise, for future versions, all vast object must be returned by this function like :
-            return vast; 
-            */
-            //console.log(vast);
-            var listAds = [];
-            for (i = 0; i < vast.ads.length; i++) {
-                for (j = 0; j < vast.ads[i].inLine.creatives.length; j++) {
-                    if (vast.ads[i].inLine.creatives[j].linear) {
-                        var linear = {};
-                        linear.id = vast.ads[i].id;
-                        linear.creativeId = vast.ads[i].inLine.creatives[j].id;
-                        linear.duration = vast.ads[i].inLine.creatives[j].linear.duration;
-                        linear.mediaFiles = vast.ads[i].inLine.creatives[j].linear.mediaFiles;
-                        linear.videoClicks = vast.ads[i].inLine.creatives[j].linear.videoClicks;
-                        listAds.push(linear);
-                    }
-                }
-            }
-            return listAds;
-        };
+            return vast;
+         };
 
     return {
 
