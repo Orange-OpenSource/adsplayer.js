@@ -422,7 +422,7 @@ AdsPlayer.AdsPlayerController = function() {
             _eventBus.addEventListener("adEnded", _onAdEnded);
 
             _mainVideo.onseeked = function() {
-                _onSeeked()
+                _onSeeked();
             };
 
             _debug.setLevel(4);
