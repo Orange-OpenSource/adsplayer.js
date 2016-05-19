@@ -60,28 +60,30 @@ AdsPlayer.AdsMediaPlayer = function() {
                 remTime;
 
             if (cTime > AdsPlayer.AdsMediaPlayer.AD_SKIPOFFSET) {
-                console.log(AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP);
-                adsSkipButton.innerHTML = AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP;
-                adsVideoPlayer.removeEventListener("timeupdate", _onTimeupdate);
+                //console.log(AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP);
                 adsSkipButton.style.cursor = 'pointer';
                 adsSkipButton.onclick = _adSkip;
+                adsSkipButton.innerHTML = AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP;
+                adsVideoPlayer.removeEventListener("timeupdate", _onTimeupdate);
                 return;
             }
             remTime = AdsPlayer.AdsMediaPlayer.AD_SKIPOFFSET - cTime;
-            console.log(AdsPlayer.AdsMediaPlayer.MSG_CAN_SKIP + remTime.toFixed(0));
+            //console.log(AdsPlayer.AdsMediaPlayer.MSG_CAN_SKIP + remTime.toFixed(0));
             adsSkipButton.innerHTML = AdsPlayer.AdsMediaPlayer.MSG_CAN_SKIP + remTime.toFixed(0);
         },
 
         _onloadedmetadata = function() {
             _adLegth = adsVideoPlayer.duration.toFixed(1);
+            adsSkipButton.onclick = null;
+            adsSkipButton.style.cursor = 'default';
+
             if (_adLegth < AdsPlayer.AdsMediaPlayer.AD_SKIP_MAX) {
                 adsVideoPlayer.removeEventListener("timeupdate", _onTimeupdate);
-                adsSkipButton.onclick = null;
-                adsSkipButton.style.cursor = 'default';
-                adsSkipButton.style.visibility = 'hidden';
+                _showAdSkip(false);
                 return;
             }
-            console.log(_adLegth);
+            _showAdSkip(true);
+            //console.log(_adLegth);
         },
             
         _removeListeners = function () {
@@ -95,6 +97,7 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         _adEnded = function () {
             _removeListeners();
+            _showAdSkip(false);
             _eventBus.dispatchEvent({
                 type: "adEnded",
                 data: {}
@@ -131,6 +134,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         },
 
         _adSkip = function () {
+            // we call here only one function, but it will be necessary to can other ones
             _adEnded();
         },
         
@@ -242,10 +246,13 @@ AdsPlayer.AdsMediaPlayer = function() {
             if (adsVideoPlayer) {
                 adsVideoPlayer.style.visibility = show ? 'visible' : 'hidden';
             }
-            if (adsSkipButton) {
-                adsSkipButton.style.visibility = show ?  'visible' : 'hidden';
-            }
         },
+
+        _showAdSkip = function(show) {
+            if (adsSkipButton) {
+                adsSkipButton.style.visibility = show ? 'visible' : 'hidden';
+            }
+        },        
 
         _reset = function() {
             if (adsImageTimeOut) {
