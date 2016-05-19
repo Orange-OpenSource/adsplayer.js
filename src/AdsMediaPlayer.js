@@ -22,6 +22,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         adsVideoPlayer = null,
         adsImageNode = null,
         adsImageTimeOut = null,
+        adsSkipButton = null,
         _medias = [],
         _ind = -1,
         _videoUrl = '',
@@ -29,6 +30,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         _eventBus = AdsPlayer.EventBus.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
+        _adLegth,
 
 
         // functions
@@ -40,6 +42,7 @@ AdsPlayer.AdsMediaPlayer = function() {
             _adsContainer = adsContainer;
             _createVideoElt();
             _createImageElt();
+            _creatSkipButton();
         },
 
         _addListeners = function() {
@@ -47,13 +50,47 @@ AdsPlayer.AdsMediaPlayer = function() {
             adsImageNode.addEventListener("click", _onVideoClick);
             adsVideoPlayer.addEventListener("loadeddata", _isLoaded);
             adsVideoPlayer.addEventListener("error", _onError);
+            adsVideoPlayer.addEventListener("timeupdate", _onTimeupdate);
+            adsVideoPlayer.addEventListener("loadedmetadata", _onloadedmetadata);
+
         },
 
+        _onTimeupdate = function () {
+            var cTime = adsVideoPlayer.currentTime,
+                remTime;
+
+            if (cTime > AdsPlayer.AdsMediaPlayer.AD_SKIPOFFSET) {
+                console.log(AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP);
+                adsSkipButton.innerHTML = AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP;
+                adsVideoPlayer.removeEventListener("timeupdate", _onTimeupdate);
+                adsSkipButton.style.cursor = 'pointer';
+                adsSkipButton.onclick = _adSkip;
+                return;
+            }
+            remTime = AdsPlayer.AdsMediaPlayer.AD_SKIPOFFSET - cTime;
+            console.log(AdsPlayer.AdsMediaPlayer.MSG_CAN_SKIP + remTime.toFixed(0));
+            adsSkipButton.innerHTML = AdsPlayer.AdsMediaPlayer.MSG_CAN_SKIP + remTime.toFixed(0);
+        },
+
+        _onloadedmetadata = function() {
+            _adLegth = adsVideoPlayer.duration.toFixed(1);
+            if (_adLegth < AdsPlayer.AdsMediaPlayer.AD_SKIP_MAX) {
+                adsVideoPlayer.removeEventListener("timeupdate", _onTimeupdate);
+                adsSkipButton.onclick = null;
+                adsSkipButton.style.cursor = 'default';
+                adsSkipButton.style.visibility = 'hidden';
+                return;
+            }
+            console.log(_adLegth);
+        },
+            
         _removeListeners = function () {
             adsVideoPlayer.removeEventListener("click", _onVideoClick);
             adsImageNode.removeEventListener("click", _onVideoClick);
             adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
             adsVideoPlayer.removeEventListener("error", _onError);
+            adsVideoPlayer.removeEventListener("timeupdate", _onTimeupdate);
+            adsVideoPlayer.removeEventListener("loadedmetadata", _onloadedmetadata);
         },
 
         _adEnded = function () {
@@ -90,6 +127,27 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsImageNode.style.height = '100%';
                 adsImageNode.style.width = '100%';
                 _adsContainer.appendChild(adsImageNode);
+            }
+        },
+
+        _adSkip = function () {
+            _adEnded();
+        },
+        
+        _creatSkipButton = function () {
+            if (adsSkipButton === null) {
+                adsSkipButton = document.createElement('button');
+                adsSkipButton.id = 'adsSkipButton';
+                adsSkipButton.innerHTML = '';
+                adsSkipButton.style = 'background-color: gray; opacity:0.4; color: white; text-align: center';
+                adsSkipButton.style.position = 'absolute';
+                adsSkipButton.style.bottom = '150px';
+                adsSkipButton.style.right = '20px';
+                adsSkipButton.style.height = '45px';
+                adsSkipButton.style.width = '110px';
+                adsSkipButton.style.border = 'solid white 2px';
+                adsSkipButton.style.visibility = 'hidden';
+                _adsContainer.appendChild(adsSkipButton);
             }
         },
 
@@ -184,6 +242,9 @@ AdsPlayer.AdsMediaPlayer = function() {
             if (adsVideoPlayer) {
                 adsVideoPlayer.style.visibility = show ? 'visible' : 'hidden';
             }
+            if (adsSkipButton) {
+                adsSkipButton.style.visibility = show ?  'visible' : 'hidden';
+            }
         },
 
         _reset = function() {
@@ -219,3 +280,8 @@ AdsPlayer.AdsMediaPlayer = function() {
 AdsPlayer.AdsMediaPlayer.prototype = {
     constructor: AdsPlayer.AdsMediaPlayer
 };
+
+AdsPlayer.AdsMediaPlayer.MSG_CAN_SKIP = "you can skip to the video in ";
+AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP = "Skip Ad";
+AdsPlayer.AdsMediaPlayer.AD_SKIP_MAX = 6;
+AdsPlayer.AdsMediaPlayer.AD_SKIPOFFSET = 5;
