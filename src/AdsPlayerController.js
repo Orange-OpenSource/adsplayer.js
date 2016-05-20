@@ -117,8 +117,7 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _analyseTrigger = function(id) { //    get ads of the trigger indexed by id
-            var medias,
-                j,
+            var j,
                 k;
 
             if (id < 0 || id >= _mastTriggers.length)
@@ -129,14 +128,9 @@ AdsPlayer.AdsPlayerController = function() {
                 return;
             }
             trigger.alreadyProcessed = true;
-            for (j = 0; j < trigger.media.length; j++) {
-                for (k = 0; k < trigger.media[j].length; k++) {
-                    medias = trigger.media[j][k].mediaFiles;
-                    medias.duration = trigger.media[j][k].duration;
-                    if (trigger.media[j][k].videoClicks.clickThrough !== null) {
-                        medias.clickThrough = trigger.media[j][k].videoClicks.clickThrough.uri;
-                    }
-                    _listVastAds.push(medias);
+            for (j = 0; j < trigger.ads.length; j++) {
+                for (k = 0; k < trigger.ads[j].creatives.length; k++) {
+                    _listVastAds.push( trigger.ads[j].creatives[k].linear);
                 }
             }
         },
@@ -274,18 +268,41 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _getVastInfo = function(vast) {
-            var listAds = [];
+            var listAds = [],
+                creative,
+                ad;
+
             for (i = 0; i < vast.ads.length; i++) {
+                ad = {
+                    adSystem: '',
+                    adTitle: '',
+                    description: '',
+                    survey: '',
+                    error: '',
+                    impression: '',
+                    creatives: []
+                };
+                ad.adSystem = vast.ads[i].inLine.adSystem;
                 for (j = 0; j < vast.ads[i].inLine.creatives.length; j++) {
+                    creative = {
+                    id: '',
+                    sequence: '',
+                    AdID: '',
+                    linear: null
+                };
+
+                    creative.id = vast.ads[i].inLine.creatives[j].id;
+                    //                  ad.creative.sequence=vast.ads[i].inLine.creatives[j].sequence;
+                    //                 ad.creative.AdID=vast.ads[i].inLine.creatives[j].AdID;
                     if (vast.ads[i].inLine.creatives[j].linear) {
-                        var linear = {};
-                        linear.id = vast.ads[i].id;
-                        linear.creativeId = vast.ads[i].inLine.creatives[j].id;
-                        linear.duration = vast.ads[i].inLine.creatives[j].linear.duration;
-                        linear.mediaFiles = vast.ads[i].inLine.creatives[j].linear.mediaFiles;
-                        linear.videoClicks = vast.ads[i].inLine.creatives[j].linear.videoClicks;
-                        listAds.push(linear);
+                        creative.linear = vast.ads[i].inLine.creatives[j].linear;
                     }
+                    if (creative.linear !== null) {
+                        ad.creatives.push(creative);
+                    }
+                }
+                if (ad.creatives != []) {
+                    listAds.push(ad);
                 }
             }
             return listAds;
@@ -301,7 +318,7 @@ AdsPlayer.AdsPlayerController = function() {
                 function(result) {
                     vastParser = new AdsPlayer.vast.VastParser(result.baseUrl);
                     vast = vastParser.parse(result.response);
-                    mastTrigger.media.push(_getVastInfo(vast));
+                    mastTrigger.ads = mastTrigger.ads.concat(_getVastInfo(vast));
                     _debug.log('vast file parsed :' + vastUrl);
                     deferred.resolve();
                 },
@@ -393,8 +410,8 @@ AdsPlayer.AdsPlayerController = function() {
 
         _playAds = function() {
             if (_listVastAds.length > 0) {
-                var medias = _listVastAds.shift();
-                _adsMediaPlayer.playVideo(medias);
+                var linear = _listVastAds.shift();
+                _adsMediaPlayer.playVideo(linear.mediaFiles,linear.duration);
             }
         };
 

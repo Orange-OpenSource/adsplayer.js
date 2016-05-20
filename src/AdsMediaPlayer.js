@@ -24,6 +24,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         adsImageTimeOut = null,
         adsSkipButton = null,
         _medias = [],
+        _duration = 0,
         _ind = -1,
         _videoUrl = '',
         _adsContainer = null,
@@ -217,7 +218,6 @@ AdsPlayer.AdsMediaPlayer = function() {
         },
 
         _play = function(media) {
-            var time = _medias.duration;
             if (media.type.indexOf('image/') != -1) {
                 if ((media.type === "image/jpeg") || (media.type === "image/png") || (media.type === "image/gif")) {
                     adsImageNode.visibility = "visible";
@@ -227,7 +227,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                         adsImageNode.visibility = "hidden";
                         adsImageTimeOut = null;
                         _adEnded();
-                    }, time * 1000);
+                    }, _duration * 1000);
                 } else {
                     _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE, "Unsupported image format", media.type);
                     _playNextMedia();
@@ -244,8 +244,9 @@ AdsPlayer.AdsMediaPlayer = function() {
             }
         },
 
-        _playVideo = function(medias) {
+        _playVideo = function(medias,duration) {
             _medias = medias;
+            _duration=duration;
             _addListeners();
             _ind = 0;
             _playNextMedia();
