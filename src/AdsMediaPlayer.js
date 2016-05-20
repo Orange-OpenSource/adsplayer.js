@@ -65,6 +65,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                 //console.log(AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP);
                 adsSkipButton.className += ' adskip-button1';
                 adsSkipButton.onclick = _adSkip;
+                adsSkipButton.focus();
                 adsSkipButton.innerHTML = AdsPlayer.AdsMediaPlayer.MSG_AD_SKIP;
                 adsVideoPlayer.removeEventListener("timeupdate", _onTimeupdate);
                 return;
@@ -112,12 +113,6 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsVideoPlayer.autoplay = false;
                 adsVideoPlayer.id = 'adsVideoPlayer';
                 adsVideoPlayer.className = 'ads-video';
-                /*
-                adsVideoPlayer.style.position = 'absolute';
-                adsVideoPlayer.style.top = 0;
-                adsVideoPlayer.style.left = 0;
-                adsVideoPlayer.style.width = '100%';
-                */
                 _adsContainer.appendChild(adsVideoPlayer);
                 adsVideoPlayer.addEventListener("ended", _adEnded);
             }
@@ -129,14 +124,6 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsImageNode.autoplay = false;
                 adsImageNode.id = 'adsImageNode';
                 adsImageNode.className = 'ads-image';
-                /*
-                adsImageNode.style.position = 'absolute';
-                adsImageNode.style.top = 0;
-                adsImageNode.style.left = 0;
-                adsImageNode.visibility = "hidden";
-                adsImageNode.style.height = '100%';
-                adsImageNode.style.width = '100%';
-                */
                 _adsContainer.appendChild(adsImageNode);
             }
         },
@@ -152,15 +139,6 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsSkipButton.id = 'adsSkipButton';
                 adsSkipButton.innerHTML = '';
                 adsSkipButton.className = 'adskip-button';
-                /*
-                adsSkipButton.style = 'background-color: gray; opacity:0.4; color: white; text-align: center';
-                adsSkipButton.style.position = 'absolute';
-                adsSkipButton.style.bottom = '150px';
-                adsSkipButton.style.right = '20px';
-                adsSkipButton.style.height = '45px';
-                adsSkipButton.style.width = '110px';
-                adsSkipButton.style.border = 'solid white 2px';
-                */
                 adsSkipButton.style.visibility = 'hidden';
                 _adsContainer.appendChild(adsSkipButton);
             }
