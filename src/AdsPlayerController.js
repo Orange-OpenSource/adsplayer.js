@@ -129,9 +129,7 @@ AdsPlayer.AdsPlayerController = function() {
             }
             trigger.alreadyProcessed = true;
             for (j = 0; j < trigger.ads.length; j++) {
-                for (k = 0; k < trigger.ads[j].creatives.length; k++) {
-                    _listVastAds.push( trigger.ads[j].creatives[k].linear);
-                }
+                _listVastAds.push(trigger.ads[j]);
             }
         },
 
@@ -283,13 +281,14 @@ AdsPlayer.AdsPlayerController = function() {
                     creatives: []
                 };
                 ad.adSystem = vast.ads[i].inLine.adSystem;
+                ad.impression = vast.ads[i].inLine.impression;
                 for (j = 0; j < vast.ads[i].inLine.creatives.length; j++) {
                     creative = {
-                    id: '',
-                    sequence: '',
-                    AdID: '',
-                    linear: null
-                };
+                        id: '',
+                        sequence: '',
+                        AdID: '',
+                        linear: null
+                    };
 
                     creative.id = vast.ads[i].inLine.creatives[j].id;
                     //                  ad.creative.sequence=vast.ads[i].inLine.creatives[j].sequence;
@@ -410,8 +409,8 @@ AdsPlayer.AdsPlayerController = function() {
 
         _playAds = function() {
             if (_listVastAds.length > 0) {
-                var linear = _listVastAds.shift();
-                _adsMediaPlayer.playVideo(linear.mediaFiles,linear.duration);
+                var ad = _listVastAds.shift();
+                _adsMediaPlayer.playAd(ad);
             }
         };
 

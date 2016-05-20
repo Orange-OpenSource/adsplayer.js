@@ -24,6 +24,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         adsImageTimeOut = null,
         adsSkipButton = null,
         _medias = [],
+        _ad = null,
         _duration = 0,
         _ind = -1,
         _videoUrl = '',
@@ -86,8 +87,8 @@ AdsPlayer.AdsMediaPlayer = function() {
             _showAdSkip(true);
             //console.log(_adLegth);
         },
-            
-        _removeListeners = function () {
+    
+        _removeListeners = function() {
             adsVideoPlayer.removeEventListener("click", _onVideoClick);
             adsImageNode.removeEventListener("click", _onVideoClick);
             adsVideoPlayer.removeEventListener("loadeddata", _isLoaded);
@@ -96,7 +97,7 @@ AdsPlayer.AdsMediaPlayer = function() {
             adsVideoPlayer.removeEventListener("loadedmetadata", _onloadedmetadata);
         },
 
-        _adEnded = function () {
+        _adEnded = function() {
             _removeListeners();
             _showAdSkip(false);
             _eventBus.dispatchEvent({
@@ -178,7 +179,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         _playNextMedia = function() {
             var media;
 
-            if (_ind<_medias.length) {
+            if (_ind < _medias.length) {
                 media = _medias[_ind];
                 _ind++;
                 _play(media);
@@ -194,7 +195,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         },
 
         _onVideoClick = function() {
-            var url = _medias.clickThrough;
+            var url = _ad.creatives[0].linear.videoClicks.clickThrough.uri;
             if (url) {
                 try {
                     window.open(url, "Ads Windows");
@@ -244,9 +245,56 @@ AdsPlayer.AdsMediaPlayer = function() {
             }
         },
 
-        _playVideo = function(medias,duration) {
+        _trackingUrl = function(type, url, callback) {
+
+            var http;
+
+            if (url === "") {
+                return;
+            }
+
+            http = new XMLHttpRequest();
+
+            http.open(type, url, true);
+            http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+            http.timeout = 2000;
+
+            http.onloadend = http.onerror = function() {
+                if (callback) {
+                    callback(http.status, http.response);
+                }
+            };
+
+            if (type === 'GET') {
+                http.send();
+            } else {
+                _debug.log('url tracking : ' + url);
+                http.send();
+            }
+
+        },
+
+        _trackImpression = function(impression) {
+            var i;
+
+            if (impression == []) {
+                return;
+            }
+
+            for (i = 0; i < impression.length; i++) {
+                _trackingUrl('POST', impression[i].uri);
+            }
+        },
+
+        _playAd = function(ad) {
+            _ad = ad;
+            _trackImpression(_ad.impression);
+            _playVideo(_ad.creatives[0].linear.mediaFiles, _ad.creatives[0].linear.duration);
+        },
+
+        _playVideo = function(medias, duration) {
             _medias = medias;
-            _duration=duration;
+            _duration = duration;
             _addListeners();
             _ind = 0;
             _playNextMedia();
@@ -279,7 +327,7 @@ AdsPlayer.AdsMediaPlayer = function() {
                 adsVideoPlayer.currentTime = 0;
                 adsVideoPlayer.src = '';
                 _show(false);
-                 _adEnded();
+                _adEnded();
             }
         };
 
@@ -288,7 +336,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         init: _init,
         reset: _reset,
         isPlayingAds: _isPlayingAds,
-        playVideo: _playVideo,
+        playAd: _playAd,
         addlistener: _addlistener,
         show: _show
     };
