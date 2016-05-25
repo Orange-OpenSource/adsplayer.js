@@ -20,6 +20,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         overlay = null,
         playingAds = false,
         adsVideoPlayer = null,
+        adsTrackingEvents = null,
         adsImageNode = null,
         adsImageTimeOut = null,
         adsSkipButton = null,
@@ -45,6 +46,7 @@ AdsPlayer.AdsMediaPlayer = function() {
             _createVideoElt();
             _createImageElt();
             _creatSkipButton();
+            adsTrackingEvents = new AdsPlayer.AdsTrackingEvents(_adsContainer,adsVideoPlayer);
         },
 
         _addListeners = function() {
@@ -100,6 +102,7 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         _adEnded = function() {
             _removeListeners();
+            adsTrackingEvents.reset();
             _showAdSkip(false);
             _eventBus.dispatchEvent({
                 type: "adEnded",
@@ -266,6 +269,7 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         _playAd = function(ad) {
             _ad = ad;
+            adsTrackingEvents.init(_ad.creatives[0].linear.trackingEvents);
             _trackImpression(_ad.impression);
             _playVideo(_ad.creatives[0].linear.mediaFiles, _ad.creatives[0].linear.duration);
         },
