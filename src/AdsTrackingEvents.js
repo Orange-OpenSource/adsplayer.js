@@ -98,10 +98,7 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
                 _addEventListener(_adsVideoPlayer, 'timeupdate', _CB_Progress);
             }
 
-            //   _testFullScreen();
-            _testPlayPause();
-            //_testMuteUnute();
-        },
+         },
 
         _postFunction = function(uri) {
             var postFn = function() {
