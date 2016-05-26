@@ -49,7 +49,7 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
 
             _reset();
 
-            _isPaused = _adsVideoPlayer.paused;
+            _isPaused = false;
             _isMuted = _adsVideoPlayer.muted || (_adsVideoPlayer.volume === 0.0 ? true : false);
 
             for (i = 0; i < trackingEvents.length; i++) {
