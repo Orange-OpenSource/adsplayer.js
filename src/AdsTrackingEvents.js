@@ -98,7 +98,8 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
                 _addEventListener(_adsVideoPlayer, 'timeupdate', _CB_Progress);
             }
 
-         },
+        },
+
 
         _postFunction = function(uri) {
             var postFn = function() {
@@ -267,89 +268,6 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
                 http.send();
             }
 
-        },
-
-        _toggle = function(e) {
-            if (e.requestFullscreen) {
-                e.requestFullscreen();
-            } else if (e.mozRequestFullScreen) {
-                e.mozRequestFullScreen();
-            } else if (e.webkitRequestFullscreen) {
-                e.webkitRequestFullscreen();
-            } else if (e.msRequestFullscreen) {
-                e.msRequestFullscreen();
-            }
-        },
-
-
-        _toggleFullscreen = function(elem) {
-            elem = elem || document.documentElement;
-            if (!document.fullscreenElement && !document.mozFullScreenElement &&
-                !document.webkitFullscreenElement && !document.msFullscreenElement) {
-                if (elem.requestFullscreen) {
-                    elem.requestFullscreen();
-                } else if (elem.msRequestFullscreen) {
-                    elem.msRequestFullscreen();
-                } else if (elem.mozRequestFullScreen) {
-                    elem.mozRequestFullScreen();
-                } else if (elem.webkitRequestFullscreen) {
-                    elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
-                }
-            } else {
-                if (document.exitFullscreen) {
-                    document.exitFullscreen();
-                } else if (document.msExitFullscreen) {
-                    document.msExitFullscreen();
-                } else if (document.mozCancelFullScreen) {
-                    document.mozCancelFullScreen();
-                } else if (document.webkitExitFullscreen) {
-                    document.webkitExitFullscreen();
-                }
-            }
-        },
-
-        _testFullScreen = function() {
-            _adsVideoPlayer.addEventListener('click', function() {
-                _toggleFullscreen(_adsContainer);
-            }, false);
-
-        },
-
-        _togglePlayPause = function() {
-            var paused = _adsVideoPlayer.paused;
-            if (paused) {
-                _adsVideoPlayer.play();
-            } else {
-                _adsVideoPlayer.pause();
-            }
-        },
-
-        _testPlayPause = function() {
-            _adsVideoPlayer.addEventListener('click', _togglePlayPause, false);
-        },
-
-
-        _testMuteUnute = function() {
-            _adsVideoPlayer.addEventListener('click', function() {
-                var volume = _adsVideoPlayer.volume;
-                if (volume === 0.0) {
-                    _adsVideoPlayer.volume = 1.0;
-                } else {
-                    _adsVideoPlayer.volume = 0.0;
-                }
-
-            }, false);
-        },
-
-        _testMuteUnute1 = function() {
-            _adsVideoPlayer.addEventListener('click', function() {
-                if (_adsVideoPlayer.muted) {
-                    _adsVideoPlayer.muted = false;
-                } else {
-                    _adsVideoPlayer.muted = true;
-                }
-
-            }, false);
         };
 
 
