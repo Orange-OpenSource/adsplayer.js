@@ -286,28 +286,51 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
             }
         },
 
+
+        _toggleFullscreen = function(elem) {
+            elem = elem || document.documentElement;
+            if (!document.fullscreenElement && !document.mozFullScreenElement &&
+                !document.webkitFullscreenElement && !document.msFullscreenElement) {
+                if (elem.requestFullscreen) {
+                    elem.requestFullscreen();
+                } else if (elem.msRequestFullscreen) {
+                    elem.msRequestFullscreen();
+                } else if (elem.mozRequestFullScreen) {
+                    elem.mozRequestFullScreen();
+                } else if (elem.webkitRequestFullscreen) {
+                    elem.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+                }
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen();
+                } else if (document.msExitFullscreen) {
+                    document.msExitFullscreen();
+                } else if (document.mozCancelFullScreen) {
+                    document.mozCancelFullScreen();
+                } else if (document.webkitExitFullscreen) {
+                    document.webkitExitFullscreen();
+                }
+            }
+        },
+
         _testFullScreen = function() {
             _adsVideoPlayer.addEventListener('click', function() {
-                var ratio;
-                var flag = true;
-                if (flag) {
-                    flag = false;
-                    _toggle(_adsContainer);
-                }
+                _toggleFullscreen(_adsContainer);
             }, false);
 
         },
 
-        _testPlayPause = function() {
-            _adsVideoPlayer.addEventListener('click', function() {
-                var paused = _adsVideoPlayer.paused;
-                if (paused) {
-                    _adsVideoPlayer.play();
-                } else {
-                    _adsVideoPlayer.pause();
-                }
+        _togglePlayPause = function() {
+            var paused = _adsVideoPlayer.paused;
+            if (paused) {
+                _adsVideoPlayer.play();
+            } else {
+                _adsVideoPlayer.pause();
+            }
+        },
 
-            }, false);
+        _testPlayPause = function() {
+            _adsVideoPlayer.addEventListener('click', _togglePlayPause, false);
         },
 
 
