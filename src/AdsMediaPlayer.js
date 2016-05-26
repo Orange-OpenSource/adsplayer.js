@@ -102,7 +102,6 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         _adEnded = function() {
             _removeListeners();
-            adsTrackingEvents.reset();
             _showAdSkip(false);
             _eventBus.dispatchEvent({
                 type: "adEnded",
