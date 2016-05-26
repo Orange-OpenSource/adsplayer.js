@@ -56,14 +56,13 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
                 trackingEvent = trackingEvents[i];
                 switch (trackingEvent.event) {
                     case 'start':
-                        _addEventListener(_adsVideoPlayer, 'playing', trackingEvent.uri);
+                        _addEventListener(_adsVideoPlayer, 'playing', _postFunction(trackingEvent.uri), true);
                         break;
                     case 'complete':
-                        _addEventListener(_adsVideoPlayer, 'ended', trackingEvent.uri);
-//                        _adsVideoPlayer.addEventListener('ended', _postFunction(trackingEvent.uri),false);
+                        _addEventListener(_adsVideoPlayer, 'ended', _postFunction(trackingEvent.uri, true));
                         break;
                     case 'creativeView':
-                        _addEventListener(_adsVideoPlayer, 'loadeddata', trackingEvent.uri);
+                        _addEventListener(_adsVideoPlayer, 'loadeddata', _postFunction(trackingEvent.uri), true);
                         break;
                     case 'firstQuartile':
                     case 'thirdQuartile':
@@ -80,10 +79,10 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
                         uriUnmute = trackingEvent.uri;
                         break;
                     case 'pause':
-                        _addEventListener(_adsVideoPlayer, 'pause', '', _CB_Pause(trackingEvent.uri));
+                        _addEventListener(_adsVideoPlayer, 'pause', _CB_Pause(trackingEvent.uri));
                         break;
                     case 'resume':
-                        _addEventListener(_adsVideoPlayer, 'play', '', _CB_Resume(trackingEvent.uri));
+                        _addEventListener(_adsVideoPlayer, 'play', _CB_Resume(trackingEvent.uri));
                         break;
                     case 'fullscreen':
                         _addFullScreenListener(trackingEvent.uri);
@@ -92,11 +91,11 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
             }
 
             if (uriMute !== '' || uriUnmute !== '') {
-                _addEventListener(_adsVideoPlayer, 'volumechange', '', _CB_MuteUnmute(uriMute, uriUnmute));
+                _addEventListener(_adsVideoPlayer, 'volumechange', _CB_MuteUnmute(uriMute, uriUnmute));
             }
 
             if (timeUpdateFlag) {
-                _addEventListener(_adsVideoPlayer, 'timeupdate', '', _CB_Progress);
+                _addEventListener(_adsVideoPlayer, 'timeupdate', _CB_Progress);
             }
 
             //   _testFullScreen();
@@ -105,23 +104,26 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
         },
 
         _postFunction = function(uri) {
-            var _uri = uri;
             var postFn = function() {
-                _trackingUrl('POST', _uri);
-            }.bind(this);
+                _trackingUrl('POST', uri);
+            };
             return postFn;
         },
 
-        _addEventListener = function(element, type, uri, callback) {
-            if (callback === undefined || callback === null) {
-                callback = _postFunction(uri);
-            }
-            element.addEventListener(type, callback, false);
+        _addEventListener = function(element, type, callback, once) {
+            var _cb = function() {
+                if (once && typeof once === "boolean") {
+                    element.removeEventListener(type, _cb, false);
+                }
+                callback();
+            };
+            element.addEventListener(type, _cb, false);
             _listeners.push({
                 element: element,
                 type: type,
-                callback: callback
+                callback: _cb
             });
+
         },
 
         _CB_MuteUnmute = function(uriMute, uriUnmute) {
