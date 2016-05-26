@@ -38,6 +38,8 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
         _listeners = [],
         _isPaused,
         _isMuted,
+        _uriTracker =new TrackingUriRequest(_debug),
+
 
         _init = function(trackingEvents) {
             var i,
@@ -103,7 +105,7 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
 
         _postFunction = function(uri) {
             var postFn = function() {
-                _trackingUrl('POST', uri);
+                _uriTracker.http('POST', uri);
             };
             return postFn;
         },
@@ -132,11 +134,11 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
                 currentState = _adsVideoPlayer.muted || (_adsVideoPlayer.volume === 0.0 ? true : false);
                 if (!currentState) {
                     if (_isMuted && uriUnmute !== '') {
-                        _trackingUrl('POST', uriUnmute);
+                        _uriTracker.http('POST', uriUnmute);
                     }
                 } else {
                     if (!_isMuted && uriMute !== '') {
-                        _trackingUrl('POST', uriMute);
+                        _uriTracker.http('POST', uriMute);
                     }
                 }
                 _isMuted = currentState;
@@ -148,7 +150,7 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
             var cb = function() {
                 _debug.log('pause CB ');
                 if (!_isPaused && _adsVideoPlayer.currentTime < _adsVideoPlayer.duration) { //if already in pause ==> do nothing
-                    _trackingUrl('POST', uri);
+                    _uriTracker.http('POST', uri);
                     _isPaused = _adsVideoPlayer.paused;
                 }
             };
@@ -159,7 +161,7 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
             var cb = function() {
                 _debug.log('resume CB ');
                 if (_isPaused && _adsVideoPlayer.currentTime > 0) { //if already not in pause ==> do nothing
-                    _trackingUrl('POST', uri);
+                    _uriTracker.http('POST', uri);
                     _isPaused = _adsVideoPlayer.paused;
                 }
             };
@@ -175,7 +177,7 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
                     document.mozFullScreen ||
                     document.webkitIsFullScreen;
                 if (isFullScreen) {
-                    _trackingUrl('POST', _uri);
+                    _uriTracker.http('POST', _uri);
                 }
             }.bind(this);
             return cb;
@@ -199,19 +201,19 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
                 switch (trackingProgressEvent.trackingEvent.event) {
                     case 'firstQuartile':
                         if (ratio >= 0.25) {
-                            _trackingUrl('POST', trackingProgressEvent.trackingEvent.uri);
+                            _uriTracker.http('POST', trackingProgressEvent.trackingEvent.uri);
                             trackingProgressEvent.checked = true;
                         }
                         break;
                     case 'thirdQuartile':
                         if (ratio >= 0.75) {
-                            _trackingUrl('POST', trackingProgressEvent.trackingEvent.uri);
+                            _uriTracker.http('POST', trackingProgressEvent.trackingEvent.uri);
                             trackingProgressEvent.checked = true;
                         }
                         break;
                     case 'midpoint':
                         if (ratio >= 0.50) {
-                            _trackingUrl('POST', trackingProgressEvent.trackingEvent.uri);
+                            _uriTracker.http('POST', trackingProgressEvent.trackingEvent.uri);
                             trackingProgressEvent.checked = true;
                         }
                         break;
@@ -239,37 +241,7 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
             _removeListeners();
             _trackingProgressEvents = [];
 
-        },
-
-        _trackingUrl = function(type, uri, callback) {
-
-            var http;
-
-            if (uri === "") {
-                return;
-            }
-
-            http = new XMLHttpRequest();
-
-            http.open(type, uri, true);
-            http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-            http.timeout = 2000;
-
-            http.onloadend = http.onerror = function() {
-                if (callback) {
-                    callback(http.status, http.response);
-                }
-            };
-
-            if (type === 'GET') {
-                http.send();
-            } else {
-                _debug.log('post to  ' + uri);
-                http.send();
-            }
-
         };
-
 
     return {
         init: _init,
