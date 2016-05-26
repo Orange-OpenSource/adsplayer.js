@@ -33,6 +33,7 @@ AdsPlayer.AdsMediaPlayer = function() {
         _eventBus = AdsPlayer.EventBus.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
+        _uriTracker = new TrackingUriRequest(_debug),
         _adLegth,
 
 
@@ -183,6 +184,10 @@ AdsPlayer.AdsMediaPlayer = function() {
                     //throw (e);
                     _errorHandler.sendWarning(AdsPlayer.ErrorHandler.UNAVAILABLE_LINK, "Unvailable link ou inaccessible server", e.target);
                 }
+            }
+
+            for (i = 0; i < _ad.creatives[0].linear.videoClicks.clickTracking.length; i++) {
+                _uriTracker.http('POST', _ad.creatives[0].linear.videoClicks.clickTracking[i].uri);
             }
         },
 
