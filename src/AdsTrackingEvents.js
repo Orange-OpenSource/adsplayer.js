@@ -125,48 +125,44 @@ AdsPlayer.AdsTrackingEvents = function(adsContainer, adsVideoPlayer) {
         },
 
         _CB_MuteUnmute = function(uriMute, uriUnmute) {
-            var _uriMute = uriMute,
-                _uriUnmute = uriUnmute;
 
             var cb = function() {
                 var currentState;
                 _debug.log('Mute/Unmute CB ');
                 currentState = _adsVideoPlayer.muted || (_adsVideoPlayer.volume === 0.0 ? true : false);
                 if (!currentState) {
-                    if (_isMuted && _uriUnmute !== '') {
-                        _trackingUrl('POST', _uriUnmute);
+                    if (_isMuted && uriUnmute !== '') {
+                        _trackingUrl('POST', uriUnmute);
                     }
                 } else {
-                    if (!_isMuted && _uriMute !== '') {
-                        _trackingUrl('POST', _uriMute);
+                    if (!_isMuted && uriMute !== '') {
+                        _trackingUrl('POST', uriMute);
                     }
                 }
                 _isMuted = currentState;
-            }.bind(this);
+            };
             return cb;
         },
 
         _CB_Pause = function(uri) {
-            var _uri = uri;
             var cb = function() {
                 _debug.log('pause CB ');
-                if (!_isPaused) { //if already in pause ==> do nothing
-                    _trackingUrl('POST', _uri);
+                if (!_isPaused && _adsVideoPlayer.currentTime < _adsVideoPlayer.duration) { //if already in pause ==> do nothing
+                    _trackingUrl('POST', uri);
                     _isPaused = _adsVideoPlayer.paused;
                 }
-            }.bind(this);
+            };
             return cb;
         },
 
         _CB_Resume = function(uri) {
-            var _uri = uri;
             var cb = function() {
                 _debug.log('resume CB ');
-                if (_isPaused) { //if already not in pause ==> do nothing
-                    _trackingUrl('POST', _uri);
+                if (_isPaused && _adsVideoPlayer.currentTime > 0) { //if already not in pause ==> do nothing
+                    _trackingUrl('POST', uri);
                     _isPaused = _adsVideoPlayer.paused;
                 }
-            }.bind(this);
+            };
             return cb;
         },
 
