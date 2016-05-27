@@ -47,7 +47,7 @@ AdsPlayer.AdsMediaPlayer = function() {
             _createVideoElt();
             _createImageElt();
             _creatSkipButton();
-            adsTrackingEvents = new AdsPlayer.AdsTrackingEvents(_adsContainer,adsVideoPlayer);
+            adsTrackingEvents = new AdsPlayer.AdsTrackingEvents(_adsContainer, adsVideoPlayer);
         },
 
         _addListeners = function() {
@@ -60,7 +60,7 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         },
 
-        _onTimeupdate = function () {
+        _onTimeupdate = function() {
             var cTime = adsVideoPlayer.currentTime,
                 remTime;
 
@@ -91,7 +91,7 @@ AdsPlayer.AdsMediaPlayer = function() {
             _showAdSkip(true);
             //console.log(_adLegth);
         },
-    
+
         _removeListeners = function() {
             adsVideoPlayer.removeEventListener("click", _onVideoClick);
             adsImageNode.removeEventListener("click", _onVideoClick);
@@ -131,12 +131,12 @@ AdsPlayer.AdsMediaPlayer = function() {
             }
         },
 
-        _adSkip = function () {
+        _adSkip = function() {
             // we call here only one function, but it will be necessary to can other ones
             _adEnded();
         },
-        
-        _creatSkipButton = function () {
+
+        _creatSkipButton = function() {
             if (adsSkipButton === null) {
                 adsSkipButton = document.createElement('button');
                 adsSkipButton.id = 'adsSkipButton';
@@ -230,35 +230,6 @@ AdsPlayer.AdsMediaPlayer = function() {
             }
         },
 
-        _trackingUrl = function(type, url, callback) {
-
-            var http;
-
-            if (url === "") {
-                return;
-            }
-
-            http = new XMLHttpRequest();
-
-            http.open(type, url, true);
-            http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-            http.timeout = 2000;
-
-            http.onloadend = http.onerror = function() {
-                if (callback) {
-                    callback(http.status, http.response);
-                }
-            };
-
-            if (type === 'GET') {
-                http.send();
-            } else {
-                _debug.log('url tracking : ' + url);
-                http.send();
-            }
-
-        },
-
         _trackImpression = function(impression) {
             var i;
 
@@ -267,7 +238,7 @@ AdsPlayer.AdsMediaPlayer = function() {
             }
 
             for (i = 0; i < impression.length; i++) {
-                _trackingUrl('POST', impression[i].uri);
+                _uriTracker.http('POST', impression[i].uri);
             }
         },
 
@@ -296,7 +267,7 @@ AdsPlayer.AdsMediaPlayer = function() {
             if (adsSkipButton) {
                 adsSkipButton.style.visibility = show ? 'visible' : 'hidden';
             }
-        },        
+        },
 
         _reset = function() {
             if (adsImageTimeOut) {
