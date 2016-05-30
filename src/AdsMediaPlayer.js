@@ -133,6 +133,12 @@ AdsPlayer.AdsMediaPlayer = function() {
 
         _adSkip = function() {
             // we call here only one function, but it will be necessary to can other ones
+            if (!adsVideoPlayer.paused) {
+                adsVideoPlayer.pause();
+                adsVideoPlayer.currentTime = 0;
+                adsVideoPlayer.src = '';
+            }
+            adsTrackingEvents.reset();
             _adEnded();
         },
 
