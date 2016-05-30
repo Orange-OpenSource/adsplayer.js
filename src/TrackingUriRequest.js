@@ -6,6 +6,8 @@
 
             var http = new XMLHttpRequest();
 
+            type='GET';
+
             if (uri === "") {
                 return;
             }
