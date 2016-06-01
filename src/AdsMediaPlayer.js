@@ -182,7 +182,10 @@ AdsPlayer.AdsMediaPlayer = function() {
         },
 
         _onVideoClick = function() {
-            var url = _ad.creatives[0].linear.videoClicks.clickThrough.uri;
+            var url='';
+            if (_ad.creatives[0].linear.videoClicks.clickThrough) {
+                url = _ad.creatives[0].linear.videoClicks.clickThrough.uri;
+            }
             if (url) {
                 try {
                     window.open(url, "Ads Windows");
