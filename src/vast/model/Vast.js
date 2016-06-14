@@ -62,20 +62,8 @@ AdsPlayer.vast.model.Vast = function () {
     "use strict";
 
     this.version = '';
-    this.ads = [];     // pointer to any number of Ad objects
-    this.model = {};
-
+    this.ad = null;
 };
-
-/**
- * [model description]
- * @return {[type]} [description]
- */
-/*AdsPlayer.vast.model = function () {
-    "use strict";
-    this.Ad = {};
-
-};*/
 
 /**
  * [Ad description]
@@ -84,7 +72,7 @@ AdsPlayer.vast.model.Ad = function () {
     "use strict";
     
     this.id = '';
-    this.inLine = null;       // pointer to one InLine object
+    this.inLine = null;
     this.wrapper = null;
 };
 
@@ -94,14 +82,14 @@ AdsPlayer.vast.model.Ad = function () {
 AdsPlayer.vast.model.Ad.InLine = function () {
     "use strict";
 
-    this.adSystem = '';              // Ad server (required)
-    this.adTitle = '';               // Ad Title
-    this.description = '';           // ad Description (optional)
-    this.survey= '';                 // URL of request to survey vendor
-    this.error = '';                 // URL to request if ad does not play due to error
-    this.impression = [];            // URI to track impression. 
-    this.creatives = [];             // pointer to any number of creative objects : AdsPlayer.vast.model.Ad.Creative
-    this.extentions = [];            // Any valid XML may be included in the Extensions node 
+    this.adSystem = '';                 // [Required] Source ad server
+    this.adTitle = '';                  // [Required] Title
+    this.description = '';              // [Optional] Description
+    this.survey = '';                   // [Optional] URI of request to survey vendor
+    this.error = '';                    // [Optional] URI to request if ad does not play due to error
+    this.impression = null;             // [Required] URI to track impression. 
+    this.creatives = [];                // [Required] Creative elements
+    this.extensions = [];               // [Optional] Any valid XML may be included in the Extensions node 
 };
 
 AdsPlayer.vast.model.Ad.InLine.prototype = {
@@ -109,16 +97,16 @@ AdsPlayer.vast.model.Ad.InLine.prototype = {
 };
 
 /**
- * [Impressions description]
+ * [Impression description]
  */
-AdsPlayer.vast.model.Ad.Impressions = function () {
+AdsPlayer.vast.model.Ad.Impression = function () {
     "use strict";
-    this.uri = '';                 // 
-    this.id = '';                  // optional 
+    this.uri = '';                      // [Required] URI to track Impression
+    this.id = '';                       // [Optional] Identifier 
 };
 
-AdsPlayer.vast.model.Ad.Impressions.prototype = {
-    constructor: AdsPlayer.vast.model.Ad.Impressions
+AdsPlayer.vast.model.Ad.Impression.prototype = {
+    constructor: AdsPlayer.vast.model.Ad.Impression
 };
 
 /**
@@ -126,8 +114,8 @@ AdsPlayer.vast.model.Ad.Impressions.prototype = {
  */
 AdsPlayer.vast.model.Ad.Extensions = function () {
     "use strict";
-    this.uri = '';                 // 
-    this.other = '';                  // optional 
+    this.uri = '';                      // 
+    this.other = '';                    // 
 };
 
 AdsPlayer.vast.model.Ad.Extensions.prototype = {
@@ -140,12 +128,12 @@ AdsPlayer.vast.model.Ad.Extensions.prototype = {
 AdsPlayer.vast.model.Ad.Creative = function () {
     "use strict";
 
-    this.id = '';                       // optional : identifier
-    this.adId = '';                     // optional : Ad-ID for the creative (formerly ISCI) 
-    this.sequence = 0;                  // optional : the preferred order in which multiple Creatives should be displayed 
-    this.linear = null;                 // pointer to a unique (if any) linear Ad : AdsPlayer.vast.model.Ad.Creative
-    this.CompanionAds = [];             // pointer to any number of companions Ads : AdsPlayer.vast.model.Ad.Creative.CompanionAds
-    this.nonLinearAds = [];             // pointer to any number of non-linear Ads : AdsPlayer.vast.model.Ad.Creative.NonLinearAds
+    this.id = '';                       // [Optional] Identifier
+    this.adId = '';                     // [Optional] Ad-ID for the creative (formerly ISCI) 
+    this.sequence = 0;                  // [Optional] The preferred order in which multiple Creatives should be displayed 
+    this.linear = null;                 // [Optional] Linear ad
+    this.CompanionAds = [];             // [Optional] Companion ads
+    this.nonLinearAds = [];             // [Optional] Non-linear ads
 };
 
 AdsPlayer.vast.model.Ad.Creative.prototype = {
@@ -156,11 +144,11 @@ AdsPlayer.vast.model.Ad.Creative.prototype = {
 // Linear object
 AdsPlayer.vast.model.Ad.Creative.Linear = function () {
     "use strict";
-    this.duration = 0;                // Duration in standard time format, hh:mm:ss
-    this.trackingEvents = [];         // pointer to any number of tracking objects : AdsPlayer.vast.model.Ad.Creative.Tracking
-    this.adParameters = '';           // Data to be passed into the video ad
-    this.videoClicks = null;          // pointer video clicks object : AdsPlayer.vast.model.Ad.Creative.VideoClicks
-    this.mediaFiles = [];             // pointer to media file object : AdsPlayer.vast.model.Ad.Creative.MediaFile
+    this.duration = 0;                  // [Required] Duration in standard time format, hh:mm:ss
+    this.trackingEvents = [];           // [Optional] Tracking events elements
+    this.adParameters = '';             // [Optional] Data to be passed into the video ad
+    this.videoClicks = null;            // [Optional] Video clicks
+    this.mediaFiles = [];               // [Required] Media file elements
 };
 
 AdsPlayer.vast.model.Ad.Creative.Linear.prototype = {
@@ -173,12 +161,26 @@ AdsPlayer.vast.model.Ad.Creative.Linear.prototype = {
  */
 AdsPlayer.vast.model.Ad.TrackingEvent = function () {
     "use strict";
-    this.event = '';   // 'creativeView'
-    this.uri = '';
+    this.uri = '';                      // [Optional] URI to track various events during playback
+    this.event = '';                    // [Required] The name of the event to track for the Linear element
 };
 
 AdsPlayer.vast.model.Ad.TrackingEvent.prototype = {
     constructor: AdsPlayer.vast.model.Ad.TrackingEvent
+};
+ 
+/**
+ * [VideoClicks description]
+ */
+AdsPlayer.vast.model.Ad.Creative.VideoClicks = function () {
+    "use strict";
+    this.clickThrough = '';             // [Optional] URI to open as destination page when user clicks on the video
+    this.clickTracking = '';            // [Optional] URI to request for tracking purposes when user clicks on the video 
+    this.customClick = '';              // [Optional] URI to request on custom events such as hotspotted video
+};
+
+AdsPlayer.vast.model.Ad.Creative.VideoClicks.prototype = {
+    constructor: AdsPlayer.vast.model.Ad.Creative.VideoClicks
 };
 
 /**
@@ -187,77 +189,23 @@ AdsPlayer.vast.model.Ad.TrackingEvent.prototype = {
 AdsPlayer.vast.model.Ad.Creative.MediaFile = function () {
     "use strict";
 
-    this.id = '';                   // optional : identifier
-    this.delivery = '';             // required: Method of delivery of ad
-    this.type = '';                 // required : MIME type
-    this.bitrate = 0;               // optional : bitrate of encoded video in Kbps 
-    this.width = 0;                 // requierd : Pixel dimensions of video
-    this.height = 0;                // requierd : Pixel dimensions of video
-    this.scalable = true;             // optional : whether it is acceptable to scale the image.
-    this.maintainAspectRatio = true;  // optional : whether the ad must have its aspect ratio maintained when scaled
-    this.apiFramework = '';           // optional : defines the method to use for communication if the MediaFile is interactive. 
+    this.id = '';                       // [Optional] Identifier
+    this.delivery = '';                 // [Required] Method of delivery of ad ('streaming' or 'progressive')
+    this.type = '';                     // [Required] MIME type
+    this.bitrate = 0;                   // [Optional] Bitrate of encoded video in Kbps 
+    this.width = 0;                     // [Required] Pixel dimensions of video
+    this.height = 0;                    // [Required] Pixel dimensions of video
+    this.scalable = true;               // [Optional] Whether it is acceptable to scale the image.
+    this.maintainAspectRatio = true;    // [Optional] Whether the ad must have its aspect ratio maintained when scaled
+    this.apiFramework = '';             // [Optional] Defines the method to use for communication if the MediaFile is interactive. 
     this.uri = '';
 };
 
 AdsPlayer.vast.model.Ad.Creative.MediaFile.prototype = {
     constructor: AdsPlayer.vast.model.Ad.Creative.MediaFile
 };
- 
-/**
- * [VideoClicks description]
- */
-AdsPlayer.vast.model.Ad.Creative.VideoClicks = function () {
-    "use strict";
-    this.clickThrough = null;                 // URI to open as destination page when user clicks on the video
-    this.clickTracking = [];                // URIs to request for tracking purposes when user clicks on the video 
-    this.customClick = [];                  // URIs to request on custom events such as hotspotted video  
-};
-
-AdsPlayer.vast.model.Ad.Creative.VideoClicks.prototype = {
-    constructor: AdsPlayer.vast.model.Ad.Creative.VideoClicks
-};
-
-/**
- * [ClickThrough description]
- */
-AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough = function () {
-    "use strict";
-    this.uri = '';                 // 
-    this.id = '';                  // optional 
-};
-
-AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough.prototype = {
-    constructor: AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough
-};
-
-/**
- * [ClickTracking description]
- */
-AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking = function () {
-    "use strict";
-    this.uri = '';                 // URL to request for tracking purposes when user clicks on the video
-    this.id = '';                  // optional 
-};
-
-AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking.prototype = {
-    constructor: AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickTracking
-};
-
-/**
- * [CustomClick description]
- */
-AdsPlayer.vast.model.Ad.Creative.VideoClicks.CustomClick = function () {
-    "use strict";
-    this.uri = '';                 // 
-    this.id = '';                  // optional 
-};
-
-AdsPlayer.vast.model.Ad.Creative.VideoClicks.CustomClick.prototype = {
-    constructor: AdsPlayer.vast.model.Ad.Creative.VideoClicks.CustomClick
-};
 
 
-//---------------------------ici -----------------------------
 /**
  * [StaticResource description]
  */
