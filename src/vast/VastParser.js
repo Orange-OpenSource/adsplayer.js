@@ -15,17 +15,58 @@
 AdsPlayer.vast.VastParser = function(vastBaseUrl) {
     "use strict";
 
-    var _vastBaseUrl = vastBaseUrl;
-    var parser = new AdsPlayer.utils.DOMParser(),
-        /*
-    _getAdsList = function() {
-        if (_xmlDoc) {
-            return 
-        }
-        return [];
-    },*/
+    var /*_getElement = function(node, name) {
+            var elements = node.getElementsByTagName(name);
+            if (elements.length !== 1) {
+                return null;
+            }
+            return elements[0];
+        },
 
-        _checkUri = function (uri) {
+        _getElements = function(node, name) {
+            return node.getElementsByTagName(name);
+        },
+
+        _getSubElements = function(node, childNodeName, subChildNodeName) {
+            var element = _getElement(node, name);
+            if (element === null) {
+                return [];
+            }
+            return element.getElementsByTagName(subName);
+        },
+
+        _getChildNode = function (node, name) {
+            if (!node || !node.childNodes) {
+                return null;
+            }
+            for (var i = 0; i < node.childNodes.length; i++) {
+                if (node.childNodes[i].nodeName === name) {
+                    return node.childNodes[i];
+                }
+            }
+            return null;
+        },
+
+        _getNodeTextValue = function (node) {
+            var cdataSection = _getChildNode(node, '#cdata-section'),
+                textSection = _getChildNode(node, '#text');
+            if (cdataSection) {
+                return cdataSection.nodeValue;
+            } else if (textSection) {
+                return textSection.nodeValue;
+            }
+            return '';
+        },
+
+        _getChildNodeTextValue = function (node, name) {
+            var element = _getElement(node, name);
+            if (element === null) {
+                return '';
+            }
+            return _getNodeTextValue(element);
+        },*/
+
+        /*_checkUri = function (uri) {
             if (uri.indexOf('http://') === -1) {
                 uri = _vastBaseUrl + uri;
             }
@@ -48,7 +89,6 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
             return parsedTime;
 
         },
-
 
         _getImpression = function(theInLineNode) {
             var impressions = [];
@@ -84,20 +124,7 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
             }
             return extensions;
         },
-        /*
-    _getMediafiles = function() {
-               var linearNode = parser.getChildNode(creative, 'Linear');
-        var linear = new AdsPlayer.vast.model.Ad.Creative.Linear();
 
-        linear.duration = (parser.getChildNode(linearNode, 'Duration')? linearNode.textContent: '');
-        linear.adParameters = (parser.getChildNode(linearNode, 'AdParameters')? linearNode.textContent: '');
-        linear.trackingEvents = []; // TO DO
-        linear.videoClicks = null; // TO DO
-        linear.mediaFiles = _getMediafiles(linearNode);    
-        return linear;
-
-    },
-*/
         _getClickThrough = function(theVideoClicks) {
             var clickthroughNode = parser.getChildNode(theVideoClicks, 'ClickThrough'), // there is only one clickthrough node
                 clickThrough = new AdsPlayer.vast.model.Ad.Creative.VideoClicks.ClickThrough();
@@ -263,36 +290,178 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
                 vast.ads.push(myAd);
             }
             return vast;
-         };
+         },*/
+
+
+
+
+
+
+
+
+
+
+        _getTrackingEvent = function (trackingNode) {
+            var trackingEvent = new AdsPlayer.vast.model.Ad.TrackingEvent();
+
+            trackingEvent.event = trackingNode.getAttribute('event');
+            trackingEvent.uri = xmldom.getNodeTextValue(trackingNode);
+
+            return trackingEvent;
+        },
+
+        _getVideoClicks = function (videoClicksNode) {
+            var videoClicks = new AdsPlayer.vast.model.Ad.Creative.VideoClicks(),
+                nodeName,
+                nodeValue,
+                i;
+
+            for (i = 0; i < videoClicksNode.childNodes.length; i++) {
+                nodeName = videoClicksNode.childNodes[i].nodeName;
+                nodeValue = xmldom.getNodeTextValue(videoClicksNode.childNodes[i]);
+
+                switch (nodeName) {
+                    case "ClickThrough":
+                        videoClicks.clickThrough = nodeValue;
+                        break;
+                    case "ClickTracking":
+                        videoClicks.clickTracking = nodeValue;
+                        break;
+                    case "CustomClick":
+                        videoClicks.customClick = nodeValue;
+                        break;
+                }
+            }
+
+            return videoClicks;
+        },
+
+        _getMediaFile = function (mediaFileNode) {
+            var mediaFile = new AdsPlayer.vast.model.Ad.Creative.MediaFile();
+
+            mediaFile.id = mediaFileNode.getAttribute('id');
+            mediaFile.delivery = mediaFileNode.getAttribute('delivery');
+            mediaFile.type = mediaFileNode.getAttribute('type');
+            mediaFile.bitrate = mediaFileNode.getAttribute('bitrate');
+            mediaFile.width = mediaFileNode.getAttribute('width');
+            mediaFile.height = mediaFileNode.getAttribute('height');
+            mediaFile.scalable = mediaFileNode.getAttribute('scalable');
+            mediaFile.maintainAspectRatio = mediaFileNode.getAttribute('maintainAspectRatio');
+            mediaFile.apiFramework = mediaFileNode.getAttribute('apiFramework');
+            mediaFile.uri = xmldom.getNodeTextValue(mediaFileNode);
+
+            return mediaFile;
+        },
+
+        _getLinear = function (linearNode) {
+            var linear = new AdsPlayer.vast.model.Ad.Creative.Linear(),
+                trackingNodes,
+                videoClicksNode,
+                mediaFileNodes,
+                i;
+
+            linear.duration = xmldom.getChildNodeTextValue(linearNode, 'Duration');
+            linear.adParameters = xmldom.getChildNodeTextValue(linearNode, 'AdParameters');
+
+            trackingNodes = xmldom.getSubElements(linearNode, 'TrackingEvents', 'Tracking');
+            for (i = 0; i < trackingNodes.length; i++) {
+                linear.trackingEvents.push(_getTrackingEvent(trackingNodes[i]));
+            }
+
+            videoClicksNode = xmldom.getElement(linearNode, 'VideoClicks');
+            if (videoClicksNode) {
+                linear.videoClicks = _getVideoClicks(videoClicksNode);
+            }
+
+            mediaFileNodes = xmldom.getSubElements(linearNode, 'MediaFiles', 'MediaFile');
+            for (i = 0; i < mediaFileNodes.length; i++) {
+                linear.mediaFiles.push(_getMediaFile(mediaFileNodes[i]));
+            }
+
+            return linear;
+        },
+
+        _getCreative = function (creativeNode) {
+            var creative = new AdsPlayer.vast.model.Ad.Creative(),
+                linearNode;
+
+            creative.id = creativeNode.getAttribute('id');
+            creative.adId = creativeNode.getAttribute('AdID');
+            creative.sequence = creativeNode.getAttribute('sequence');
+
+            linearNode = xmldom.getElement(creativeNode, 'Linear');
+            if (linearNode) {
+                creative.linear = _getLinear(linearNode);
+            }
+
+            // TODO: get Companion and non-Linear elements
+
+            return creative;
+        },
+
+        _getInLine = function(adNode) {
+            var inLine = new AdsPlayer.vast.model.Ad.InLine(),
+                inLineNode = xmldom.getElement(adNode, 'InLine'),
+                impressionNode,
+                creativeNodes,
+                i;
+
+            if (inLineNode === null) {
+                return null;
+            }
+
+            inLine.adSystem = xmldom.getChildNodeTextValue(inLineNode, 'AdSystem');
+            inLine.adTitle = xmldom.getChildNodeTextValue(inLineNode, 'AdTitle');
+            inLine.description = xmldom.getChildNodeTextValue(inLineNode, 'Description');
+            inLine.survey = xmldom.getChildNodeTextValue(inLineNode, 'Survey');
+            inLine.error = xmldom.getChildNodeTextValue(inLineNode, 'Error');
+
+            impressionNode = xmldom.getElement(inLineNode, 'Impression');
+            if (impressionNode) {
+                inLine.impression = new AdsPlayer.vast.model.Ad.Impression();
+                inLine.impression.id = impressionNode.getAttribute('id');
+                inLine.impression.uri = xmldom.getNodeTextValue(impressionNode);
+            }
+
+            creativeNodes = xmldom.getSubElements(inLineNode, 'Creatives', 'Creative');
+            for (i = 0; i < creativeNodes.length; i++) {
+                inLine.creatives.push(_getCreative(creativeNodes[i]));
+            }
+
+            return inLine;
+        },
+
+        _getAd = function(vastNode, vast) {
+            var adNode = xmldom.getElement(vastNode, 'Ad');
+
+            if (adNode === null) {
+                return;
+            }
+
+            vast.ad = new AdsPlayer.vast.model.Ad();
+            vast.ad.id = adNode.getAttribute('id');
+            vast.ad.inLine = _getInLine(adNode);
+        };
 
     return {
 
         /**
-         * [init description]
-         * @return {[type]} [description]
-         */
-        init: function() {
-            // to be used later
-        },
+        * Parses the VAST XML DOM and get the triggers.
+        * @param {object} xmlDom - the XML DOM to parse
+        */
+        parse: function(xmlDom) {
+            var vast = new AdsPlayer.vast.model.Vast(),
+                vastNode = xmldom.getElement(xmlDom, 'VAST');
 
-        /**
-         * [parse description]
-         * @param  {[type]} vastDom [description]
-         * @return {[type]}         [description]
-         */
-        parse: function(vastDom) {
+            if (vastNode === null) {
+                return vast;
+            }
 
-            return _parse(vastDom);
-        },
+            vast.version = vastNode.getAttribute('version');
 
-        /**
-         * [load description]
-         * @param  {[type]} vastUrl [description]
-         * @return {[type]}         [description]
-         */
-        load: function(vastUrl) {
-            // this function must be handled by AdsPlayerController
+            _getAd(vastNode, vast);
 
+            return vast;
         }
     };
 };
