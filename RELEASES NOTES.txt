@@ -1,6 +1,8 @@
-### Release Notes v1.0.0 (2016/05/11) 
+### Release Notes v0.0.1 (2016/05/13) 
+* 1st version for ad-insertion plugin for hasplayer.js
 * Based on Mast specification 0.9 and Vast specification 2.0
-* Implements preroll digital video advertising. Can play several successive ads supplied by one or several Vast.
-* Supports ads video format which can be handled by the browser like mp4
-* Supports also ads image formats jpeg, gif and png
-* Can consider the clickthrough link allowing user click on ad (video or image)
+* Supports preroll ad-insertion scenario
+* Supports successive ads playing supplied by one or multiple Vast
+* Supports playing of ads as video files which format is natively supported by the browser
+* Supports playing of ads as image files in jpeg, gif and png formats
+* Supports click-through link when user clicks on ad (video or image)
