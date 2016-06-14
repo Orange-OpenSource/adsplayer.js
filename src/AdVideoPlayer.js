@@ -7,8 +7,14 @@ var AdVideoPlayer =  function () {
 	this.video;
 
 	this.isMediaSupported = function (mimeType) {
-		;
-	}
+		if (!(element instanceof HTMLMediaElement)) {
+		//throw "element must be of type HTMLMediaElement";
+		_debug.log('element must be of type HTMLMediaElement');
+		}
+
+		var canPlay = element.canPlayType(codec);
+		return (canPlay === "probably" || canPlay === "maybe");
+	};
 };
 
 
