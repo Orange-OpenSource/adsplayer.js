@@ -41,6 +41,9 @@ AdsPlayer.AdsPlayerController = function() {
 
     var _mainPlayer = null,
         _mainVideo = null,
+        _mast = null,
+        _triggerManagers = [],
+        _adsPlayerManager = null,
         _adsContainer = null,
         _adsMediaPlayer = null,
         _listCues = [],
@@ -48,6 +51,7 @@ AdsPlayer.AdsPlayerController = function() {
         _listVastAds = [], // this table is used to track the (groups of) ads to be played
         _fileLoader = new AdsPlayer.FileLoader(),
         _mastParser = new AdsPlayer.mast.MastParser(),
+        _vastParser = new AdsPlayer.vast.VastParser(),
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
         _eventBus = AdsPlayer.EventBus.getInstance();
@@ -58,7 +62,7 @@ AdsPlayer.AdsPlayerController = function() {
      * [_onMainVideoLoadStart description]
      * @return {[type]} [description]
      */
-    var _onMainVideoLoadStart = function() {
+    var /*_onMainVideoLoadStart = function() {
             _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
             if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
                 _mainVideo.addEventListener('timeupdate', _onTimeChange);
@@ -305,20 +309,26 @@ AdsPlayer.AdsPlayerController = function() {
                 }
             }
             return listAds;
+        },*/
+
+
+
+
+        _onVideoTimeupdate = function() {
+            _checkTriggersStart(false);
         },
 
-        _loadVast = function(mastTrigger, vastUrl) {
+        _loadVast = function(trigger, url) {
             var deferred = Q.defer(),
-                fileLoader = new AdsPlayer.FileLoader(),
-                vastParser = null,
                 vast = null;
 
-            fileLoader.load(vastUrl).then(
+            _debug.log("Download VAST file: " + url);
+            _fileLoader.load(url).then(
                 function(result) {
-                    vastParser = new AdsPlayer.vast.VastParser(result.baseUrl);
-                    vast = vastParser.parse(result.response);
-                    mastTrigger.ads = mastTrigger.ads.concat(_getVastInfo(vast));
-                    _debug.log('vast file parsed :' + vastUrl);
+                    _debug.log("Parse VAST file");
+                    vast = _vastParser.parse(result.response);
+                    //trigger.vast.push(mastTrigger.ads.concat(_getVastInfo(vast));
+                    trigger.vasts.push(vast);
                     deferred.resolve();
                 },
                 function(error) {
@@ -329,18 +339,19 @@ AdsPlayer.AdsPlayerController = function() {
             return deferred.promise;
         },
 
-        _loadTrigger = function(mastTrigger, mastBaseUrl) {
-            var i,
+        _loadTriggerVasts = function(trigger) {
+            var deferred = Q.defer(),
+                i,
                 deferLoadVasts = [],
                 uri;
-            var deferred = Q.defer();
 
-            for (i = 0; i < mastTrigger.sources.length; i++) {
-                uri = mastTrigger.sources[i].uri;
+            for (i = 0; i < trigger.sources.length; i++) {
+                uri = trigger.sources[i].uri;
+                // check for relative uri path
                 if (uri.indexOf('http://') === -1) {
-                    uri = mastBaseUrl + uri;
+                    uri = _mast.baseUrl + uri;
                 }
-                deferLoadVasts.push(_loadVast(mastTrigger, uri));
+                deferLoadVasts.push(_loadVast(trigger, uri));
             }
 
             Q.all(deferLoadVasts).then(function() {
@@ -351,13 +362,27 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _parseMastFile = function(mastContent, mastBaseUrl) {
-            var deferred = null,
-                mast,
-                i,
-                deferLoadTriggers;
+            var triggerManager,
+                i;
 
-            mast = _mastParser.parse(mastContent);
-            _mastTriggers = mast.triggers;
+            // Parse the MAST file
+            _mast = _mastParser.parse(mastContent);
+
+            if (!_mast) {
+                return;
+            }
+
+            // Store base URL for subsequent VATS files download
+            _mast.baseUrl = mastBaseUrl;
+
+            // Initialize the trigger managers
+            for (i = 0; i < _mast.triggers.length; i++) {
+                triggerManager = new AdsPlayer.TriggerManager();
+                triggerManager.init(_mast.triggers[i]);
+                _triggerManagers.push(triggerManager);
+            }
+
+            /*_mastTriggers = mast.triggers;
 
             //_mastTriggers = _mastParser.parse(mastContent);
 
@@ -376,9 +401,70 @@ AdsPlayer.AdsPlayerController = function() {
                 _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
                 _createCues(_onCueEnter);
                 deferred.resolve();
-            });
+            });*/
+        },
+
+        _playTrigger = function (trigger) {
+            _adsPlayerManager = new AdsPlayer.AdsPlayerManager();
+            _adsPlayerManager.init(trigger.vasts);
+            _adsPlayerManager.start();
+        },
+
+        _activateTrigger = function (trigger) {
+
+            if (trigger.vasts.length === 0) {
+                // Download VAST files
+                _loadTriggerVasts(trigger).then(function () {
+                    _playTrigger(trigger);
+                });
+            } else {
+                _playTrigger(trigger);
+            }
+        },
+
+        _checkTriggersStart = function(itemStart) {
+            var i;
+
+            for (i = 0; i < _triggerManagers.length; i++) {
+                if (_triggerManagers[i].checkStartConditions(_mainVideo, itemStart)) {
+                    _activateTrigger(_triggerManagers[i].getTrigger());
+                    break;
+                }
+            }
+        },
+
+        _checkTriggersEnd = function() {
+            var i;
+
+            for (i = 0; i < _triggerManagers.length; i++) {
+                if (_triggerManagers[i].checkEndConditions(_mainVideo)) {
+                    // Remove trigger manager => will not be activated anymore 
+                    _triggerManagers.splice(0, 1);
+                    i--;
+                }
+            }
 
             return deferred.promise;
+        },
+
+        _start = function() {
+
+            if (!_mast) {
+                return;
+            }
+
+            // Add <video> event listener
+            _mainVideo.addEventListener('timeupdate', _onVideoTimeupdate);
+            _mainVideo.addEventListener('seeking', _onVideoTimeupdate);
+
+            // check for pre-roll trigger
+            _checkTriggersStart(true);
+        },
+
+        _stop = function() {
+            // Remove <video> event listener
+            _mainVideo.removeEventListener('timeupdate', _onVideoTimeupdate);
+            _mainVideo.removeEventListener('seeking', _onVideoTimeupdate);            
         },
 
         _onAdEnded = function( /*msg*/ ) {
@@ -400,46 +486,47 @@ AdsPlayer.AdsPlayerController = function() {
                 _debug.log('play main video');
                 _mainVideo.play();
             }
-        },
+        };
 
         /*_onAborted = function() {
             _onEnded('ad video aborted due to error on the adsMediaPlayer, e.g. : file not found');
         },*/
 
 
-        _playAds = function() {
+        /*_playAds = function() {
             if (_listVastAds.length > 0) {
                 var ad = _listVastAds.shift();
                 _adsMediaPlayer.playAd(ad);
             }
-        };
+        };*/
 
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
-    /**
-     * Initialize the Ads Player Controller.
-     * @method init
-     * @access public
-     * @memberof AdsPlayerController#
-     * @param {Object} mainVideo - the HTML5 video element used by the main media player
-     * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
-     */
+    return {
 
-    var _init = function(player, adsContainer) {
+        /**
+         * Initialize the Ads Player Controller.
+         * @method init
+         * @access public
+         * @memberof AdsPlayerController#
+         * @param {Object} mainVideo - the HTML5 video element used by the main media player
+         * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
+         */
+        init : function(player, adsContainer) {
             _mainPlayer = player;
             _mainVideo = player.getVideoModel().getElement();
             _adsContainer = adsContainer;
 
-            _adsMediaPlayer = new AdsPlayer.AdsMediaPlayer();
+            /*_adsMediaPlayer = new AdsPlayer.AdsMediaPlayer();
             _adsMediaPlayer.init(_adsContainer);
 
             _eventBus.addEventListener("adEnded", _onAdEnded);
 
             _mainVideo.onseeked = function() {
                 _onSeeked();
-            };
+            };*/
 
             _debug.setLevel(4);
         },
@@ -452,20 +539,20 @@ AdsPlayer.AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          * @param {string} mastUrl - the MAST file url
          */
-        _load = function(url) {
+        load : function(url) {
             var deferred = Q.defer();
 
+            // Download and parse MAST file
+            _debug.log("Download MAST file: " + url);
             _fileLoader.load(url).then(function(result) {
-                _debug.log("MAST file loaded");
-                _parseMastFile(result.response, result.baseUrl).then(function() {
-                    deferred.resolve();
-                });
+                _debug.log("Parse MAST file");
+                _parseMastFile(result.response, result.baseUrl);
+                // Start managing triggers and ads playing
+                _debug.log("Start");
+                _start();
+                deferred.resolve();
             }, function(error) {
-                /*_({
-                    type: "error",
-                    data: error
-                });*/
-                deferred.reject();
+                deferred.reject(error);
             });
 
             return deferred.promise;
@@ -477,26 +564,16 @@ AdsPlayer.AdsPlayerController = function() {
          * @access public
          * @memberof AdsPlayerController#
          */
-        _reset = function() {
-            if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
+        stop : function() {
+/*            if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
                 _mainVideo.removeEventListener('timeupdate', _onTimeChange);
             } else {
                 _clearTextTrackCues();
             }
             _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
             _mastTriggers = [];
-            _listVastAds = [];
-        },
-
-        _stop = function() {
-            _reset();
-            _adsMediaPlayer.reset();
-        };
-
-    return {
-        init: _init,
-        stop: _stop,
-        load: _load
+            _listVastAds = [];*/
+        }
     };
 
 };
