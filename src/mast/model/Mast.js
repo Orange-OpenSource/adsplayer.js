@@ -36,6 +36,7 @@ var SourceFormat = {
  */
 AdsPlayer.mast.model.Mast = function () {
     "use strict";
+    this.baseUrl = '';
     this.triggers = [];     // pointer to any number of Ad objects
 };
 
@@ -45,7 +46,6 @@ AdsPlayer.mast.model.Mast = function () {
 AdsPlayer.mast.model.Trigger = function() {
     "use strict";
 
-    this.baseUrl = '';
     this.id = '';
     this.description = 0;
     this.startConditions = []; // pointer to a list of start conditions to  : AdsPlayer.mast.model.Trigger.Condition
