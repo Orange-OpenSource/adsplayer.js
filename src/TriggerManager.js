@@ -6,18 +6,7 @@
  */
 AdsPlayer.TriggerManager = function() {
 
-    var _mainPlayer = null,
-        _mainVideo = null,
-        _adsContainer = null,
-        _adsMediaPlayer = null,
-        _listCues = [],
-        _mastTriggers = [],
-        _listVastAds = [], // this table is used to track the (groups of) ads to be played
-        _fileLoader = new AdsPlayer.FileLoader(),
-        _mastParser = new AdsPlayer.mast.MastParser(),
-        _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
-        _debug = AdsPlayer.Debug.getInstance(),
-        _eventBus = AdsPlayer.EventBus.getInstance(),
+    var _trigger = null,
 
         _parseTime = function(str) {
             var timeParts,
