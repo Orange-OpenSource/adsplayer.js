@@ -5,14 +5,19 @@
  */
 var AdMediaPlayer =  {
 
-
-    play: function (mediaFiles) {
-    	console.log("play() method is not defined");
+    load: function (baseUrl, mediaFiles) {
+		console.log("load() method is not defined");
     },
 
     addEventListener: function (type, listener) {},
 
     removeEventListener: function (type, listener) {},
+
+    getDuration: function () {},
+
+    getCurrentTime: function () {},
+
+    play: function () {},
 
     stop: function () {},
 
