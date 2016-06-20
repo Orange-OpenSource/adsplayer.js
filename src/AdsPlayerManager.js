@@ -17,15 +17,25 @@ AdsPlayer.AdsPlayerManager = function() {
         _debug = AdsPlayer.Debug.getInstance(),
         _eventBus = AdsPlayer.EventBus.getInstance(),
         _mediaPlayer = null,
+        _trackingEventsManager = null,
 
         _onMediaEnded = function () {
+            // Stop the MediaPlayer
             _mediaPlayer.stop();
             _mediaPlayer.reset();
             _mediaPlayer = null;
+
+            // Stop the TrackingEvents manager
+            if (_trackingEventsManager) {
+                _trackingEventsManager.stop();
+                _trackingEventsManager = null;
+            }
+
+            // Play next creative
             _playNextCreative();
         },
 
-        _playMedia = function (mediaFiles) {
+        _playMedia = function (baseUrl, mediaFiles, trackingEvents) {
             var mediaFile,
                 isVideo,
                 isImage;
@@ -47,8 +57,14 @@ AdsPlayer.AdsPlayerManager = function() {
                 //_mediaPlayer = new AdImagePlayer();
             }
 
+            if (trackingEvents) {
+                _trackingEventsManager = new AdsPlayer.TrackingEventsManager();
+                _trackingEventsManager.init(trackingEvents, _mediaPlayer);
+                _trackingEventsManager.start();
+            }
+
             // Load the media files
-            if (_mediaPlayer.load(mediaFiles)) {
+            if (_mediaPlayer.load(baseUrl, mediaFiles)) {
                 // Notify an ad is starting to play
                 _eventBus.dispatchEvent({
                     type: "adMediaStart",
@@ -94,7 +110,7 @@ AdsPlayer.AdsPlayerManager = function() {
             // Play Linear element
             linear = creative.linear;
             _debug.log("Play Linear Ad");
-            _playMedia(linear.mediaFiles);
+            _playMedia(_vasts[_vastIndex].baseUrl, linear.mediaFiles, linear.trackingEvents);
         },
 
         _playAd = function () {
