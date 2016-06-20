@@ -327,6 +327,7 @@ AdsPlayer.AdsPlayerController = function() {
                 function(result) {
                     _debug.log("Parse VAST file");
                     vast = _vastParser.parse(result.response);
+                    vast.baseUrl = result.baseUrl;
                     //trigger.vast.push(mastTrigger.ads.concat(_getVastInfo(vast));
                     trigger.vasts.push(vast);
                     deferred.resolve();
