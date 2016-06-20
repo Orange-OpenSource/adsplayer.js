@@ -15,57 +15,78 @@ AdsPlayer.TrackingEventsManager = function() {
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
         _eventBus = AdsPlayer.EventBus.getInstance(),
+        _eventListeners = [],
 
         _postEvent = function (uri) {
-            if (uri === "") {
-                return;
-            }
             var xhr = new XMLHttpRequest();
             xhr.open('GET', uri, true);
             xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
             xhr.send();
         },
 
-        _addEventListener = function (element, type, callback, once) {
-            var _cb = function() {
-                if (once && typeof once === "boolean") {
-                    element.removeEventListener(type, _cb, false);
-                }
-                callback();
-            };
-            element.addEventListener(type, _cb, false);
-            _listeners.push({
-                element: element,
-                type: type,
-                callback: _cb
-            });
 
+        _addEventListener = function (eventType, trackingEvent, condition) {
+
+            var _listener = function (event) {
+                    if (this.completed === true) {
+                        return;
+                    }
+                    if (this.uri === undefined || this.uri.length === 0) {
+                        return;
+                    }
+                    if (!condition()) {
+                        return;
+                    }
+                    _postEvent(this.uri);
+                    if (this.oneShot === true) {
+                        this.completed = true;
+                    }
+                },
+                _eventListener = {
+                    type: eventType,
+                    listener: _listener.bind(trackingEvent)
+                };
+
+            _adMediaPlayer.addEventListener(eventType, _eventListener.listener);
+            _eventListeners.push(_eventListener);
         },
 
-        _listenPlayerEvents = function () {
+        _addPlayerEventListeners = function () {
 
-
-            for (i = 0; i < _trackingEvents.length; i++) {
+            for (var i = 0; i < _trackingEvents.length; i++) {
                 trackingEvent = _trackingEvents[i];
                 switch (trackingEvent.event) {
                     case 'start':
-                        _addEventListener(_adMediaPlayer, 'playing', _postFunction(trackingEvent.uri), true);
+                        trackingEvent.oneShot = true;
+                        _addEventListener('playing', trackingEvent);
                         break;
                     case 'complete':
-                        _addEventListener(_adMediaPlayer, 'ended', _postFunction(trackingEvent.uri, true));
+                        trackingEvent.oneShot = true;
+                        _addEventListener('ended', trackingEvent);
                         break;
                     case 'creativeView':
-                        _addEventListener(_adMediaPlayer, 'loadeddata', _postFunction(trackingEvent.uri), true);
+                        trackingEvent.oneShot = true;
+                        _addEventListener('loadeddata', trackingEvent);
                         break;
                     case 'firstQuartile':
-                    case 'thirdQuartile':
-                    case 'midpoint':
-                        myEvent = new AdsPlayer.AdsTrackingEvents.ProgressEvent();
-                        myEvent.trackingEvent = trackingEvent;
-                        _trackingProgressEvents.push(myEvent);
-                        timeUpdateFlag = true;
+                        trackingEvent.oneShot = true;
+                        _addEventListener('timeupdate', trackingEvent, function () {
+                            return ((_adMediaPlayer.getCurrentTime() / _adMediaPlayer.getDuration()) >= 0.25);
+                        });
                         break;
-                    case 'mute':
+                    case 'midpoint':
+                        trackingEvent.oneShot = true;
+                        _addEventListener('timeupdate', trackingEvent, function () {
+                            return ((_adMediaPlayer.getCurrentTime() / _adMediaPlayer.getDuration()) >= 0.50);
+                        });
+                        break;
+                    case 'thirdQuartile':
+                        trackingEvent.oneShot = true;
+                        _addEventListener('timeupdate', trackingEvent, function () {
+                            return ((_adMediaPlayer.getCurrentTime() / _adMediaPlayer.getDuration()) >= 0.75);
+                        });
+                        break;
+                    /*case 'mute':
                         uriMute = trackingEvent.uri;
                         break;
                     case 'unmute':
@@ -79,10 +100,17 @@ AdsPlayer.TrackingEventsManager = function() {
                         break;
                     case 'fullscreen':
                         _addFullScreenListener(trackingEvent.uri);
-                        break;
+                        break;*/
                 }
             }
 
+        },
+
+        _removePlayerEventListeners = function () {
+
+            for (var i = 0; i < _eventListeners.length; i++) {
+                _adMediaPlayer.addEventListener(_eventListeners[i].type, _eventListeners[i].listener);
+            }
         };
 
 
@@ -107,12 +135,11 @@ AdsPlayer.TrackingEventsManager = function() {
             if (_trackingEvents.length === 0) {
                 return;
             }
-
-            _listenPlayerEvents();
+            _addPlayerEventListeners();
         },
 
         stop: function() {
-
+            _removePlayerEventListeners();
         }
 
     };
