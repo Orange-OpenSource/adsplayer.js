@@ -16,7 +16,7 @@
  *
  */
 
-AdsPlayer = function(adsContainer) {
+AdsPlayer = function(playerContainer, adsContainer) {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
@@ -27,6 +27,7 @@ AdsPlayer = function(adsContainer) {
         BUILD_DATE = '@@TIMESTAMP',
         _error = null,
         _warning = null,
+        _playerContainer = playerContainer,
         _adsContainer = adsContainer,
         _eventBus = AdsPlayer.EventBus.getInstance(),
         _adsPlayerController = null;
@@ -107,7 +108,7 @@ AdsPlayer = function(adsContainer) {
          */
         init: function(player, callback) {
             _adsPlayerController = new AdsPlayer.AdsPlayerController();
-            _adsPlayerController.init(player, _adsContainer);
+            _adsPlayerController.init(player, _playerContainer, _adsContainer);
             _eventBus.addEventListener('error', _onError);
             _eventBus.addEventListener('warning', _onWarning);
 
