@@ -41,14 +41,12 @@ AdsPlayer.AdsPlayerController = function() {
 
     var _mainPlayer = null,
         _mainVideo = null,
+        _playerContainer = null,
+        _adsContainer = null,
         _mast = null,
         _triggerManagers = [],
         _adsPlayerManager = null,
-        _adsContainer = null,
-        _adsMediaPlayer = null,
-        _listCues = [],
-        _mastTriggers = [],
-        _listVastAds = [], // this table is used to track the (groups of) ads to be played
+        _onMainVideoPlayingListener = null,
         _fileLoader = new AdsPlayer.FileLoader(),
         _mastParser = new AdsPlayer.mast.MastParser(),
         _vastParser = new AdsPlayer.vast.VastParser(),
@@ -311,13 +309,6 @@ AdsPlayer.AdsPlayerController = function() {
             return listAds;
         },*/
 
-
-
-
-        _onVideoTimeupdate = function() {
-            _checkTriggersStart(false);
-        },
-
         _loadVast = function(trigger, url) {
             var deferred = Q.defer(),
                 vast = null;
@@ -328,7 +319,6 @@ AdsPlayer.AdsPlayerController = function() {
                     _debug.log("Parse VAST file");
                     vast = _vastParser.parse(result.response);
                     vast.baseUrl = result.baseUrl;
-                    //trigger.vast.push(mastTrigger.ads.concat(_getVastInfo(vast));
                     trigger.vasts.push(vast);
                     deferred.resolve();
                 },
@@ -382,37 +372,83 @@ AdsPlayer.AdsPlayerController = function() {
                 triggerManager.init(_mast.triggers[i]);
                 _triggerManagers.push(triggerManager);
             }
+        },
 
-            /*_mastTriggers = mast.triggers;
+        _onVideoPlaying = function() {
+            if (_adsPlayerManager) {
+                _debug.log("Pause main video");
+                _mainVideo.pause();
+                //_mainVideo.removeEventListener("playing", _onMainVideoPlayingListener);
+            }
+        },
 
-            //_mastTriggers = _mastParser.parse(mastContent);
+        _onVideoTimeupdate = function() {
+            _checkTriggersStart(false);
+        },
 
-            if (_mastTriggers.length === 0) {
-                return Q.when();
+        _onVideoEnded = function() {
+            _checkTriggersEnd();
+        },
+
+        _pauseVideo = function () {
+            if (!_mainVideo.paused) {
+                _debug.log("Pause main video");
+                _mainVideo.pause();
+            }
+        },
+
+        _resumeVideo = function () {
+            //_mainVideo.removeEventListener("playing", _onMainVideoPlayingListener);
+            if (_mainVideo.paused) {
+                _debug.log("Resume main video");
+                _mainVideo.play();
+            }
+        },
+
+        _showMainPlayer = function (show) {
+            _playerContainer.style.visibility = show ? 'visible' : 'hidden';
+        },
+
+        _onTriggerEnd = function () {
+            _debug.log('End playing trigger');
+
+            if (_adsPlayerManager) {
+                _adsPlayerManager.stop();
+                _adsPlayerManager = null;
             }
 
-            deferred = Q.defer();
-            deferLoadTriggers = [];
-
-            for (i = 0; i < _mastTriggers.length; i++) {
-                deferLoadTriggers.push(_loadTrigger(_mastTriggers[i], mastBaseUrl));
-            }
-
-            Q.all(deferLoadTriggers).then(function() {
-                _mainVideo.addEventListener("loadstart", _onMainVideoLoadStart);
-                _createCues(_onCueEnter);
-                deferred.resolve();
-            });*/
+            // Show the main player
+            _showMainPlayer(true);
+            
+            // Resume the main video element
+            _resumeVideo();
         },
 
         _playTrigger = function (trigger) {
+            if (trigger.vasts.length === 0) {
+                return;
+            }
+
+            // Pause the main video element
+            _pauseVideo();
+
+            // Hide the main player
+            _showMainPlayer(false);
+
+            // Wait for trigger end
+            _eventBus.addEventListener('adTriggerEnd', _onTriggerEnd);
+
+            // Play the trigger
+            _debug.log('Start playing trigger ' + trigger.id);
             _adsPlayerManager = new AdsPlayer.AdsPlayerManager();
-            _adsPlayerManager.init(trigger.vasts);
+            _adsPlayerManager.init(trigger.vasts, _adsContainer);
             _adsPlayerManager.start();
         },
 
         _activateTrigger = function (trigger) {
 
+            _debug.log('Activate trigger ' + trigger.id);
+            trigger.activated = true;
             if (trigger.vasts.length === 0) {
                 // Download VAST files
                 _loadTriggerVasts(trigger).then(function () {
@@ -424,9 +460,7 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _checkTriggersStart = function(itemStart) {
-            var i;
-
-            for (i = 0; i < _triggerManagers.length; i++) {
+            for (var i = 0; i < _triggerManagers.length; i++) {
                 if (_triggerManagers[i].checkStartConditions(_mainVideo, itemStart)) {
                     _activateTrigger(_triggerManagers[i].getTrigger());
                     break;
@@ -435,72 +469,23 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _checkTriggersEnd = function() {
-            var i;
-
-            for (i = 0; i < _triggerManagers.length; i++) {
+            for (var i = 0; i < _triggerManagers.length; i++) {
                 if (_triggerManagers[i].checkEndConditions(_mainVideo)) {
                     // Remove trigger manager => will not be activated anymore 
+                    _debug.log('Revocate trigger ' + trigger.id);
                     _triggerManagers.splice(0, 1);
                     i--;
                 }
             }
-
-            return deferred.promise;
         },
 
         _start = function() {
-
             if (!_mast) {
                 return;
             }
-
-            // Add <video> event listener
-            _mainVideo.addEventListener('timeupdate', _onVideoTimeupdate);
-            _mainVideo.addEventListener('seeking', _onVideoTimeupdate);
-
-            // check for pre-roll trigger
+            // Check for pre-roll trigger
             _checkTriggersStart(true);
-        },
-
-        _stop = function() {
-            // Remove <video> event listener
-            _mainVideo.removeEventListener('timeupdate', _onVideoTimeupdate);
-            _mainVideo.removeEventListener('seeking', _onVideoTimeupdate);            
-        },
-
-        _onAdEnded = function( /*msg*/ ) {
-            /*if (!msg) {
-                msg = 'ad video ended';
-            }
-            console.log(msg);*/
-            if (_listVastAds.length > 0) {
-                _playAds();
-            } else {
-                _mainVideo.removeEventListener("playing", _onPlaying);
-
-                _debug.log('no more Ads to Play : dispatch "adEnd" towards the html Player');
-                _eventBus.dispatchEvent({
-                    type: "adEnd",
-                    data: {}
-                });
-                _adsMediaPlayer.show(false);
-                _debug.log('play main video');
-                _mainVideo.play();
-            }
         };
-
-        /*_onAborted = function() {
-            _onEnded('ad video aborted due to error on the adsMediaPlayer, e.g. : file not found');
-        },*/
-
-
-        /*_playAds = function() {
-            if (_listVastAds.length > 0) {
-                var ad = _listVastAds.shift();
-                _adsMediaPlayer.playAd(ad);
-            }
-        };*/
-
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
@@ -515,19 +500,18 @@ AdsPlayer.AdsPlayerController = function() {
          * @param {Object} mainVideo - the HTML5 video element used by the main media player
          * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
          */
-        init : function(player, adsContainer) {
+        init : function(player, playerContainer, adsContainer) {
             _mainPlayer = player;
             _mainVideo = player.getVideoModel().getElement();
+            _playerContainer = playerContainer;
             _adsContainer = adsContainer;
+            _onMainVideoPlayingListener = _onVideoPlaying.bind(this);
 
-            /*_adsMediaPlayer = new AdsPlayer.AdsMediaPlayer();
-            _adsMediaPlayer.init(_adsContainer);
-
-            _eventBus.addEventListener("adEnded", _onAdEnded);
-
-            _mainVideo.onseeked = function() {
-                _onSeeked();
-            };*/
+            // Add <video> event listener
+            _mainVideo.addEventListener('playing', _onVideoPlaying);
+            _mainVideo.addEventListener('timeupdate', _onVideoTimeupdate);
+            _mainVideo.addEventListener('seeking', _onVideoTimeupdate);
+            _mainVideo.addEventListener('ended', _onVideoEnded);
 
             _debug.setLevel(4);
         },
@@ -542,6 +526,10 @@ AdsPlayer.AdsPlayerController = function() {
          */
         load : function(url) {
             var deferred = Q.defer();
+
+            // Reset the MAST and trigger managers
+            _mast = null;
+            _triggerManagers = [];
 
             // Download and parse MAST file
             _debug.log("Download MAST file: " + url);
@@ -566,14 +554,34 @@ AdsPlayer.AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          */
         stop : function() {
-/*            if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-                _mainVideo.removeEventListener('timeupdate', _onTimeChange);
-            } else {
-                _clearTextTrackCues();
+
+            //_mainVideo.removeEventListener("playing", _onMainVideoPlayingListener);
+            
+            // Stop the ad player
+            if (_adsPlayerManager) {
+                _adsPlayerManager.stop();
+                _adsPlayerManager = null;
             }
-            _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
-            _mastTriggers = [];
-            _listVastAds = [];*/
+
+            // Show the main player
+            _showMainPlayer(true);
+        },
+
+        reset : function() {
+            
+            stop();
+
+            // Remove <video> event listener
+            _mainVideo.removeEventListener('playing', _onVideoPlaying);
+            _mainVideo.removeEventListener('timeupdate', _onVideoTimeupdate);
+            _mainVideo.removeEventListener('seeking', _onVideoTimeupdate);            
+            _mainVideo.removeEventListener('ended', _onVideoEnded);            
+
+            // Reset the trigger managers
+            _triggerManagers = [];
+
+            // Reset the MAST
+            _mast = null;
         }
     };
 
