@@ -150,6 +150,9 @@ AdsPlayer.TriggerManager = function() {
          * @param {Boolean} itemStart - if the item will start to play (for checking pre-roll condition) 
          */
         checkStartConditions: function(video, itemStart) {
+            if (_trigger.activated) {
+                return false;
+            }
             return _evaluateConditions(_trigger.startConditions, video, itemStart, false);
         },
 
@@ -162,23 +165,7 @@ AdsPlayer.TriggerManager = function() {
          */
         checkEndConditions: function (video) {
             return _evaluateConditions(_trigger.endConditions, video, false, true);
-        },
-
-        /**
-         * Activates the trigger.
-         * @method activate
-         * @access public
-         * @memberof TriggerManager#
-         */
-        activate: function () {
-            var deferred = Q.defer(); 
-            if (_trigger.ads.length === 0) {
-                _loadTrigger();
-            }
-
-            return deferred.promise;
-        },
-
+        }
     };
 
 };
