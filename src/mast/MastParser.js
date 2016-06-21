@@ -2,9 +2,6 @@
 
 AdsPlayer.mast.MastParser = function() {
     "use strict";
-    var _parser = new AdsPlayer.utils.DOMParser(),
-        _debug = AdsPlayer.Debug.getInstance();
-
 
     var _getCondition = function(conditionNode) {
             var condition = new AdsPlayer.mast.model.Trigger.Condition(),

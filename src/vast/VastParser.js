@@ -294,13 +294,6 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
 
 
 
-
-
-
-
-
-
-
         _getTrackingEvent = function (trackingNode) {
             var trackingEvent = new AdsPlayer.vast.model.Ad.TrackingEvent();
 
