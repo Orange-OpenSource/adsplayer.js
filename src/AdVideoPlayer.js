@@ -4,8 +4,8 @@
  * We have two specific implementation of the MediaPlayer: VideoPlayer and ImagePlayer.
  */
 var AdVideoPlayer =  function () {
-    this.uri;
-    this.video;
+    this.uri = '';
+    this.video = null;
 
     this.isMediaSupported = function (mimeType) {
         if (!this.video) {
@@ -56,6 +56,10 @@ AdVideoPlayer.prototype.load = function (baseUrl, mediaFiles) {
     this.video.load();
 
     return true;
+};
+
+AdVideoPlayer.prototype.getElement = function () {
+    return this.video;
 };
 
 AdVideoPlayer.prototype.addEventListener = function (type, listener) {

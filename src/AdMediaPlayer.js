@@ -9,6 +9,10 @@ var AdMediaPlayer =  {
 		console.log("load() method is not defined");
     },
 
+    getElement: function () {
+        return null;
+    },
+
     addEventListener: function (type, listener) {},
 
     removeEventListener: function (type, listener) {},
