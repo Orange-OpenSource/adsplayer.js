@@ -52,8 +52,8 @@ AdsPlayer.mast.model.Trigger = function() {
     this.endConditions = []; // pointer to a list of end conditions : AdsPlayer.mast.model.Trigger.Condition
     this.sources = []; // pointer to a list of sources : AdsPlayer.mast.model.Trigger.Source
     this.alreadyProcessed = false; // mainly in the seeked case : do not replay trigger already played
-    this.ads = [];
     this.vasts = [];
+    this.activated = false;
 };
 
 AdsPlayer.mast.model.Trigger.prototype = {
