@@ -141,6 +141,7 @@ AdsPlayer.FileLoader = function() {
                 request.onerror = report;
                 request.onabort = onabort;
                 request.open("GET", url, true);
+                request.timeout = 2000;
                 request.send();
             } catch (e) {
                 request.onerror();
@@ -151,7 +152,6 @@ AdsPlayer.FileLoader = function() {
         load: function(url) {
             deferred = Q.defer();
             request = new XMLHttpRequest();
-            //request.timeout = 500; // time in milliseconds
             _load.call(this, url);
             return deferred.promise;
         },
