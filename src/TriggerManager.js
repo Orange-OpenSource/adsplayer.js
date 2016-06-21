@@ -77,10 +77,10 @@ AdsPlayer.TriggerManager = function() {
             if (condition.type === ConditionType.PROPERTY) {
                 switch (condition.name) {
                     case ConditionName.POSITION:
-                        res = _compareValues(_parseTime(condition.value), video.currentTime, condition.operator);
+                        res = _compareValues(video.currentTime, _parseTime(condition.value), condition.operator);
                         break;
                     case ConditionName.DURATION:
-                        res = _compareValues(_parseTime(condition.value), video.duration, condition.operator);
+                        res = _compareValues(video.duration, _parseTime(condition.value), condition.operator);
                         break;
                     default:
                         break;
