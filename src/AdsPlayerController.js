@@ -46,268 +46,13 @@ AdsPlayer.AdsPlayerController = function() {
         _mast = null,
         _triggerManagers = [],
         _adsPlayerManager = null,
-        _onMainVideoPlayingListener = null,
         _fileLoader = new AdsPlayer.FileLoader(),
         _mastParser = new AdsPlayer.mast.MastParser(),
         _vastParser = new AdsPlayer.vast.VastParser(),
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
-        _eventBus = AdsPlayer.EventBus.getInstance();
+        _eventBus = AdsPlayer.EventBus.getInstance(),
 
-    /////////// INITIALIZATION
-
-    /**
-     * [_onMainVideoLoadStart description]
-     * @return {[type]} [description]
-     */
-    var /*_onMainVideoLoadStart = function() {
-            _mainVideo.removeEventListener("loadstart", _onMainVideoLoadStart);
-            if (navigator.userAgent.toLowerCase().indexOf('firefox') > -1) {
-                _mainVideo.addEventListener('timeupdate', _onTimeChange);
-            } else {
-                _addTextTrackCues();
-            }
-            _analyseTriggers();
-        },
-
-        _onPlaying = function() {
-            _debug.log('pause main video');
-            _mainVideo.removeEventListener("playing", _onPlaying);
-            _mainVideo.pause();
-        },
-
-        _analyseTriggers = function() { //    Look for preRoll ads triggers 
-            var i,
-                j,
-                k;
-
-            _listVastAds = [];
-
-            for (i = 0; i < _mastTriggers.length; i++) {
-                var trigger = _mastTriggers[i];
-                if (trigger.alreadyProcessed || trigger.startConditions == []) {
-                    continue;
-                }
-                var flag = false;
-                for (j = 0; j < trigger.startConditions.length; j++) {
-                    if (trigger.startConditions[j].type === ConditionType.EVENT && trigger.startConditions[j].name === ConditionName.ON_ITEM_START) {
-                        _analyseTrigger(i);
-                        break;
-                    } else if (trigger.startConditions[j].type === ConditionType.PROPERTY &&
-                        trigger.startConditions[j].name === ConditionName.POSITION &&
-                        trigger.startConditions[j].operator === ConditionOperator.GEQ &&
-                        trigger.startConditions[j].value === 0) {
-                        _analyseTrigger(i);
-                        break;
-                    }
-                }
-            }
-
-            if (_listVastAds.length === 0) {
-                // means that no medias are available, e.g. if the vast files couldn't be loaded
-                return;
-            }
-
-            _debug.log('PreRoll');
-            _adsMediaPlayer.show(true);
-            _eventBus.dispatchEvent({
-                type: "adStart",
-                data: {}
-            });
-            _mainVideo.addEventListener("playing", _onPlaying);
-            _playAds();
-        },
-
-        _analyseTrigger = function(id) { //    get ads of the trigger indexed by id
-            var j,
-                k;
-
-            if (id < 0 || id >= _mastTriggers.length)
-                return;
-
-            var trigger = _mastTriggers[id];
-            if (trigger.alreadyProcessed || trigger.startConditions == []) {
-                return;
-            }
-            trigger.alreadyProcessed = true;
-            for (j = 0; j < trigger.ads.length; j++) {
-                _listVastAds.push(trigger.ads[j]);
-            }
-        },
-
-        _startPlayAds = function(msg) {
-            if (!_listVastAds.length) {
-                return;
-            }
-            _debug.log(msg);
-            _adsMediaPlayer.show(true);
-            _eventBus.dispatchEvent({
-                type: "adStart",
-                data: {}
-            });
-            _debug.log('pause main video');
-            _mainVideo.pause();
-            _playAds();
-        },
-
-        _onCueEnter = function(e) {
-            var ind;
-            ind = parseInt(e.target.text, 10);
-            _debug.log('_onCueEnter :' + ind);
-            _debug.log('video timestamp :' + _mainVideo.currentTime);
-            _analyseTrigger(ind);
-            _startPlayAds('midRoll');
-        },
-
-        _createCues = function(listener) {
-
-            // sort elements by date
-            _mastTriggers.sort(function(a, b) {
-                if (a.startConditions[0].value < b.startConditions[0].value)
-                    return -1;
-                else if (a.startConditions[0].value > b.startConditions[0].value)
-                    return 1;
-                else
-                    return 0;
-            });
-
-            // create cues according to the sorted ads
-            var cues = [],
-                Cue = window.VTTCue || window.TextTrackCue,
-                i,
-                trigger = null,
-                newCue = null;
-
-            for (i = 0; i < _mastTriggers.length; i++) {
-                trigger = _mastTriggers[i];
-                if (trigger.startConditions[0].type === ConditionType.PROPERTY &&
-                    trigger.startConditions[0].name === ConditionName.POSITION &&
-                    trigger.startConditions[0].operator === ConditionOperator.GEQ) {
-                    var cue = new Cue(trigger.startConditions[0].value, trigger.startConditions[0].value + 1, i);
-                    cue.onenter = listener;
-                    cues.push(cue);
-                }
-            }
-            _listCues = cues;
-        },
-
-        _addTextTrackCues = function() {
-            var i,
-                len = _listCues.length;
-            if (len === 0) {
-                return;
-            }
-
-            var track = _mainVideo.addTextTrack("chapters", "ads", "none");
-            track.mode = "showing";
-            for (i = 0; i < len; i++)
-                track.addCue(_listCues[i]);
-        },
-
-        _clearTextTrackCues = function() {
-            var textTracks = _mainVideo.textTracks; // one for each track element
-            for (var c = 0; c < textTracks.length; c++) {
-                var textTrack = textTracks[c];
-                if (textTrack.label == 'ads') {
-                    var cues = textTrack.cues;
-                    for (var i = cues.length - 1; i >= 0; i--) {
-                        textTrack.removeCue(cues[i]);
-                    }
-                }
-            }
-        },
-
-        _onTimeChange = function() {
-            var changedTime = _mainVideo.currentTime;
-            if (changedTime === 0) {
-                return; // to avoid overlapp with preRoll
-            }
-            _debug.log('timeChange at  :' + changedTime);
-            for (i = 0; i < _mastTriggers.length; i++) {
-                var trigger = _mastTriggers[i];
-                if (trigger.alreadyProcessed || trigger.startConditions == []) {
-                    continue;
-                }
-                for (j = 0; j < trigger.startConditions.length; j++) {
-                    if (trigger.startConditions[j].type === ConditionType.PROPERTY &&
-                        trigger.startConditions[j].name === ConditionName.POSITION &&
-                        trigger.startConditions[j].operator === ConditionOperator.GEQ &&
-                        trigger.startConditions[j].value < changedTime) {
-                        _analyseTrigger(i);
-                        break;
-                    }
-                }
-            }
-            _startPlayAds('_onTimeChange');
-        },
-
-
-        _onSeeked = function() {
-            var seekedTime;
-            seekedTime = _mainVideo.currentTime;
-            if (seekedTime === 0) {
-                return; // to avoid overlapp with preRoll
-            }
-            _debug.log('seeked at  :' + seekedTime);
-            for (i = 0; i < _mastTriggers.length; i++) {
-                var trigger = _mastTriggers[i];
-                if (trigger.alreadyProcessed || trigger.startConditions == []) {
-                    continue;
-                }
-                for (j = 0; j < trigger.startConditions.length; j++) {
-                    if (trigger.startConditions[j].type === ConditionType.PROPERTY &&
-                        trigger.startConditions[j].name === ConditionName.POSITION &&
-                        trigger.startConditions[j].operator === ConditionOperator.GEQ &&
-                        trigger.startConditions[j].value < seekedTime) {
-                        _analyseTrigger(i);
-                        break;
-                    }
-                }
-            }
-            _startPlayAds('seeked');
-        },
-
-        _getVastInfo = function(vast) {
-            var listAds = [],
-                creative,
-                ad;
-
-            for (i = 0; i < vast.ads.length; i++) {
-                ad = {
-                    adSystem: '',
-                    adTitle: '',
-                    description: '',
-                    survey: '',
-                    error: '',
-                    impression: '',
-                    creatives: []
-                };
-                ad.adSystem = vast.ads[i].inLine.adSystem;
-                ad.impression = vast.ads[i].inLine.impression;
-                for (j = 0; j < vast.ads[i].inLine.creatives.length; j++) {
-                    creative = {
-                        id: '',
-                        sequence: '',
-                        AdID: '',
-                        linear: null
-                    };
-
-                    creative.id = vast.ads[i].inLine.creatives[j].id;
-                    //                  ad.creative.sequence=vast.ads[i].inLine.creatives[j].sequence;
-                    //                 ad.creative.AdID=vast.ads[i].inLine.creatives[j].AdID;
-                    if (vast.ads[i].inLine.creatives[j].linear) {
-                        creative.linear = vast.ads[i].inLine.creatives[j].linear;
-                    }
-                    if (creative.linear !== null) {
-                        ad.creatives.push(creative);
-                    }
-                }
-                if (ad.creatives != []) {
-                    listAds.push(ad);
-                }
-            }
-            return listAds;
-        },*/
 
         _loadVast = function(trigger, url) {
             var deferred = Q.defer(),
@@ -378,7 +123,6 @@ AdsPlayer.AdsPlayerController = function() {
             if (_adsPlayerManager) {
                 _debug.log("Pause main video");
                 _mainVideo.pause();
-                //_mainVideo.removeEventListener("playing", _onMainVideoPlayingListener);
             }
         },
 
@@ -398,7 +142,6 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _resumeVideo = function () {
-            //_mainVideo.removeEventListener("playing", _onMainVideoPlayingListener);
             if (_mainVideo.paused) {
                 _debug.log("Resume main video");
                 _mainVideo.play();
@@ -505,7 +248,6 @@ AdsPlayer.AdsPlayerController = function() {
             _mainVideo = player.getVideoModel().getElement();
             _playerContainer = playerContainer;
             _adsContainer = adsContainer;
-            _onMainVideoPlayingListener = _onVideoPlaying.bind(this);
 
             // Add <video> event listener
             _mainVideo.addEventListener('playing', _onVideoPlaying);
@@ -554,8 +296,6 @@ AdsPlayer.AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          */
         stop : function() {
-
-            //_mainVideo.removeEventListener("playing", _onMainVideoPlayingListener);
             
             // Stop the ad player
             if (_adsPlayerManager) {
