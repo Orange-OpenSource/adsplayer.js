@@ -3,10 +3,11 @@
  * The MediaPlayer is the interface for all media player.
  * We have two specific implementation of the MediaPlayer: VideoPlayer and ImagePlayer.
  */
-var AdMediaPlayer =  {
+
+var MediaPlayer =  {
 
     load: function (baseUrl, mediaFiles) {
-		console.log("load() method is not defined");
+        console.log("load() method is not defined");
     },
 
     getElement: function () {
