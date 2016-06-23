@@ -4,7 +4,7 @@
  * It takes as input a trigger object (as parsed from a MAST file) and tests the start and end conditions
  * to detect the activation and revocation of a trigger. 
  */
-AdsPlayer.TriggerManager = function() {
+AdsPlayer.mast.TriggerManager = function() {
 
     var _trigger = null,
 
@@ -170,6 +170,6 @@ AdsPlayer.TriggerManager = function() {
 
 };
 
-AdsPlayer.TriggerManager.prototype = {
-    constructor: AdsPlayer.TriggerManager
+AdsPlayer.mast.TriggerManager.prototype = {
+    constructor: AdsPlayer.mast.TriggerManager
 };
