@@ -126,8 +126,8 @@ AdsPlayer.FileLoader = function() {
                 } else if (request.responseXML === null) {
                     // status not useful
                     deferred.reject({
-                        name: AdsPlayer.ErrorHandler.DOWNLOAD_ERR_NOTXML,
-                        message: "the downloaded file format is not xml",
+                        name: AdsPlayer.ErrorHandler.DOWNLOAD_ERR_NOT_XML,
+                        message: "The downloaded file format is not in xml format",
                         data: {
                             url: url
                         }
