@@ -41,11 +41,11 @@ AdsPlayer.AdsPlayerController = function() {
 
     var _mainPlayer = null,
         _mainVideo = null,
-        _playerContainer = null,
+        _playerElement = null,
         _adsContainer = null,
         _mast = null,
         _triggerManagers = [],
-        _adsPlayerManager = null,
+        _vastPlayerManager = null,
         _fileLoader = new AdsPlayer.FileLoader(),
         _mastParser = new AdsPlayer.mast.MastParser(),
         _vastParser = new AdsPlayer.vast.VastParser(),
@@ -113,14 +113,14 @@ AdsPlayer.AdsPlayerController = function() {
 
             // Initialize the trigger managers
             for (i = 0; i < _mast.triggers.length; i++) {
-                triggerManager = new AdsPlayer.TriggerManager();
+                triggerManager = new AdsPlayer.mast.TriggerManager();
                 triggerManager.init(_mast.triggers[i]);
                 _triggerManagers.push(triggerManager);
             }
         },
 
         _onVideoPlaying = function() {
-            if (_adsPlayerManager) {
+            if (_vastPlayerManager) {
                 _debug.log("Pause main video");
                 _mainVideo.pause();
             }
@@ -149,20 +149,27 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _showMainPlayer = function (show) {
-            _playerContainer.style.visibility = show ? 'visible' : 'hidden';
+            _playerElement.style.display = show ? 'block' : 'none';
+        },
+
+        _showAdsContainer = function (show) {
+            _adsContainer.style.display = show ? 'block' : 'none';
         },
 
         _onTriggerEnd = function () {
             _debug.log('End playing trigger');
 
-            if (_adsPlayerManager) {
-                _adsPlayerManager.stop();
-                _adsPlayerManager = null;
+            if (_vastPlayerManager) {
+                _vastPlayerManager.stop();
+                _vastPlayerManager = null;
             }
 
             // Show the main player
             _showMainPlayer(true);
             
+            // Hide the ads player container
+            _showAdsContainer(false);
+
             // Resume the main video element
             _resumeVideo();
         },
@@ -178,14 +185,17 @@ AdsPlayer.AdsPlayerController = function() {
             // Hide the main player
             _showMainPlayer(false);
 
+            // Show the ads player container
+            _showAdsContainer(true);
+
             // Wait for trigger end
             _eventBus.addEventListener('adTriggerEnd', _onTriggerEnd);
 
             // Play the trigger
             _debug.log('Start playing trigger ' + trigger.id);
-            _adsPlayerManager = new AdsPlayer.AdsPlayerManager();
-            _adsPlayerManager.init(trigger.vasts, _adsContainer);
-            _adsPlayerManager.start();
+            _vastPlayerManager = new AdsPlayer.vast.VastPlayerManager();
+            _vastPlayerManager.init(trigger.vasts, _adsContainer);
+            _vastPlayerManager.start();
         },
 
         _activateTrigger = function (trigger) {
@@ -243,10 +253,10 @@ AdsPlayer.AdsPlayerController = function() {
          * @param {Object} mainVideo - the HTML5 video element used by the main media player
          * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
          */
-        init : function(player, playerContainer, adsContainer) {
+        init : function(player, playerElement, adsContainer) {
             _mainPlayer = player;
             _mainVideo = player.getVideoModel().getElement();
-            _playerContainer = playerContainer;
+            _playerElement = playerElement;
             _adsContainer = adsContainer;
 
             // Add <video> event listener
@@ -283,6 +293,7 @@ AdsPlayer.AdsPlayerController = function() {
                 _start();
                 deferred.resolve();
             }, function(error) {
+                _errorHandler.sendError(error.name, error.message, error.data);
                 deferred.reject(error);
             });
 
@@ -298,13 +309,16 @@ AdsPlayer.AdsPlayerController = function() {
         stop : function() {
             
             // Stop the ad player
-            if (_adsPlayerManager) {
-                _adsPlayerManager.stop();
-                _adsPlayerManager = null;
+            if (_vastPlayerManager) {
+                _vastPlayerManager.stop();
+                _vastPlayerManager = null;
             }
 
             // Show the main player
             _showMainPlayer(true);
+
+            // Hide the ads player container
+            _showAdsContainer(false);
         },
 
         reset : function() {
