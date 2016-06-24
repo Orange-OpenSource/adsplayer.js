@@ -41,8 +41,7 @@ AdsPlayer.AdsPlayerController = function() {
 
     var _mainPlayer = null,
         _mainVideo = null,
-        _playerElement = null,
-        _adsContainer = null,
+        _adsPlayerContainer = null,
         _mast = null,
         _triggerManagers = [],
         _vastPlayerManager = null,
@@ -127,7 +126,10 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _onVideoTimeupdate = function() {
-            _checkTriggersStart(false);
+            var trigger = _checkTriggersStart(false);
+            if (trigger !== null) {
+                _activateTrigger(trigger);
+            }
         },
 
         _onVideoEnded = function() {
@@ -148,30 +150,26 @@ AdsPlayer.AdsPlayerController = function() {
             }
         },
 
-        _showMainPlayer = function (show) {
-            _playerElement.style.display = show ? 'block' : 'none';
-        },
-
-        _showAdsContainer = function (show) {
-            _adsContainer.style.display = show ? 'block' : 'none';
-        },
-
         _onTriggerEnd = function () {
             _debug.log('End playing trigger');
 
+            // Delete VAST player manager
             if (_vastPlayerManager) {
-                _vastPlayerManager.stop();
                 _vastPlayerManager = null;
             }
 
-            // Show the main player
-            _showMainPlayer(true);
-            
-            // Hide the ads player container
-            _showAdsContainer(false);
+            // Check if another trigger has to be activated
+            var trigger = _checkTriggersStart(false);
+            if (trigger !== null) {
+                _activateTrigger(trigger);
+            } else {
+                // Notifies the application ad(s) playback has ended
+                _eventBus.dispatchEvent({type: 'end', data: null}); 
 
-            // Resume the main video element
-            _resumeVideo();
+                // Resume the main video element
+                _resumeVideo();                
+            }
+
         },
 
         _playTrigger = function (trigger) {
@@ -179,29 +177,32 @@ AdsPlayer.AdsPlayerController = function() {
                 return;
             }
 
+            trigger.activated = true;
+
             // Pause the main video element
             _pauseVideo();
 
-            // Hide the main player
-            _showMainPlayer(false);
-
-            // Show the ads player container
-            _showAdsContainer(true);
+            // Notifies the application ad(s) playback starts
+            _eventBus.dispatchEvent({type: 'start', data: null}); 
 
             // Wait for trigger end
-            _eventBus.addEventListener('adTriggerEnd', _onTriggerEnd);
+            _eventBus.addEventListener('triggerEnd', _onTriggerEnd);
 
             // Play the trigger
             _debug.log('Start playing trigger ' + trigger.id);
             _vastPlayerManager = new AdsPlayer.vast.VastPlayerManager();
-            _vastPlayerManager.init(trigger.vasts, _adsContainer);
+            _vastPlayerManager.init(trigger.vasts, _adsPlayerContainer);
             _vastPlayerManager.start();
         },
 
         _activateTrigger = function (trigger) {
 
+            // Check if a trigger is not already activated
+            if (_vastPlayerManager) {
+                return;
+            }
+
             _debug.log('Activate trigger ' + trigger.id);
-            trigger.activated = true;
             if (trigger.vasts.length === 0) {
                 // Download VAST files
                 _loadTriggerVasts(trigger).then(function () {
@@ -215,10 +216,10 @@ AdsPlayer.AdsPlayerController = function() {
         _checkTriggersStart = function(itemStart) {
             for (var i = 0; i < _triggerManagers.length; i++) {
                 if (_triggerManagers[i].checkStartConditions(_mainVideo, itemStart)) {
-                    _activateTrigger(_triggerManagers[i].getTrigger());
-                    break;
+                    return _triggerManagers[i].getTrigger();
                 }
             }
+            return null;
         },
 
         _checkTriggersEnd = function() {
@@ -237,7 +238,10 @@ AdsPlayer.AdsPlayerController = function() {
                 return;
             }
             // Check for pre-roll trigger
-            _checkTriggersStart(true);
+            var trigger = _checkTriggersStart(true);
+            if (trigger !== null) {
+                _activateTrigger(trigger);
+            }
         };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -251,13 +255,12 @@ AdsPlayer.AdsPlayerController = function() {
          * @access public
          * @memberof AdsPlayerController#
          * @param {Object} mainVideo - the HTML5 video element used by the main media player
-         * @param {Object} adsContainer - The container to create the HTML5 video element used to play and render the Ads video streams
+         * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
          */
-        init : function(player, playerElement, adsContainer) {
+        init : function(player, adsPlayerContainer) {
             _mainPlayer = player;
             _mainVideo = player.getVideoModel().getElement();
-            _playerElement = playerElement;
-            _adsContainer = adsContainer;
+            _adsPlayerContainer = adsPlayerContainer;
 
             // Add <video> event listener
             _mainVideo.addEventListener('playing', _onVideoPlaying);
@@ -313,12 +316,6 @@ AdsPlayer.AdsPlayerController = function() {
                 _vastPlayerManager.stop();
                 _vastPlayerManager = null;
             }
-
-            // Show the main player
-            _showMainPlayer(true);
-
-            // Hide the ads player container
-            _showAdsContainer(false);
         },
 
         reset : function() {
@@ -336,7 +333,35 @@ AdsPlayer.AdsPlayerController = function() {
 
             // Reset the MAST
             _mast = null;
-        }
+        },
+
+        /**
+         * Plays/resumes the playback of the current ad.
+         * @method reset
+         * @access public
+         * @memberof AdsPlayerController#
+         */
+        play : function() {
+            
+            // Stop the ad player
+            if (_vastPlayerManager) {
+                _vastPlayerManager.play();
+            }
+        },        
+
+        /**
+         * Pauses the playback of the current ad.
+         * @method reset
+         * @access public
+         * @memberof AdsPlayerController#
+         */
+        pause : function() {
+            
+            // Stop the ad player
+            if (_vastPlayerManager) {
+                _vastPlayerManager.pause();
+            }
+        }        
     };
 
 };

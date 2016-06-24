@@ -16,7 +16,7 @@
  *
  */
 
-AdsPlayer = function(playerElement, adsContainer) {
+AdsPlayer = function(adsPlayerContainer) {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
@@ -27,8 +27,7 @@ AdsPlayer = function(playerElement, adsContainer) {
         BUILD_DATE = '@@TIMESTAMP',
         _error = null,
         _warning = null,
-        _playerElement = playerElement,
-        _adsContainer = adsContainer,
+        _adsPlayerContainer = adsPlayerContainer,
         _eventBus = AdsPlayer.EventBus.getInstance(),
         _adsPlayerController = null;
 
@@ -108,7 +107,7 @@ AdsPlayer = function(playerElement, adsContainer) {
          */
         init: function(player, callback) {
             _adsPlayerController = new AdsPlayer.AdsPlayerController();
-            _adsPlayerController.init(player, _playerElement, _adsContainer);
+            _adsPlayerController.init(player, _adsPlayerContainer);
             _eventBus.addEventListener('error', _onError);
             _eventBus.addEventListener('warning', _onWarning);
 
@@ -158,12 +157,24 @@ AdsPlayer = function(playerElement, adsContainer) {
         // AdsPlayer additionnal API
 
         /**
+         * Pauses the playback of the current ad.
+         * @method pause
+         * @access public
+         * @memberof AdsPlayer#
+         */
+        pause: function() {
+            _adsPlayerController.pause();
+        },
+
+
+        /**
          * Registers a listener on the specified event.
          * The possible event types are:
          * <li>'error' (see [error]{@link AdsPlayer#event:error} event specification)
          * <li>'warning' (see [warning]{@link AdsPlayer#event:warning} event specification)
          * <li>'adStart' (see [adStart]{@link AdsPlayer#event:adStart} event specification)
          * <li>'adEnd' (see [adEnd]{@link AdsPlayer#event:adEnd} event specification)
+         * <li>'adClick' (see [adEnd]{@link AdsPlayer#event:adClick} event specification)
          * @method addEventListener
          * @access public
          * @memberof AdsPlayer#
@@ -233,19 +244,51 @@ AdsPlayer.utils = {};
 /////////// EVENTS
 
 /**
- * The 'adStart' event is fired when the playback of an ad is starting.
- * When the 'adStart' event is fired, the application shall hide the main player component.
+ * The 'start' event is fired when the playback of ad(s) is starting.
+ * When the 'start' event is fired, the application shall hide the main player component and
+ * display the ads player container in which the ad media player component (<video> or <image>)
+ * will be created and displayed.
  *
- * @event AdsPlayer#adStart
+ * @event AdsPlayer#start
  * @param {object} event - the event
+ * @param {object} event.type - the event type ('start')
  */
 
 /**
- * The 'adStop' event is fired when the playback of an ad has ended.
- * When the 'adStop' event is fired, the application shall show the main player component.
+ * The 'end' event is fired when the playback of ad(s) has ended.
+ * When the 'end' event is fired, the application shall display the main player component and
+ * hide the ads player container.
  *
- * @event AdsPlayer#adStop
+ * @event AdsPlayer#end
  * @param {object} event - the event
+ * @param {object} event.type - the event type ('end')
+ */
+
+/**
+ * The 'play' event is fired when the playback of media ad is starting.
+ *
+ * @event AdsPlayer#play
+ * @param {object} event - the event
+ * @param {object} event.type - the event type ('play')
+ */
+
+/**
+ * The 'pause' event is fired when the playback of an ad is paused.
+ *
+ * @event AdsPlayer#pause
+ * @param {object} event - the event
+ * @param {object} event.type - the event type ('pause')
+ */
+
+/**
+ * The 'click' event is fired when a click has been performed on the ad component.
+ * When the 'click' event is fired, the application shall open the web page with the provided URI.
+ *
+ * @event AdsPlayer#click
+ * @param {object} event - the event
+ * @param {object} event.type - the event type ('click')
+ * @param {object} event.data - the event data
+ * @param {string} event.data.uri - the web page uri
  */
 
 /**
