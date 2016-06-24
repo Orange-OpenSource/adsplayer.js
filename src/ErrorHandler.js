@@ -32,7 +32,7 @@ AdsPlayer.ErrorHandler = (function() {
              */
             sendWarning: function(code, message, data) {
                 _eventBus.dispatchEvent({
-                    type: "warning",
+                    type: 'warning',
                     data: {
                         code: code,
                         message: message,
@@ -51,7 +51,7 @@ AdsPlayer.ErrorHandler = (function() {
              */
             sendError: function(code, message, data) {
                 _eventBus.dispatchEvent({
-                    type: "error",
+                    type: 'error',
                     data: {
                         code: code,
                         message: message,
