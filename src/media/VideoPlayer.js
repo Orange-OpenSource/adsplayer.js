@@ -8,13 +8,6 @@ AdsPlayer.media.VideoPlayer = function() {
     var _uri = '',
         _video = null,
         _debug = AdsPlayer.Debug.getInstance(),
-        _style = {
-            display: 'block',
-            position: 'absolute',
-            transform: 'translate(-50%,-50%)',
-            top: '50%',
-            left: '50%'
-        },
 
         isMediaSupported = function (mimeType) {
             if (!_video) {
@@ -32,10 +25,16 @@ AdsPlayer.media.VideoPlayer = function() {
 
         load : function (baseUrl, mediaFiles) {
 
-            // Create the video element
-            _video = document.createElement('video');
-            _video.autoplay = false;
-            _video.id = 'adsplayer-video';
+
+            // Get 'adsplayer-video' element if already declared in DOM
+            _video = document.getElementById('adsplayer-video');
+
+            if (!_video) {
+                // Create the video element
+                _video = document.createElement('video');
+                _video.autoplay = false;
+                _video.id = 'adsplayer-video';
+            }
 
             // Check if input format is supported
             if (!isMediaSupported(mediaFiles[0].type)) {
@@ -57,8 +56,12 @@ AdsPlayer.media.VideoPlayer = function() {
             _uri = (_uri.indexOf('http://') === -1) ? (baseUrl + _uri) : _uri;
 
             _debug.log("Load video media, uri = " + _uri);
+
+            _video.addEventListener('error', function(e) {
+                console.log(e);
+            })
+
             _video.src = _uri;
-            _video.load();
 
             return true;
         },
@@ -113,11 +116,17 @@ AdsPlayer.media.VideoPlayer = function() {
             _video.pause();
         },
 
+        pause : function () {
+            if (!_video) {
+                return;
+            }
+            _video.pause();
+        },
+
         reset : function () {
             if (!_video) {
                 return;
             }
-            _video.src = "";
             _video = null;
         }
     };

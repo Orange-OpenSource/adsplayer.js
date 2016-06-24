@@ -11,20 +11,8 @@ AdsPlayer.media.ImagePlayer = function() {
         _listeners = {},
         _timerInterval = null,
         _startTime = -1,
+        _events = ['play', 'pause', 'timeupdate', 'ended'],
         _debug = AdsPlayer.Debug.getInstance(),
-        _style = {
-            'display': 'block',
-            'position': 'absolute',
-            'transform': 'translate(-50%,-50%)',
-            'top': '50%',
-            'left': '50%'
-        },
-
-        _setStyle = function (element, style) {
-            for (var property in style) {
-                element.style[property] = style[property];
-            }
-        },
 
         _getListeners = function (type) {
             if (!(type in _listeners)) {
@@ -69,7 +57,6 @@ AdsPlayer.media.ImagePlayer = function() {
 
             if (_currentTime >= _duration) {
                 _stopTimer();
-                _debug.log("Image display ended");
                 _notifyEvent('ended');                
             }
         },
@@ -78,7 +65,10 @@ AdsPlayer.media.ImagePlayer = function() {
             if (_timerInterval !== null) {
                 return;
             }
-            _startTime = new Date().getTime();
+            _notifyEvent('play'); 
+            if (_startTime === -1) {
+                _startTime = new Date().getTime();
+            }
             _timerInterval = setInterval(_updateCurrentTime, 100);
         },
 
@@ -86,6 +76,7 @@ AdsPlayer.media.ImagePlayer = function() {
             if (_timerInterval === null) {
                 return;
             }
+            _notifyEvent('play'); 
             clearInterval(_timerInterval);
             _timerInterval = null;
         };
@@ -112,11 +103,15 @@ AdsPlayer.media.ImagePlayer = function() {
                 return false;
             }
 
-            // Create the image element
-            _image = document.createElement('img');
-            _image.autoplay = false;
-            _image.id = 'adsplayer-image';
-            _setStyle(_image, _style);
+            // Get adsplayer-image element if already declared in DOM
+            _image = document.getElementById('adsplayer-image');
+
+            if (!_image) {
+                // Create the image element
+                _image = document.createElement('img');
+                _image.autoplay = false;
+                _image.id = 'adsplayer-image';
+            }
 
             // Add base URL
             _uri = mediaFile.uri;
@@ -124,6 +119,9 @@ AdsPlayer.media.ImagePlayer = function() {
             
             _debug.log("Load image media, uri = " + _uri);
             _image.src = _uri;
+
+            // Reset timer start time
+            _startTime = -1;
 
             return true;
         },
@@ -136,7 +134,7 @@ AdsPlayer.media.ImagePlayer = function() {
             if (!_image) {
                 return;
             }
-            if ((type === 'timeupdate') || (type === 'ended')) {
+            if (_events.indexOf(type) !== -1) {
                 _addEventListener(type, listener);
             } else {
                 _image.addEventListener(type, listener);
@@ -147,7 +145,7 @@ AdsPlayer.media.ImagePlayer = function() {
             if (!_image) {
                 return;
             }
-            if ((type === 'timeupdate') || (type === 'ended')) {
+            if (_events.indexOf(type) !== -1) {
                 _removeEventListener(type, listener);
             } else {
                 _image.removeEventListener(type, listener);
@@ -173,6 +171,13 @@ AdsPlayer.media.ImagePlayer = function() {
             _startTimer();
         },
 
+        pause : function () {
+            if (!_image) {
+                return;
+            }
+            _stopTimer();
+        },
+
         stop : function () {
             if (!_image) {
                 return;
@@ -184,7 +189,6 @@ AdsPlayer.media.ImagePlayer = function() {
             if (!_image) {
                 return;
             }
-            _image.src = "";
             _image = null;
             _listeners = {};
         }
