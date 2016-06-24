@@ -11,12 +11,11 @@ AdsPlayer.vast.VastPlayerManager = function() {
         _adPlayerContainer = null,
         _vastIndex = -1,
         _creativeIndex = -1,
-        _creativePlayer = null,
+        _creativePlayer = new AdsPlayer.vast.CreativePlayer(),
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
         _eventBus = AdsPlayer.EventBus.getInstance(),
         _mediaPlayer = null,
-        _trackingEventsManager = null,
 
         _sendImpression = function (impression) {
             var http = new XMLHttpRequest();
@@ -38,11 +37,25 @@ AdsPlayer.vast.VastPlayerManager = function() {
             _playNextCreative();
         },
 
+        _pauseCreative = function () {
+            if (!_creativePlayer) {
+                return;
+            }
+            _creativePlayer.pause();
+        },
+
+        _resumeCreative = function () {
+            if (!_creativePlayer) {
+                return;
+            }
+            _creativePlayer.play();
+        },
+
         _stopCreative = function () {
             if (!_creativePlayer) {
                 return;
             }
-            _eventBus.removeEventListener('adCreativeEnd', _onCreativeEnd);
+            _eventBus.removeEventListener('creativeEnd', _onCreativeEnd);
             _creativePlayer.stop();
         },
 
@@ -58,7 +71,7 @@ AdsPlayer.vast.VastPlayerManager = function() {
 
             if (linear) {
                 _debug.log("Play Linear Ad, duration = " + linear.duration);
-                _eventBus.addEventListener('adCreativeEnd', _onCreativeEnd);
+                _eventBus.addEventListener('creativeEnd', _onCreativeEnd);
                 if (!_creativePlayer.play(creative.linear, _vasts[_vastIndex].baseUrl)) {
                     _playNextCreative();
                 }
@@ -92,7 +105,7 @@ AdsPlayer.vast.VastPlayerManager = function() {
             } else {
                 // Notify end of trigger
                 _eventBus.dispatchEvent({
-                    type: "adTriggerEnd",
+                    type: 'triggerEnd',
                     data: {}
                 });
             }
@@ -122,32 +135,39 @@ AdsPlayer.vast.VastPlayerManager = function() {
          * @access public
          * @memberof VastPlayerManager#
          * @param {Array} vasts - the array of Vast components to play
+         * @param {Array} adPlayerContainer - the HTML DOM container for ads player components
          */        
         init: function(vasts, adPlayerContainer) {
             _vasts = vasts;
             _adPlayerContainer = adPlayerContainer;
-            _creativePlayer = new AdsPlayer.vast.CreativePlayer();
             _creativePlayer.init(_adPlayerContainer);
         },
 
         start: function() {
-            if (_vasts.length === 0) {
+            if (!_vasts || _vasts.length === 0) {
                 return;
             }
-            
+
             // Notify a trigger is starting to play
             _eventBus.dispatchEvent({
-                type: "adTriggerStart",
+                type: 'triggerStart',
                 data: {}
             });
 
             _playVast(0);
         },
 
+        play: function() {
+            _resumeCreative();
+        },
+
+        pause: function() {
+            _pauseCreative();
+        },
+
         stop: function() {
             _stopCreative();
         }
-
     };
 
 };
