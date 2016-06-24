@@ -11,7 +11,6 @@ AdsPlayer.vast.CreativePlayer = function() {
     var _adPlayerContainer = null,
         _mediaPlayer = null,
         _trackingEventsManager = null,
-        _skipElement = null,
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
         _eventBus = AdsPlayer.EventBus.getInstance(),
@@ -37,24 +36,46 @@ AdsPlayer.vast.CreativePlayer = function() {
                     (parseFloat(timeParts[2]));
         },
 
-        _onMediaError = function () {
+        _onMediaPlay = function () {
 
-            _debug.log("Media error");
+            _debug.log("Creative media play");
 
             // Notify the creative has ended
             _eventBus.dispatchEvent({
-                type: "adCreativeEnd",
+                type: 'play',
+                data: {}
+            });
+        },
+
+        _onMediaPause = function () {
+
+            _debug.log("Creative media pause");
+
+            // Notify the creative has ended
+            _eventBus.dispatchEvent({
+                type: 'pause',
+                data: {}
+            });
+        },
+
+        _onMediaError = function () {
+
+            _debug.log("Creative media error");
+
+            // Notify the creative has ended
+            _eventBus.dispatchEvent({
+                type: 'creativeEnd',
                 data: {}
             });
         },
 
         _onMediaEnded = function () {
 
-            _debug.log("Media ended");
+            _debug.log("creative media ended");
 
             // Notify the creative has ended
             _eventBus.dispatchEvent({
-                type: "adCreativeEnd",
+                type: 'creativeEnd',
                 data: {}
             });
         },
@@ -71,10 +92,13 @@ AdsPlayer.vast.CreativePlayer = function() {
                 return;
             }
 
-            // ClickThrough
+            _debug.log("Creative Click");
+
+            // ClickThrough : send an event for the application to open the web page
             if (this.videoClicks.clickThrough) {
+                _debug.log("Ad click, uri = " + this.videoClicks.clickThrough);
                 _eventBus.dispatchEvent({
-                    type: "adClickThrough",
+                    type: 'click',
                     data: {
                         uri: this.videoClicks.clickThrough
                     }
@@ -83,17 +107,8 @@ AdsPlayer.vast.CreativePlayer = function() {
 
             // ClickTracking
             if (this.videoClicks.clickTracking) {
-
+                // TODO
             }
-        },
-
-        _creatSkipElement = function() {
-            _skipElement = document.createElement('button');
-            _skipElement.id = 'adSkip';
-            _skipElement.innerHTML = '';
-            _skipElement.className = 'adskip-button';
-            _skipElement.style.visibility = 'visible';
-            _adPlayerContainer.appendChild(_skipElement);
         },
 
         _play = function (creative, baseUrl) {
@@ -127,12 +142,15 @@ AdsPlayer.vast.CreativePlayer = function() {
             }
 
             // Load the media files
+            _debug.log("Creative load");
             if (!_mediaPlayer.load(baseUrl, creative.mediaFiles)) {
                 _mediaPlayer = null;
                 return false;
             }
 
             _mediaPlayer.setDuration(_parseTime(creative.duration));
+            _mediaPlayer.addEventListener('play', _onMediaPlay);
+            _mediaPlayer.addEventListener('pause', _onMediaPause);
             _mediaPlayer.addEventListener('error', _onMediaError);
             _mediaPlayer.addEventListener('timeupdate', _onMediaTimeupdate);
             _mediaPlayer.addEventListener('ended', _onMediaEnded);
@@ -146,20 +164,38 @@ AdsPlayer.vast.CreativePlayer = function() {
 
             // Notify a creative is starting to play
             _eventBus.dispatchEvent({
-                type: "adCreativeStart",
+                type: 'creativeStart',
                 data: {}
             });
 
             // Add the media player DOM element
-            _adPlayerContainer.appendChild(_mediaPlayer.getElement());
+            _adPlayerContainer.appendChild(_mediaPlayer.getElement());                
 
             // Listener for click
-            _mediaPlayer.getElement().addEventListener("click", _onAdClick.bind(creative));
+            if (creative.videoClicks) {
+                if (creative.videoClicks.clickThrough) {
+                    _mediaPlayer.getElement().style.cursor = 'pointer';
+                }
+                _mediaPlayer.getElement().addEventListener('click', _onAdClick.bind(creative));
+            }
 
             // Start playing the media
+            _debug.log("Creative play");
             _mediaPlayer.play();
 
             return true;
+        },
+
+        _pause = function () {
+
+            if (!_mediaPlayer) {
+                return;
+            }
+
+            _debug.log("Creative pause");
+
+            // Pauses the media player
+            _mediaPlayer.pause();
         },
 
         _stop = function () {
@@ -168,13 +204,18 @@ AdsPlayer.vast.CreativePlayer = function() {
                 return;
             }
 
+            _debug.log("Creative stop");
+
             // Remove the element from the DOM
             _adPlayerContainer.removeChild(_mediaPlayer.getElement());
 
             // Stop the media player
-            _mediaPlayer.removeEventListener('error', _onMediaError);
-            _mediaPlayer.removeEventListener('ended', _onMediaEnded);
             _mediaPlayer.stop();
+            _mediaPlayer.removeEventListener('play', _onMediaPlay);
+            _mediaPlayer.removeEventListener('pause', _onMediaPause);
+            _mediaPlayer.removeEventListener('error', _onMediaError);
+            _mediaPlayer.removeEventListener('timeupdate', _onMediaTimeupdate);
+            _mediaPlayer.removeEventListener('ended', _onMediaEnded);
             _mediaPlayer.reset();
             _mediaPlayer = null;
 
@@ -200,11 +241,14 @@ AdsPlayer.vast.CreativePlayer = function() {
          */
         init: function(adPlayerContainer) {
             _adPlayerContainer = adPlayerContainer;
-            //_creatSkipElement();
         },
 
         play: function(creative, baseUrl) {
             return _play(creative, baseUrl);
+        },
+
+        pause: function() {
+            _pause();
         },
 
         stop: function() {
@@ -216,5 +260,5 @@ AdsPlayer.vast.CreativePlayer = function() {
 };
 
 AdsPlayer.vast.CreativePlayer.prototype = {
-    constructor: AdsPlayer.vats.CreativePlayer
+    constructor: AdsPlayer.vast.CreativePlayer
 };
