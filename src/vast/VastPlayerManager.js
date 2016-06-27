@@ -72,7 +72,7 @@ AdsPlayer.vast.VastPlayerManager = function() {
             if (linear) {
                 _debug.log("Play Linear Ad, duration = " + linear.duration);
                 _eventBus.addEventListener('creativeEnd', _onCreativeEnd);
-                if (!_creativePlayer.play(creative.linear, _vasts[_vastIndex].baseUrl)) {
+                if (!_creativePlayer.load(creative.linear, _vasts[_vastIndex].baseUrl)) {
                     _playNextCreative();
                 }
             } else {

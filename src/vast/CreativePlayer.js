@@ -111,7 +111,7 @@ AdsPlayer.vast.CreativePlayer = function() {
             }
         },
 
-        _play = function (creative, baseUrl) {
+        _load = function (creative, baseUrl) {
             var mediaFile,
                 isVideo,
                 isImage;
@@ -180,10 +180,21 @@ AdsPlayer.vast.CreativePlayer = function() {
             }
 
             // Start playing the media
-            _debug.log("Creative play");
-            _mediaPlayer.play();
+            _play();
 
             return true;
+        },
+
+        _play = function () {
+
+            if (!_mediaPlayer) {
+                return;
+            }
+
+            _debug.log("Creative play");
+
+            // Play the media player
+            _mediaPlayer.play();
         },
 
         _pause = function () {
@@ -194,7 +205,7 @@ AdsPlayer.vast.CreativePlayer = function() {
 
             _debug.log("Creative pause");
 
-            // Pauses the media player
+            // Pause the media player
             _mediaPlayer.pause();
         },
 
@@ -243,8 +254,12 @@ AdsPlayer.vast.CreativePlayer = function() {
             _adPlayerContainer = adPlayerContainer;
         },
 
-        play: function(creative, baseUrl) {
-            return _play(creative, baseUrl);
+        load: function(creative, baseUrl) {
+            return _load(creative, baseUrl);
+        },
+
+        play: function() {
+            _play();
         },
 
         pause: function() {
