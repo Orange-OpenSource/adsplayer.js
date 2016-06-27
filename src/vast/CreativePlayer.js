@@ -221,12 +221,12 @@ AdsPlayer.vast.CreativePlayer = function() {
             _adPlayerContainer.removeChild(_mediaPlayer.getElement());
 
             // Stop the media player
-            _mediaPlayer.stop();
             _mediaPlayer.removeEventListener('play', _onMediaPlay);
             _mediaPlayer.removeEventListener('pause', _onMediaPause);
             _mediaPlayer.removeEventListener('error', _onMediaError);
             _mediaPlayer.removeEventListener('timeupdate', _onMediaTimeupdate);
             _mediaPlayer.removeEventListener('ended', _onMediaEnded);
+            _mediaPlayer.stop();
             _mediaPlayer.reset();
             _mediaPlayer = null;
 
