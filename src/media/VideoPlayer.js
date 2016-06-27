@@ -59,7 +59,7 @@ AdsPlayer.media.VideoPlayer = function() {
 
             _video.addEventListener('error', function(e) {
                 console.log(e);
-            })
+            });
 
             _video.src = _uri;
 

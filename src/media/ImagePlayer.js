@@ -76,7 +76,7 @@ AdsPlayer.media.ImagePlayer = function() {
             if (_timerInterval === null) {
                 return;
             }
-            _notifyEvent('play'); 
+            _notifyEvent('pause'); 
             clearInterval(_timerInterval);
             _timerInterval = null;
         };
