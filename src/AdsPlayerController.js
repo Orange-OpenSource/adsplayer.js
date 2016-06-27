@@ -316,6 +316,9 @@ AdsPlayer.AdsPlayerController = function() {
             if (_vastPlayerManager) {
                 _vastPlayerManager.stop();
                 _vastPlayerManager = null;
+
+                // Notifies the application ad(s) playback has ended
+                _eventBus.dispatchEvent({type: 'end', data: null});
             }
         },
 
