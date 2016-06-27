@@ -311,6 +311,7 @@ AdsPlayer.AdsPlayerController = function() {
          */
         stop : function() {
             
+            _debug.log("Stop");
             // Stop the ad player
             if (_vastPlayerManager) {
                 _vastPlayerManager.stop();
@@ -343,7 +344,8 @@ AdsPlayer.AdsPlayerController = function() {
          */
         play : function() {
             
-            // Stop the ad player
+            _debug.log("Play");
+            // Play the ad player
             if (_vastPlayerManager) {
                 _vastPlayerManager.play();
             }
@@ -357,6 +359,7 @@ AdsPlayer.AdsPlayerController = function() {
          */
         pause : function() {
             
+            _debug.log("Pause");
             // Stop the ad player
             if (_vastPlayerManager) {
                 _vastPlayerManager.pause();

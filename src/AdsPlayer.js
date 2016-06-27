@@ -157,6 +157,16 @@ AdsPlayer = function(adsPlayerContainer) {
         // AdsPlayer additionnal API
 
         /**
+         * Plays/resumes the playback of the current ad.
+         * @method pause
+         * @access public
+         * @memberof AdsPlayer#
+         */
+        play: function() {
+            _adsPlayerController.play();
+        },
+
+        /**
          * Pauses the playback of the current ad.
          * @method pause
          * @access public
@@ -165,7 +175,6 @@ AdsPlayer = function(adsPlayerContainer) {
         pause: function() {
             _adsPlayerController.pause();
         },
-
 
         /**
          * Registers a listener on the specified event.
