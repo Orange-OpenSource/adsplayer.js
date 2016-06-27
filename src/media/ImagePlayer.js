@@ -10,7 +10,7 @@ AdsPlayer.media.ImagePlayer = function() {
         _currentTime = 0,
         _listeners = {},
         _timerInterval = null,
-        _startTime = -1,
+        _timerTime = -1,
         _events = ['play', 'pause', 'timeupdate', 'ended'],
         _debug = AdsPlayer.Debug.getInstance(),
 
@@ -51,14 +51,16 @@ AdsPlayer.media.ImagePlayer = function() {
         _updateCurrentTime = function () {
             var time = new Date().getTime();
 
-            _currentTime = (time - _startTime) / 1000;
-            //_debug.log("Image display timeupdate, time = " + _currentTime);
+            _currentTime += (time - _timerTime) / 1000;
+            //_debug.log("Image timeupdate, time = " + _currentTime);
             _notifyEvent('timeupdate');
 
             if (_currentTime >= _duration) {
                 _stopTimer();
                 _notifyEvent('ended');                
             }
+
+            _timerTime = time;
         },
 
         _startTimer = function () {
@@ -66,10 +68,8 @@ AdsPlayer.media.ImagePlayer = function() {
                 return;
             }
             _notifyEvent('play'); 
-            if (_startTime === -1) {
-                _startTime = new Date().getTime();
-            }
-            _timerInterval = setInterval(_updateCurrentTime, 100);
+            _timerTime = new Date().getTime();
+            _timerInterval = setInterval(_updateCurrentTime, 200);
         },
 
         _stopTimer = function () {
@@ -120,8 +120,8 @@ AdsPlayer.media.ImagePlayer = function() {
             _debug.log("Load image media, uri = " + _uri);
             _image.src = _uri;
 
-            // Reset timer start time
-            _startTime = -1;
+            // Reset current time
+            _currentTime = 0;
 
             return true;
         },
