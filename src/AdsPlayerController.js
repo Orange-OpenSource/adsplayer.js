@@ -11,7 +11,6 @@ AdsPlayer.AdsPlayerController = function() {
         _mast = null,
         _triggerManagers = [],
         _vastPlayerManager = null,
-        _fileLoader = new AdsPlayer.FileLoader(),
         _mastParser = new AdsPlayer.mast.MastParser(),
         _vastParser = new AdsPlayer.vast.VastParser(),
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
@@ -21,10 +20,11 @@ AdsPlayer.AdsPlayerController = function() {
 
         _loadVast = function(trigger, url) {
             var deferred = Q.defer(),
+                fileLoader = new AdsPlayer.FileLoader(),
                 vast = null;
 
             _debug.log("Download VAST file: " + url);
-            _fileLoader.load(url).then(
+            fileLoader.load(url).then(
                 function(result) {
                     _debug.log("Parse VAST file");
                     vast = _vastParser.parse(result.response);
@@ -246,7 +246,8 @@ AdsPlayer.AdsPlayerController = function() {
          * @param {string} mastUrl - the MAST file url
          */
         load : function(url) {
-            var deferred = Q.defer();
+            var deferred = Q.defer(),
+                fileLoader = new AdsPlayer.FileLoader();
 
             // Reset the MAST and trigger managers
             _mast = null;
@@ -254,7 +255,7 @@ AdsPlayer.AdsPlayerController = function() {
 
             // Download and parse MAST file
             _debug.log("Download MAST file: " + url);
-            _fileLoader.load(url).then(function(result) {
+            fileLoader.load(url).then(function(result) {
                 _debug.log("Parse MAST file");
                 _parseMastFile(result.response, result.baseUrl);
                 // Start managing triggers and ads playing
