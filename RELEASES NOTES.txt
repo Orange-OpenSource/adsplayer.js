@@ -1,3 +1,9 @@
+### Release Notes v0.1.0 (2016/06/28) 
+* Refactored version
+* Supports pre-roll, mid-roll and end-roll ad-insertion
+* Add events ('start', 'end', 'play', 'pause', 'click') to enable application handling adsplayer's components display
+* Add play/pause methods to enable application to pause/resume playback of current media ad
+
 ### Release Notes v0.0.1 (2016/05/13) 
 * 1st version for ad-insertion plugin for hasplayer.js
 * Based on Mast specification 0.9 and Vast specification 2.0
