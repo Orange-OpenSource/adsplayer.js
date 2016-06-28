@@ -1,19 +1,25 @@
 // Requis
 var gulp = require('gulp'),
+    // node packages
     $ = require('gulp-load-plugins')(),
     del = require('del'),
-    path = require('path'),
-    git = require('git-rev'),
-    runSequence = require('run-sequence'),
     fs = require('fs'),
+    path = require('path'),
+    runSequence = require('run-sequence'),
+    // gulp packages
+    git = require('gulp-git'),
     browserSync = require('browser-sync'),
     browserify = require('browserify'),
     reload = browserSync.reload,
+    // custom import
     pkg = require('../package.json'),
     source = require('vinyl-source-stream'),
     sources = require('./sources.json');
 
-var comment = '<%= pkg.copyright %>\n\n/* Last build : <%= pkg.date %>_<%= pkg.time %> / git revision : <%= pkg.revision %> */\n\n';
+var comment = '<%= pkg.copyright %>\n\n/* Last build : <%= pkg.gitDate %>_<%= pkg.gitTime %> / git revision : <%= pkg.gitRevision %> */\n\n';
+
+var jshint_ignore_start = '/* jshint ignore:start */\n';
+var jshint_ignore_end = '\n/* jshint ignore:end */';
 
 var config = {
     name: "AdsPlayer",
@@ -21,7 +27,7 @@ var config = {
     doc: {
         dir: '../dist/doc/',
         template: '../node_modules/gulp-jsdoc/node_modules/ink-docstrap/template',
-        readMe: '../doc/JSDoc/README.md',
+        readMe: '../README.md',
         fileSource: '../src/AdsPlayer.js'
     }
 };
@@ -56,14 +62,20 @@ gulp.task('umd_test', function() {
 /*** UMD TEST ****/
 
 gulp.task('package-info', function() {
-    git.short(function(str) {
-        pkg.revision = str;
+    // Get last abbreviated commit hash 
+    git.exec({args: 'log -1 --format=%h', quiet: true}, function (err, stdout) {
+        pkg.gitRevision = stdout.replace(/(\r\n|\n|\r)/gm,"");
     });
-    fs.readFile('../LICENSE', null, function(err, _data) {
-       // pkg.copyright = _data;
+    // Get last commit date
+    git.exec({args: 'log -1 --format=%cD', quiet: true}, function (err, stdout) {
+        var date = new Date(stdout);
+        pkg.gitDate = (date.getFullYear()) + '-' + (date.getMonth() + 1) + '-' + (date.getDate());
+        pkg.gitTime = (date.getHours()) + ':' + (date.getMinutes()) + ':' + (date.getSeconds());
     });
-    pkg.date = (new Date().getFullYear()) + '-' + (new Date().getMonth() + 1) + '-' + (new Date().getDate());
-    pkg.time = (new Date().getHours()) + ':' + (new Date().getMinutes()) + ':' + (new Date().getSeconds());
+    fs.readFile('../COPYRIGHT', null, function(err, _data) {
+        pkg.copyright = _data;
+    });
+
 });
 
 gulp.task('lint', function() {
@@ -90,6 +102,8 @@ gulp.task('build', ['clean', 'package-info', 'lint'], function() {
         }))
         .pipe(gulp.dest(config.distDir))
         .pipe($.uglify())
+        .pipe($.banner(jshint_ignore_start))
+        .pipe($.footer(jshint_ignore_end))
         .pipe($.banner(comment, {
             pkg: pkg
         }))
@@ -119,7 +133,7 @@ gulp.task('zip', function() {
 });
 
 gulp.task('doc', function() {
-    return gulp.src([config.doc.fileSource/*, config.doc.readMe*/])
+    return gulp.src([config.doc.fileSource, config.doc.readMe])
         .pipe($.jsdoc(config.doc.dir, {
             path: config.doc.template,
             'theme': 'united',

@@ -2,10 +2,6 @@
     "name": "adsplayer.js",
     "version": "0.0.1",
     "description": "Plugin for hasplayer.js used to handle ad-insertion in MAST/VAST format",
-    "directories": {
-        "doc": "doc",
-        "test": "tests"
-    },
     "scripts": {
         "build": "cd build && gulp",
         "test": "echo \"Error: no test specified\" && exit 1"
@@ -14,13 +10,8 @@
         "type": "git",
         "url": "https://www.forge.orange-labs.fr/plugins/git/dash-js/adsplayer.js.git"
     },
-    "keywords": [
-        "VAST",
-        "MAST",
-        "Plugin"
-    ],
     "author": "Orange",
-    "license": "BSD",
+    "license": "BSD-3-Clause-Clear",
     "devDependencies": {
         "browser-sync": "^2.12.5",
         "browserify": "^13.0.0",
@@ -29,6 +20,8 @@
         "gulp": "^3.9.1",
         "gulp-banner": "^0.1.3",
         "gulp-concat": "^2.6.0",
+        "gulp-footer": "^1.0.5",
+        "gulp-git": "^1.7.2",
         "gulp-jsdoc": "^0.1.5",
         "gulp-jshint": "^2.0.0",
         "gulp-load-plugins": "^1.2.2",
