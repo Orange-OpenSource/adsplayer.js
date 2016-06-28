@@ -17,9 +17,13 @@ AdsPlayer.vast.VastPlayerManager = function() {
         _mediaPlayer = null,
 
         _sendImpression = function (impression) {
-            var http = new XMLHttpRequest();
 
+            if (!impression.uri || impression.uri.length === 0) {
+                return;
+            }
+            
             _debug.log("Send Impression, uri = " + impression.uri);
+            var http = new XMLHttpRequest();
             http.open("GET", impression.uri, true);
             http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
             http.send();
