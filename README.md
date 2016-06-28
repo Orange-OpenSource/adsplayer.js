@@ -13,7 +13,7 @@ The adsplayer.js plugin takes charge of:
 The application that uses hasplayer.js in conjunction with adsplayer.js has to take charge of:
 * hiding/showing adsplayer.js components according to the events raised by the plugin
 * opening the web page when a click on the playing ad has been detected by the plugin
-* pausing/resuming the plugin (for example when applicatioj visibility changes)
+* pausing/resuming the plugin (for example when application visibility changes)
 
 ## Build / Run
 
