@@ -1,21 +1,8 @@
 /**
- * The copyright in this software module is being made available under the BSD License, included below. This software module may be subject to other third party and/or contributor rights, including patent rights, and no such rights are granted under this license.
- * The whole software resulting from the execution of this software module together with its external dependent software modules from dash.js project may be subject to Orange and/or other third party rights, including patent rights, and no such rights are granted under this license.
- *
- * Copyright (c) 2016, Orange
- * All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without modification, are permitted provided that the following conditions are met:
- * •  Redistributions of source code must retain the above copyright notice, this list of conditions and the following disclaimer.
- * •  Redistributions in binary form must reproduce the above copyright notice, this list of conditions and the following disclaimer in the documentation and/or other materials provided with the distribution.
- * •  Neither the name of the Orange nor the names of its contributors may be used to endorse or promote products derived from this software module without specific prior written permission.
- *
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- * @constructs AdsPlayer
- *
+ * AdsPlayer.
+ * @constructor AdsPlayer
+ * @param {Object} adsPlayerContainer - the DOM container in which &lt;video&gt; and &lt;img&gt; HTML components will be appended
  */
-
 AdsPlayer = function(adsPlayerContainer) {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -49,6 +36,7 @@ AdsPlayer = function(adsPlayerContainer) {
         // Plugin API
 
         /**
+         * [Plugin API, invoked by hasplayer.js]
          * Returns the plugin name.
          * @method getName
          * @access public
@@ -60,44 +48,7 @@ AdsPlayer = function(adsPlayerContainer) {
         },
 
         /**
-         * Returns the plugin version.
-         * @method getVersion
-         * @access public
-         * @memberof AdsPlayer#
-         * @return {string} the plugin version
-         */
-        getVersion: function() {
-            return VERSION;
-        },
-
-        /**
-         * [getVersionFull description]
-         * @return {string} [description]
-         */
-        getVersionFull: function () {
-            if (GIT_TAG.indexOf("@@") === -1) {
-                return VERSION + '_' + GIT_TAG;
-            } else {
-                return VERSION;
-            }
-        },
-
-        /**
-         * Returns the build date of this Ads player.
-         * @method getBuildDate
-         * @access public
-         * @memberof AdsPlayer#
-         * @return {string} the build date of this Ads player
-         */
-        getBuildDate: function() {
-            if (BUILD_DATE.indexOf("@@") === -1) {
-                return BUILD_DATE;
-            } else {
-                return 'Not a builded version';
-            }
-        },
-
-        /**
+         * [Plugin API, invoked by hasplayer.js]
          * Initializes the plugin.
          * @method init
          * @access public
@@ -115,6 +66,7 @@ AdsPlayer = function(adsPlayerContainer) {
         },
 
         /**
+         * [Plugin API, invoked by hasplayer.js]
          * This method is invoked when a new stream is to be loaded/opened.
          * @method load
          * @access public
@@ -134,6 +86,7 @@ AdsPlayer = function(adsPlayerContainer) {
         },
 
         /**
+         * [Plugin API, invoked by hasplayer.js]
          * This method is invoked when the current stream is to be stopped.
          * @method stop
          * @access public
@@ -144,6 +97,7 @@ AdsPlayer = function(adsPlayerContainer) {
         },
 
         /**
+         * [Plugin API, invoked by hasplayer.js]
          * This method is invoked when the player is to be reset.
          * @method reset
          * @access public
@@ -155,6 +109,46 @@ AdsPlayer = function(adsPlayerContainer) {
 
 
         // AdsPlayer additionnal API
+
+        /**
+         * Returns the plugin version.
+         * @method getVersion
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {string} the plugin version
+         */
+        getVersion: function() {
+            return VERSION;
+        },
+
+        /**
+         * Returns the full plugin version, including git revision
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {string} the full plugin version, including git revision
+         */
+        getVersionFull: function () {
+            if (GIT_TAG.indexOf("@@") === -1) {
+                return VERSION + '_' + GIT_TAG;
+            } else {
+                return VERSION;
+            }
+        },
+
+        /**
+         * Returns the build date.
+         * @method getBuildDate
+         * @access public
+         * @memberof AdsPlayer#
+         * @return {string} the build date
+         */
+        getBuildDate: function() {
+            if (BUILD_DATE.indexOf("@@") === -1) {
+                return BUILD_DATE;
+            } else {
+                return 'Not a builded version';
+            }
+        },
 
         /**
          * Plays/resumes the playback of the current ad.
@@ -181,9 +175,9 @@ AdsPlayer = function(adsPlayerContainer) {
          * The possible event types are:
          * <li>'error' (see [error]{@link AdsPlayer#event:error} event specification)
          * <li>'warning' (see [warning]{@link AdsPlayer#event:warning} event specification)
-         * <li>'adStart' (see [adStart]{@link AdsPlayer#event:adStart} event specification)
-         * <li>'adEnd' (see [adEnd]{@link AdsPlayer#event:adEnd} event specification)
-         * <li>'adClick' (see [adEnd]{@link AdsPlayer#event:adClick} event specification)
+         * <li>'start' (see [start]{@link AdsPlayer#event:start} event specification)
+         * <li>'end' (see [end]{@link AdsPlayer#event:end} event specification)
+         * <li>'click' (see [click]{@link AdsPlayer#event:click} event specification)
          * @method addEventListener
          * @access public
          * @memberof AdsPlayer#
@@ -255,8 +249,8 @@ AdsPlayer.utils = {};
 /**
  * The 'start' event is fired when the playback of ad(s) is starting.
  * When the 'start' event is fired, the application shall hide the main player component and
- * display the ads player container in which the ad media player component (<video> or <image>)
- * will be created and displayed.
+ * display the ads player container in which the ad media player component(s) will be created
+ * and displayed.
  *
  * @event AdsPlayer#start
  * @param {object} event - the event
