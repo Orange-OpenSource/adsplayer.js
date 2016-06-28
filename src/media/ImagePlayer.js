@@ -92,7 +92,7 @@ AdsPlayer.media.ImagePlayer = function() {
             // Support only jpeg, png and gif image formats
             for (i = 0; i < mediaFiles.length; i++) {
                 type = mediaFiles[i].type;
-                if ((type === "image/jpeg") || (type === "image/png") || (type === "image/gif")) {
+                if ((type === "image/jpeg") || (type === "image/jpg") || (type === "image/png") || (type === "image/gif")) {
                     mediaFile = mediaFiles[i];
                     break;
                 }
