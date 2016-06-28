@@ -1,4 +1,3 @@
-
 /**
  * The ImagePlayer is a MediaPlayer implementation for playing still images.
  */

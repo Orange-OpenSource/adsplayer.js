@@ -1,4 +1,3 @@
-
 /**
  * The VastPlayerManager manages the sequencing of playing creatives of a single VAST.
  * It takes as input the list of Vast objects as returned by the VAST parser.

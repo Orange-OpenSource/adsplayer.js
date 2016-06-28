@@ -1,5 +1,7 @@
-
-
+/**
+ * MAST parser. This class parses MAST file in XML format
+ * and construct the corresponding MAST object according to MAST data model.
+ */
 AdsPlayer.mast.MastParser = function() {
     "use strict";
 

@@ -1,4 +1,3 @@
-
 /**
  * The TriggerManager manages the detection of the start and end of a trigger.
  * It takes as input a trigger object (as parsed from a MAST file) and tests the start and end conditions

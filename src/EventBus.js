@@ -1,4 +1,6 @@
-
+/**
+ * Event bus utility class for events listening and notifying.
+ */
 AdsPlayer.EventBus = (function() {
     "use strict"; // TBC
     var instance;

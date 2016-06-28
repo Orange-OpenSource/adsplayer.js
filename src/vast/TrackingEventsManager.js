@@ -2,7 +2,6 @@
  * The TrackingEventsManager manages the sending of the tracking events while a creative's media is playing.
  * It takes as input the list of tracking events to send.
  */
-
 AdsPlayer.vast.TrackingEventsManager = function() {
 
     var _trackingEvents = [],

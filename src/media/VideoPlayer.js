@@ -1,8 +1,6 @@
-
 /**
  * The VideoPlayer is a MediaPlayer implementation for playing video files.
  */
-
 AdsPlayer.media.VideoPlayer = function() {
 
     var _uri = '',

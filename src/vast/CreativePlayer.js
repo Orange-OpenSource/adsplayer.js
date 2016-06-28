@@ -1,4 +1,3 @@
-
 /**
  * The CreativePlayer manages:
  * - the playing of media files within a Creative (with the help of a Image/VideoPlayer)
