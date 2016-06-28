@@ -47,17 +47,21 @@ mediaPlayer.load(stream);
 In order to interact with AdsPlayer, the application has to register to some events raised by the AdsPlayer:
 
 ``` js
-adsPlayer.addEventListener("start", function (){
+adsPlayer.addEventListener("start", function (e) {
     // Ad(s) playback is starting => show ad(s) player container and hide main video
 });
-adsPlayer.addEventListener("end", function () {
+adsPlayer.addEventListener("end", function (e) {
     // Ad(s) playback has ended => hide ad(s) player container and show main video
 });
-adsPlayer.addEventListener("play", function () {
+adsPlayer.addEventListener("play", function (e) {
     // An ad's media playback is starting => update play/pause button
 });
-adsPlayer.addEventListener("pause", function () {
+adsPlayer.addEventListener("pause", function (e) {
     // An ad's media playback is paused => update play/pause button
+});
+adsPlayer.addEventListener("click", function (e) {
+    // A click has beed detected on the media component
+    // e.data.uri contains the URI of the webpage to open
 });
 ```
 
