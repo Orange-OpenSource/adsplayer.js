@@ -18,7 +18,7 @@ AdsPlayer.AdsPlayerController = function() {
         _eventBus = AdsPlayer.EventBus.getInstance(),
 
 
-        _loadVast = function(trigger, url) {
+        _loadVast = function(url) {
             var deferred = Q.defer(),
                 fileLoader = new AdsPlayer.FileLoader(),
                 vast = null;
@@ -29,12 +29,11 @@ AdsPlayer.AdsPlayerController = function() {
                     _debug.log("Parse VAST file");
                     vast = _vastParser.parse(result.response);
                     vast.baseUrl = result.baseUrl;
-                    trigger.vasts.push(vast);
-                    deferred.resolve();
+                    deferred.resolve(vast);
                 },
                 function(error) {
                     _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_VAST_FAILED, "Failed to load VAST file", error);
-                    deferred.resolve();
+                    deferred.resolve(null);
                 }
             );
             return deferred.promise;
@@ -48,16 +47,23 @@ AdsPlayer.AdsPlayerController = function() {
 
             for (i = 0; i < trigger.sources.length; i++) {
                 uri = trigger.sources[i].uri;
-                // check for relative uri path
+                // Check for relative uri path
                 if (uri.indexOf('http://') === -1) {
                     uri = _mast.baseUrl + uri;
                 }
-                deferLoadVasts.push(_loadVast(trigger, uri));
+                deferLoadVasts.push(_loadVast(uri));
             }
 
-            Q.all(deferLoadVasts).then(function() {
+            Q.all(deferLoadVasts).then((function() {
+                // Push vast objects in the trigger in the original order
+                // (this = promises returned objects)
+                for (var i = 0; i < this.length; i++) {
+                    if (this[i]) {
+                        trigger.vasts.push(this[i]);
+                    }
+                }
                 deferred.resolve();
-            });
+            }).bind(deferLoadVasts));
 
             return deferred.promise;
         },
