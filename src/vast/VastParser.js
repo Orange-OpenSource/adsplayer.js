@@ -106,7 +106,7 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
         _getInLine = function(adNode) {
             var inLine = new AdsPlayer.vast.model.Ad.InLine(),
                 inLineNode = xmldom.getElement(adNode, 'InLine'),
-                impressionNode,
+                impressionNodes,
                 creativeNodes,
                 i;
 
@@ -120,11 +120,13 @@ AdsPlayer.vast.VastParser = function(vastBaseUrl) {
             inLine.survey = xmldom.getChildNodeTextValue(inLineNode, 'Survey');
             inLine.error = xmldom.getChildNodeTextValue(inLineNode, 'Error');
 
-            impressionNode = xmldom.getElement(inLineNode, 'Impression');
-            if (impressionNode) {
-                inLine.impression = new AdsPlayer.vast.model.Ad.Impression();
-                inLine.impression.id = impressionNode.getAttribute('id');
-                inLine.impression.uri = xmldom.getNodeTextValue(impressionNode);
+            impressionNodes = xmldom.getElements(inLineNode, 'Impression');
+            for (i = 0; i < impressionNodes.length; i++) {
+                var impression = new AdsPlayer.vast.model.Ad.Impression();
+                impression.id = impressionNodes[i].getAttribute('id');
+                impression.uri = xmldom.getNodeTextValue(impressionNodes[i]);
+                inLine.impressions.push(impression);
+
             }
 
             creativeNodes = xmldom.getSubElements(inLineNode, 'Creatives', 'Creative');

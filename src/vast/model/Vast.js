@@ -73,7 +73,7 @@ AdsPlayer.vast.model.Ad.InLine = function () {
     this.description = '';              // [Optional] Description
     this.survey = '';                   // [Optional] URI of request to survey vendor
     this.error = '';                    // [Optional] URI to request if ad does not play due to error
-    this.impression = null;             // [Required] URI to track impression. 
+    this.impressions = [];              // [Required] URIs to track impressions. 
     this.creatives = [];                // [Required] Creative elements
     this.extensions = [];               // [Optional] Any valid XML may be included in the Extensions node 
 };

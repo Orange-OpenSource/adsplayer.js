@@ -16,17 +16,24 @@ AdsPlayer.vast.VastPlayerManager = function() {
         _eventBus = AdsPlayer.EventBus.getInstance(),
         _mediaPlayer = null,
 
-        _sendImpression = function (impression) {
+        _sendImpressions = function (impressions) {
+            var impression,
+                i;
 
-            if (!impression.uri || impression.uri.length === 0) {
+            if (impressions.length === 0) {
                 return;
             }
-            
-            _debug.log("Send Impression, uri = " + impression.uri);
-            var http = new XMLHttpRequest();
-            http.open("GET", impression.uri, true);
-            http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-            http.send();
+
+            for (i = 0; i < impressions.length; i++) {
+                impression = impressions[i];
+                if (impression.uri && impression.uri.length > 0) {
+                    _debug.log("Send Impression, uri = " + impression.uri);
+                    var http = new XMLHttpRequest();
+                    http.open("GET", impression.uri, true);
+                    http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+                    http.send();
+                }            
+            }
         },
 
         _onCreativeEnd = function () {
@@ -90,10 +97,8 @@ AdsPlayer.vast.VastPlayerManager = function() {
             _vastIndex = index;
             _debug.log("Play Vast - index = " + _vastIndex + ", Ad id = " + ad.id);
 
-            // Send Impression tracking
-            if (ad.inLine.impression) {
-                _sendImpression(ad.inLine.impression);
-            }
+            // Send Impressions tracking
+            _sendImpressions(ad.inLine.impressions);
 
             // Play first Creative
             _playCreative(0);            
