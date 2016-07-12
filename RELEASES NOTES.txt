@@ -1,3 +1,10 @@
+### Release Notes v0.2.0 (2016/07/13) 
+* Handle multiple Impressions per VAST
+* Adjust automatically adsplayer volume according to hasplayer's volume
+* Add events 'addElement' and 'removeElement' to notify creation and deletion of adsplayer DOM elements (<video> or <img>)
+* Bugs fixing:
+* - Process multiple VASTs of a trigger in chronological order
+
 ### Release Notes v0.1.0 (2016/06/28) 
 * Refactored version
 * Supports pre-roll, mid-roll and end-roll ad-insertion
