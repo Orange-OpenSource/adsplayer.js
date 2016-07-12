@@ -10,6 +10,7 @@ AdsPlayer.vast.CreativePlayer = function() {
     var _adPlayerContainer = null,
         _mediaPlayer = null,
         _trackingEventsManager = null,
+        _mainVideo = null,
         _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
         _debug = AdsPlayer.Debug.getInstance(),
         _eventBus = AdsPlayer.EventBus.getInstance(),
@@ -30,8 +31,8 @@ AdsPlayer.vast.CreativePlayer = function() {
                 return -1;
             }
 
-            return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) + 
-                    (parseInt(timeParts[1]) * SECONDS_IN_MIN) + 
+            return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) +
+                    (parseInt(timeParts[1]) * SECONDS_IN_MIN) +
                     (parseFloat(timeParts[2]));
         },
 
@@ -101,7 +102,7 @@ AdsPlayer.vast.CreativePlayer = function() {
                     data: {
                         uri: this.videoClicks.clickThrough
                     }
-                });                
+                });
             }
 
             // ClickTracking
@@ -127,7 +128,7 @@ AdsPlayer.vast.CreativePlayer = function() {
             mediaFile = creative.mediaFiles[0];
 
             // Video or image media ?
-            isVideo = mediaFile.type.indexOf('video') !== -1; 
+            isVideo = mediaFile.type.indexOf('video') !== -1;
             isImage = mediaFile.type.indexOf('image') !== -1;
 
             if (isVideo) {
@@ -167,8 +168,17 @@ AdsPlayer.vast.CreativePlayer = function() {
                 data: {}
             });
 
+            // Notify a media element has been created and appended into document
+            _eventBus.dispatchEvent({
+                type: 'addElement',
+                data: {
+                    element: _mediaPlayer.getElement(),
+                    type: _mediaPlayer.getType()
+                }
+            });
+
             // Add the media player DOM element
-            _adPlayerContainer.appendChild(_mediaPlayer.getElement());                
+            _adPlayerContainer.appendChild(_mediaPlayer.getElement());
 
             // Listener for click
             if (creative.videoClicks) {
@@ -177,6 +187,9 @@ AdsPlayer.vast.CreativePlayer = function() {
                 }
                 _mediaPlayer.getElement().addEventListener('click', _onAdClick.bind(creative));
             }
+
+            // Align media volume to main video volume
+            _onMainVideoVolumeChange();
 
             // Start playing the media
             _play();
@@ -216,9 +229,6 @@ AdsPlayer.vast.CreativePlayer = function() {
 
             _debug.log("Creative stop");
 
-            // Remove the element from the DOM
-            _adPlayerContainer.removeChild(_mediaPlayer.getElement());
-
             // Stop the media player
             _mediaPlayer.removeEventListener('play', _onMediaPlay);
             _mediaPlayer.removeEventListener('pause', _onMediaPause);
@@ -226,6 +236,20 @@ AdsPlayer.vast.CreativePlayer = function() {
             _mediaPlayer.removeEventListener('timeupdate', _onMediaTimeupdate);
             _mediaPlayer.removeEventListener('ended', _onMediaEnded);
             _mediaPlayer.stop();
+
+            // Notify a media element has been created and appended into document
+            _eventBus.dispatchEvent({
+                type: 'removeElement',
+                data: {
+                    element: _mediaPlayer.getElement(),
+                    type: _mediaPlayer.getType()
+                }
+            });
+
+            // Remove the element from the DOM
+            _adPlayerContainer.removeChild(_mediaPlayer.getElement());
+
+            // Reset the media player
             _mediaPlayer.reset();
             _mediaPlayer = null;
 
@@ -234,6 +258,13 @@ AdsPlayer.vast.CreativePlayer = function() {
                 _trackingEventsManager.stop();
                 _trackingEventsManager = null;
             }
+        },
+
+        _onMainVideoVolumeChange = function() {
+            if (!_mediaPlayer) {
+                return;
+            }
+            _mediaPlayer.setVolume(_mainVideo.muted ? 0 : _mainVideo.volume);
         };
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -249,8 +280,10 @@ AdsPlayer.vast.CreativePlayer = function() {
          * @param {Object} creative - the creative element to play
          * @param {String} baseUrl - the base URL for media files
          */
-        init: function(adPlayerContainer) {
+        init: function(adPlayerContainer, mainVideo) {
             _adPlayerContainer = adPlayerContainer;
+            _mainVideo = mainVideo;
+            _mainVideo.addEventListener('volumechange', _onMainVideoVolumeChange);
         },
 
         load: function(creative, baseUrl) {
@@ -267,6 +300,11 @@ AdsPlayer.vast.CreativePlayer = function() {
 
         stop: function() {
             _stop();
+        },
+
+        reset: function() {
+            _mainVideo.removeEventListener('volumechange', _onMainVideoVolumeChange);
+            _mainVideo = null;
         }
 
     };

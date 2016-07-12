@@ -125,6 +125,10 @@ AdsPlayer.media.ImagePlayer = function() {
             return true;
         },
 
+        getType : function () {
+            return "image";
+        },
+
         getElement : function () {
             return _image;
         },
@@ -168,6 +172,10 @@ AdsPlayer.media.ImagePlayer = function() {
                 return;
             }
             _startTimer();
+        },
+
+        setVolume : function (volume) {
+            // NA
         },
 
         pause : function () {

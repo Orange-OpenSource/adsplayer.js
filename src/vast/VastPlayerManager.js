@@ -145,10 +145,10 @@ AdsPlayer.vast.VastPlayerManager = function() {
          * @param {Array} vasts - the array of Vast components to play
          * @param {Array} adPlayerContainer - the HTML DOM container for ads player components
          */        
-        init: function(vasts, adPlayerContainer) {
+        init: function(vasts, adPlayerContainer, mainVideo) {
             _vasts = vasts;
             _adPlayerContainer = adPlayerContainer;
-            _creativePlayer.init(_adPlayerContainer);
+            _creativePlayer.init(_adPlayerContainer, mainVideo);
         },
 
         start: function() {
@@ -175,7 +175,11 @@ AdsPlayer.vast.VastPlayerManager = function() {
 
         stop: function() {
             _stopCreative();
-        }
+        },
+
+        reset: function() {
+            _creativePlayer.reset();
+        }      
     };
 
 };

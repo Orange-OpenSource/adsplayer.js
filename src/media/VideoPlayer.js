@@ -64,6 +64,10 @@ AdsPlayer.media.VideoPlayer = function() {
             return true;
         },
 
+        getType : function () {
+            return "video";
+        },
+
         getElement : function () {
             return _video;
         },
@@ -119,6 +123,13 @@ AdsPlayer.media.VideoPlayer = function() {
                 return;
             }
             _video.pause();
+        },
+
+        setVolume : function (volume) {
+            if (!_video) {
+                return;
+            }
+            _video.volume = volume;
         },
 
         reset : function () {

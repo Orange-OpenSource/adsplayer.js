@@ -127,6 +127,7 @@ AdsPlayer.AdsPlayerController = function() {
 
             // Delete VAST player manager
             if (_vastPlayerManager) {
+                _vastPlayerManager.reset();
                 _vastPlayerManager = null;
             }
 
@@ -136,10 +137,10 @@ AdsPlayer.AdsPlayerController = function() {
                 _activateTrigger(trigger);
             } else {
                 // Notifies the application ad(s) playback has ended
-                _eventBus.dispatchEvent({type: 'end', data: null}); 
+                _eventBus.dispatchEvent({type: 'end', data: null});
 
                 // Resume the main video element
-                _resumeVideo();                
+                _resumeVideo();
             }
 
         },
@@ -155,7 +156,7 @@ AdsPlayer.AdsPlayerController = function() {
             _pauseVideo();
 
             // Notifies the application ad(s) playback starts
-            _eventBus.dispatchEvent({type: 'start', data: null}); 
+            _eventBus.dispatchEvent({type: 'start', data: null});
 
             // Wait for trigger end
             _eventBus.addEventListener('triggerEnd', _onTriggerEnd);
@@ -163,7 +164,7 @@ AdsPlayer.AdsPlayerController = function() {
             // Play the trigger
             _debug.log('Start playing trigger ' + trigger.id);
             _vastPlayerManager = new AdsPlayer.vast.VastPlayerManager();
-            _vastPlayerManager.init(trigger.vasts, _adsPlayerContainer);
+            _vastPlayerManager.init(trigger.vasts, _adsPlayerContainer, _mainVideo);
             _vastPlayerManager.start();
         },
 
@@ -197,7 +198,7 @@ AdsPlayer.AdsPlayerController = function() {
         _checkTriggersEnd = function() {
             for (var i = 0; i < _triggerManagers.length; i++) {
                 if (_triggerManagers[i].checkEndConditions(_mainVideo)) {
-                    // Remove trigger manager => will not be activated anymore 
+                    // Remove trigger manager => will not be activated anymore
                     _debug.log('Revocate trigger ' + trigger.id);
                     _triggerManagers.splice(0, 1);
                     i--;
@@ -283,11 +284,12 @@ AdsPlayer.AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          */
         stop : function() {
-            
+
             _debug.log("Stop");
             // Stop the ad player
             if (_vastPlayerManager) {
                 _vastPlayerManager.stop();
+                _vastPlayerManager.reset();
                 _vastPlayerManager = null;
 
                 // Notifies the application ad(s) playback has ended
@@ -296,14 +298,14 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         reset : function() {
-            
+
             stop();
 
             // Remove <video> event listener
             _mainVideo.removeEventListener('playing', _onVideoPlaying);
             _mainVideo.removeEventListener('timeupdate', _onVideoTimeupdate);
-            _mainVideo.removeEventListener('seeking', _onVideoTimeupdate);            
-            _mainVideo.removeEventListener('ended', _onVideoEnded);            
+            _mainVideo.removeEventListener('seeking', _onVideoTimeupdate);
+            _mainVideo.removeEventListener('ended', _onVideoEnded);
 
             // Reset the trigger managers
             _triggerManagers = [];
@@ -319,13 +321,13 @@ AdsPlayer.AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          */
         play : function() {
-            
+
             _debug.log("Play");
             // Play the ad player
             if (_vastPlayerManager) {
                 _vastPlayerManager.play();
             }
-        },        
+        },
 
         /**
          * Pauses the playback of the current ad.
@@ -334,13 +336,13 @@ AdsPlayer.AdsPlayerController = function() {
          * @memberof AdsPlayerController#
          */
         pause : function() {
-            
+
             _debug.log("Pause");
             // Stop the ad player
             if (_vastPlayerManager) {
                 _vastPlayerManager.pause();
             }
-        }        
+        }
     };
 
 };
