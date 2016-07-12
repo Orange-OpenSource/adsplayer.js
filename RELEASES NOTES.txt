@@ -1,4 +1,4 @@
-### Release Notes v0.2.0 (2016/07/13) 
+### Release Notes v0.2.0 (2016/07/12) 
 * Handle multiple Impressions per VAST
 * Adjust automatically adsplayer volume according to hasplayer's volume
 * Add events 'addElement' and 'removeElement' to notify creation and deletion of adsplayer DOM elements (<video> or <img>)
