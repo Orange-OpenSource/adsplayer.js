@@ -9,7 +9,7 @@ AdsPlayer = function(adsPlayerContainer) {
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
     var NAME = 'AdsPlayer',
-        VERSION = '0.1.0_dev',
+        VERSION = '0.2.0_dev',
         GIT_TAG = '@@REVISION',
         BUILD_DATE = '@@TIMESTAMP',
         _error = null,

@@ -1,6 +1,6 @@
 {
     "name": "adsplayer.js",
-    "version": "0.1.0",
+    "version": "0.2.0",
     "description": "Plugin for hasplayer.js used to handle ad-insertion in MAST/VAST format",
     "scripts": {
         "build": "cd build && gulp",
