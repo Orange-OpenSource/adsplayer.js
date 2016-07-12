@@ -268,6 +268,31 @@ AdsPlayer.utils = {};
  */
 
 /**
+ * The 'addElement' event is fired when a DOM element for playing an ad has been created
+ * and will be appended in the ads player container.
+ * The element can be either a &lt;video&gt; or an &lt;img&gt; element.
+ *
+ * @event AdsPlayer#addElement
+ * @param {object} event - the event
+ * @param {object} event.type - the event type ('addElement')
+ * @param {object} event.data - the event data
+ * @param {string} event.data.element - the created element
+ * @param {string} event.data.type - the type of the element, 'video' for &lt;video&gt; or 'image' for &lt;img&gt;
+ */
+
+/**
+ * The 'removeElement' event is fired when the DOM element for playing an ad is being removed
+ * from the ads player container and deleted.
+ *
+ * @event AdsPlayer#removeElement
+ * @param {object} event - the event
+ * @param {object} event.type - the event type ('removeElement')
+ * @param {object} event.data - the event data
+ * @param {string} event.data.element - the created element
+ * @param {string} event.data.type - the type of the element, 'video' for &lt;video&gt; or 'image' for &lt;img&gt;
+ */
+
+/**
  * The 'play' event is fired when the playback of media ad is starting.
  *
  * @event AdsPlayer#play
