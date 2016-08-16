@@ -1,7 +1,7 @@
 /**
  * The TriggerManager manages the detection of the start and end of a trigger.
  * It takes as input a trigger object (as parsed from a MAST file) and tests the start and end conditions
- * to detect the activation and revocation of a trigger. 
+ * to detect the activation and revocation of a trigger.
  */
 AdsPlayer.mast.TriggerManager = function() {
 
@@ -23,8 +23,8 @@ AdsPlayer.mast.TriggerManager = function() {
                 return -1;
             }
 
-            return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) + 
-                    (parseInt(timeParts[1]) * SECONDS_IN_MIN) + 
+            return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) +
+                    (parseInt(timeParts[1]) * SECONDS_IN_MIN) +
                     (parseFloat(timeParts[2]));
         },
 
@@ -62,13 +62,13 @@ AdsPlayer.mast.TriggerManager = function() {
             }
             return res;
         },
-    
-        _evaluateCondition = function (condition, video, itemStart, itemEnd) {
+
+        _evaluateCondition = function (condition, video) {
             var res = false,
                 i;
 
             // Check pre-roll condition for activation
-            if (itemStart && condition.type === ConditionType.EVENT && condition.name === ConditionName.ON_ITEM_START) {
+            if (video.currentTime === 0 && condition.type === ConditionType.EVENT && condition.name === ConditionName.ON_ITEM_START) {
                 res = true;
             }
 
@@ -87,7 +87,7 @@ AdsPlayer.mast.TriggerManager = function() {
             }
 
             // Check condition for revocation
-            if (itemEnd && condition.type === ConditionType.EVENT && condition.name === ConditionName.ON_ITEM_END) {
+            if (video.ended && condition.type === ConditionType.EVENT && condition.name === ConditionName.ON_ITEM_END) {
                 res = true;
             }
 
@@ -100,14 +100,14 @@ AdsPlayer.mast.TriggerManager = function() {
             return res;
         },
 
-        _evaluateConditions = function (conditions, video, itemStart, itemEnd) {
+        _evaluateConditions = function (conditions, video) {
             var res = false,
                 i;
 
             // Evaluate each condition
             // MAST spec. : "Multiple condition elements are treated as an implicit OR, any one of them evaluating true will fire the trigger."
             for (i = 0; i < conditions.length; i++) {
-                res |=  _evaluateCondition(conditions[i], video, itemStart, itemEnd);
+                res |=  _evaluateCondition(conditions[i], video);
             }
 
             return res;
@@ -124,7 +124,7 @@ AdsPlayer.mast.TriggerManager = function() {
          * @access public
          * @memberof TriggerManager#
          * @param {Object} trigger - the trigger to handle by this manager
-         */        
+         */
         init: function(trigger) {
             _trigger = trigger;
         },
@@ -135,7 +135,7 @@ AdsPlayer.mast.TriggerManager = function() {
          * @access public
          * @memberof TriggerManager#
          * @return {Object} the managed trigger object
-         */        
+         */
         getTrigger: function() {
             return _trigger;
         },
@@ -146,13 +146,12 @@ AdsPlayer.mast.TriggerManager = function() {
          * @access public
          * @memberof TriggerManager#
          * @param {Number} video - the main video element
-         * @param {Boolean} itemStart - if the item will start to play (for checking pre-roll condition) 
          */
-        checkStartConditions: function(video, itemStart) {
+        checkStartConditions: function(video) {
             if (_trigger.activated) {
                 return false;
             }
-            return _evaluateConditions(_trigger.startConditions, video, itemStart, false);
+            return _evaluateConditions(_trigger.startConditions, video);
         },
 
         /**
@@ -163,7 +162,7 @@ AdsPlayer.mast.TriggerManager = function() {
          * @param {Number} video - the main video element
          */
         checkEndConditions: function (video) {
-            return _evaluateConditions(_trigger.endConditions, video, false, true);
+            return _evaluateConditions(_trigger.endConditions, video);
         }
     };
 
