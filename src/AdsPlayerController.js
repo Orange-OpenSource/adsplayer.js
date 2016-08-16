@@ -145,10 +145,11 @@ AdsPlayer.AdsPlayerController = function() {
                 // Notifies the application ad(s) playback has ended
                 _eventBus.dispatchEvent({type: 'end', data: null});
 
-                // Resume the main video element
-                _resumeVideo();
+                if (!_mainVideo.ended) {
+                    // Resume the main video element
+                    _resumeVideo();
+                }
             }
-
         },
 
         _playTrigger = function (trigger) {
