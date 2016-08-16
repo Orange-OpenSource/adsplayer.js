@@ -150,8 +150,6 @@ AdsPlayer.AdsPlayerController = function() {
                 return;
             }
 
-            trigger.activated = true;
-
             // Pause the main video element
             _pauseVideo();
 
@@ -176,6 +174,9 @@ AdsPlayer.AdsPlayerController = function() {
             }
 
             _debug.log('Activate trigger ' + trigger.id);
+
+            trigger.activated = true;
+
             if (trigger.vasts.length === 0) {
                 // Download VAST files
                 _loadTriggerVasts(trigger).then(function () {
