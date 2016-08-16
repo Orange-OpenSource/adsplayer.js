@@ -98,7 +98,7 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _onVideoTimeupdate = function() {
-            var trigger = _checkTriggersStart(false);
+            var trigger = _checkTriggersStart();
             if (trigger !== null) {
                 _activateTrigger(trigger);
             }
@@ -132,7 +132,7 @@ AdsPlayer.AdsPlayerController = function() {
             }
 
             // Check if another trigger has to be activated
-            var trigger = _checkTriggersStart(false);
+            var trigger = _checkTriggersStart();
             if (trigger !== null) {
                 _activateTrigger(trigger);
             } else {
@@ -186,9 +186,9 @@ AdsPlayer.AdsPlayerController = function() {
             }
         },
 
-        _checkTriggersStart = function(itemStart) {
+        _checkTriggersStart = function() {
             for (var i = 0; i < _triggerManagers.length; i++) {
-                if (_triggerManagers[i].checkStartConditions(_mainVideo, itemStart)) {
+                if (_triggerManagers[i].checkStartConditions(_mainVideo)) {
                     return _triggerManagers[i].getTrigger();
                 }
             }
@@ -211,7 +211,7 @@ AdsPlayer.AdsPlayerController = function() {
                 return;
             }
             // Check for pre-roll trigger
-            var trigger = _checkTriggersStart(true);
+            var trigger = _checkTriggersStart();
             if (trigger !== null) {
                 _activateTrigger(trigger);
             }
