@@ -105,6 +105,12 @@ AdsPlayer.AdsPlayerController = function() {
         },
 
         _onVideoEnded = function() {
+            // Check for end-roll triggers
+            var trigger = _checkTriggersStart();
+            if (trigger !== null) {
+                _activateTrigger(trigger);
+            }
+
             _checkTriggersEnd();
         },
 
