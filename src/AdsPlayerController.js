@@ -200,7 +200,6 @@ AdsPlayer.AdsPlayerController = function() {
             for (var i = 0; i < _triggerManagers.length; i++) {
                 if (_triggerManagers[i].checkEndConditions(_mainVideo)) {
                     // Remove trigger manager => will not be activated anymore
-                    _debug.log('Revocate trigger ' + trigger.id);
                     _triggerManagers.splice(0, 1);
                     i--;
                 }
