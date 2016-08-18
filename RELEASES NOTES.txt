@@ -1,17 +1,21 @@
-### Release Notes v0.2.0 (2016/07/12) 
+### Release Notes v0.2.1 (2016/08/18)
+* Bugs fixing:
+* - Correct support for end-roll ad-insertion
+
+### Release Notes v0.2.0 (2016/07/12)
 * Handle multiple Impressions per VAST
 * Adjust automatically adsplayer volume according to hasplayer's volume
 * Add events 'addElement' and 'removeElement' to notify creation and deletion of adsplayer DOM elements (<video> or <img>)
 * Bugs fixing:
 * - Process multiple VASTs of a trigger in chronological order
 
-### Release Notes v0.1.0 (2016/06/28) 
+### Release Notes v0.1.0 (2016/06/28)
 * Refactored version
 * Supports pre-roll, mid-roll and end-roll ad-insertion
 * Add events ('start', 'end', 'play', 'pause', 'click') to enable application handling adsplayer's components display
 * Add play/pause methods to enable application to pause/resume playback of current media ad
 
-### Release Notes v0.0.1 (2016/05/13) 
+### Release Notes v0.0.1 (2016/05/13)
 * 1st version for ad-insertion plugin for hasplayer.js
 * Based on Mast specification 0.9 and Vast specification 2.0
 * Supports preroll ad-insertion scenario
