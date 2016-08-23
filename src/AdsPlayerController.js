@@ -306,19 +306,28 @@ AdsPlayer.AdsPlayerController = function() {
 
         reset : function() {
 
-            stop();
+            _debug.log("Reset");
 
-            // Remove <video> event listener
-            _mainVideo.removeEventListener('playing', _onVideoPlaying);
-            _mainVideo.removeEventListener('timeupdate', _onVideoTimeupdate);
-            _mainVideo.removeEventListener('seeking', _onVideoTimeupdate);
-            _mainVideo.removeEventListener('ended', _onVideoEnded);
+            this.stop();
 
             // Reset the trigger managers
             _triggerManagers = [];
 
             // Reset the MAST
             _mast = null;
+        },
+
+        destroy: function() {
+
+            _debug.log("Destroy");
+
+            this.reset();
+
+            // Remove <video> event listener
+            _mainVideo.removeEventListener('playing', _onVideoPlaying);
+            _mainVideo.removeEventListener('timeupdate', _onVideoTimeupdate);
+            _mainVideo.removeEventListener('seeking', _onVideoTimeupdate);
+            _mainVideo.removeEventListener('ended', _onVideoEnded);
         },
 
         /**
