@@ -102,7 +102,7 @@
                 request.onerror = report;
                 request.onabort = onabort;
                 request.open("GET", url, true);
-                request.timeout = 2000;
+                request.timeout = 10000;
                 request.send();
             } catch (e) {
                 request.onerror();

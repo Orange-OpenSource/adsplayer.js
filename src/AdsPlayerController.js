@@ -9,6 +9,7 @@ AdsPlayer.AdsPlayerController = function() {
         _mainVideo = null,
         _adsPlayerContainer = null,
         _mast = null,
+        _fileLoaders = [],
         _triggerManagers = [],
         _vastPlayerManager = null,
         _mastParser = new AdsPlayer.mast.MastParser(),
@@ -32,10 +33,13 @@ AdsPlayer.AdsPlayerController = function() {
                     deferred.resolve(vast);
                 },
                 function(error) {
-                    _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_VAST_FAILED, "Failed to load VAST file", error);
+                    if (error) {
+                        _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_VAST_FAILED, "Failed to load VAST file", error);
+                    }
                     deferred.resolve(null);
                 }
             );
+            _fileLoaders.push(fileLoader);
             return deferred.promise;
         },
 
@@ -277,9 +281,14 @@ AdsPlayer.AdsPlayerController = function() {
                 _start();
                 deferred.resolve();
             }, function(error) {
-                _errorHandler.sendError(error.name, error.message, error.data);
-                deferred.reject(error);
+                if (error) {
+                    _errorHandler.sendError(error.name, error.message, error.data);
+                    deferred.reject(error);
+                } else {
+                    deferred.resolve();
+                }
             });
+            _fileLoaders.push(fileLoader);
 
             return deferred.promise;
         },
@@ -293,6 +302,13 @@ AdsPlayer.AdsPlayerController = function() {
         stop : function() {
 
             _debug.log("Stop");
+
+            // Stop/abort the file loaders
+            for (var i = 0; i < _fileLoaders.length; i++) {
+                _fileLoaders[i].abort();
+            }
+            _fileLoaders = [];
+
             // Stop the ad player
             if (_vastPlayerManager) {
                 _vastPlayerManager.stop();
