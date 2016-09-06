@@ -62,7 +62,7 @@ gulp.task('umd_test', function() {
 /*** UMD TEST ****/
 
 gulp.task('package-info', function() {
-    // Get last abbreviated commit hash 
+    // Get last abbreviated commit hash
     git.exec({args: 'log -1 --format=%h', quiet: true}, function (err, stdout) {
         pkg.gitRevision = stdout.replace(/(\r\n|\n|\r)/gm,"");
     });
@@ -94,9 +94,9 @@ gulp.task('build', ['clean', 'package-info', 'lint'], function() {
             },
             template: path.join(__dirname, 'umd.js')
         }))
-        .pipe($.replace(/VERSION[\s*]=[\s*]['\\](\d.\d.\d_dev)['\\]/g, 'VERSION = \'' + pkg.version + '\''))
-        .pipe($.replace(/@@TIMESTAMP/, pkg.date + '_' + pkg.time))
-        .pipe($.replace(/@@REVISION/, pkg.revision))
+        .pipe($.replace(/VERSION[\s*]=[\s*]['\\](.*)['\\]/g, 'VERSION = \'' + pkg.version + '\''))
+        .pipe($.replace(/@@TIMESTAMP/, pkg.gitDate + '_' + pkg.gitTime))
+        .pipe($.replace(/@@REVISION/, pkg.gitRevision))
         .pipe($.banner(comment, {
             pkg: pkg
         }))
