@@ -1,3 +1,6 @@
+### Release Notes v0.3.0 (2016/09/06)
+* Update plugin API according to hasplayer.js v1.5.0
+
 ### Release Notes v0.2.2 (2016/08/25)
 * - Modify files downloading timeout (set to 10 sec.)
 * - Abort files downloading when stopping AdsPlayer
