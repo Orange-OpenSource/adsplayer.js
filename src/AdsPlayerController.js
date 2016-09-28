@@ -221,6 +221,11 @@ AdsPlayer.AdsPlayerController = function() {
             if (!_mast) {
                 return;
             }
+
+            if (_mast.triggers.length === 0) {
+                _debug.warn('No trigger in MAST');
+            }
+
             // Check for pre-roll trigger
             var trigger = _checkTriggersStart();
             if (trigger !== null) {
