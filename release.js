@@ -3,20 +3,15 @@ var PACKAGE_JSON_FILE = './package.json',
 
 var child = require('child_process'),
     fs = require('fs'),
-    pkg = require(PACKAGE_JSON_FILE),
     semver = require('semver'),
-    argv = require('yargs')
-        .alias('s', 'start')
-        .alias('f', 'finish')
-        .alias('n', 'version')
-        .alias('t', 'type')
-        .alias('m', 'message')
-        .alias('p', 'push')
-        .alias('c', 'codenames').normalize('c')
+    yargs = require('yargs'),
+    argv = yargs
+        .usage("$0 --start [--type major|minor] [--version <version>] \n$0 --finish")
         .default('type', 'minor')
         .argv;
 
 function execSync(command) {
+    console.info('Exec command: ' + command);
     var res = child.execSync(command);
     res = String(res).trim();
     return res;
@@ -56,15 +51,24 @@ function gitPush() {
     execSync('git push --tags');
 }
 
-function gitFlowStart(version) {
-    return execSync('git flow release start ' + version);
+function gitFlowStart(type, version) {
+    return execSync('git flow ' + type + ' start ' + version);
 }
 
-function gitFlowFinish(version) {
-    console.log('git flow release finish -F ' + version + ' -m \"Release v' + version + '\"');
-    return execSync('git flow release finish -F ' + version + ' -m \"Release v' + version + '\"');
-}
+function gitFlowFinish(type, version) {
 
+    try {
+        execSync('git flow ' + type + ' finish -F ' + version + ' -m \"' + type + ' v' + version + '\"');
+    } catch (err) {
+        // In case of hotfix, there will be a conflict when merging hotfix branch into development with package.json file (version value)
+        // Then resolve the merge and finish again the hotfix
+        if (type === 'hotfix') {
+            execSync('git checkout --ours package.json');
+            execSync('git commit -am \"Merge tag v' + version + ' into development\"');
+            execSync('git flow ' + type + ' finish -F ' + version + ' -m \"' + type + ' v' + version + '\"');
+        }
+    }
+}
 
 function prependFile(path, data) {
 
@@ -106,33 +110,37 @@ function generateReleaseNotes(version) {
 
     // Get last/previous tag
     var lastTag = gitGetLastTag();
-    //console.log("Last tag: " + lastTag);
 
     // Get commits since last tag
     var commits = gitGetCommits(lastTag, 'HEAD');
-    //console.log("Commits :" + commits);
     for (var i =0; i < commits.length; i++) {
         notes += '* ' + commits[i] + '\n';
     }
     notes += '\n';
 
-    //console.log('Release notes = \n' + notes);
     return notes;
 }
 
 function startRelease() {
 
-    //console.log(JSON.stringify(pkg, null, '\t'));
+    var releaseType = argv.type === 'patch' ? 'hotfix' : 'release';
 
     // Check if repository is clean
     if (!gitIsRepoClean()) {
         console.error("Repository is not clean");
         return;
     }
-    console.info("Repository is clean");
 
+    if (releaseType === 'hotfix') {
+        // Checkout master branch
+        gitCheckout('master');
+    } else {
     // Checkout development branch
     gitCheckout('development');
+    }
+
+    // Read package.json file
+    var pkg = require(PACKAGE_JSON_FILE);
 
     // Get current version from package.json and increment it:
     // - if version ends with '-dev' suffix, then suffix is removed
@@ -143,11 +151,9 @@ function startRelease() {
     pkg.version = version;
     console.info("=> Release version: " + pkg.version);
 
-    //console.log(JSON.stringify(pkg, null, '\t'));
-
     // Start git flow release
-    console.info('Start git release v' + pkg.version);
-    gitFlowStart(pkg.version);
+    console.info('Start git ' + releaseType + ' v' + pkg.version);
+    gitFlowStart(releaseType, pkg.version);
 
     // Write/update and commit package.jon file with the new version number
     fs.writeFileSync(PACKAGE_JSON_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
@@ -162,17 +168,24 @@ function startRelease() {
 
 function finishRelease() {
 
+    // Get flow type
+    var branch = gitGetCurrentBranch(),
+        releaseType = branch.startsWith('release/') ? 'release' : (branch.startsWith('hotfix/') ? 'hotfix' : null);
+
     // Check if we are on release branch
-    var branch = gitGetCurrentBranch();
-    if (!branch.startsWith('release/')) {
-        console.error('Current branch = ' + branch + '. Please checkout current release branch');
+    if (releaseType === null) {
+        console.error('Current branch = ' + branch + '. Please checkout current release/hotfix branch');
         return;
     }
 
-    // Finish git flow release
-    console.info('Finish git release v' + pkg.version);
-    gitFlowFinish(pkg.version);
+    // Read package.json file
+    var pkg = require(PACKAGE_JSON_FILE);
 
+    // Finish git flow
+    console.info('Finish git ' + releaseType + ' v' + pkg.version);
+    gitFlowFinish(releaseType, pkg.version);
+
+    if (releaseType === 'release') {
     // Increment version number for next release version in development
     gitCheckout('development');
     var version = semver.inc(pkg.version, 'minor');
@@ -181,6 +194,7 @@ function finishRelease() {
     console.info("Next release version in development: " + pkg.version);
     fs.writeFileSync(PACKAGE_JSON_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
     gitCommit('v' + pkg.version);
+    }
 
     // Push all branches and tags to remote
     gitPush();
@@ -188,12 +202,11 @@ function finishRelease() {
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 if (argv.start) {
     startRelease();
-}
-
-if (argv.finish) {
+} else if (argv.finish) {
     finishRelease();
+} else {
+    yargs.showHelp();
 }
 
