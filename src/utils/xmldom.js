@@ -1,7 +1,18 @@
 xmldom = {};
 
-xmldom.getElement = function(node, name) {
+
+xmldom.getElementsByTagName = function(node, name) {
     var elements = node.getElementsByTagName(name);
+    if (elements.length < 1 && node.firstChild) {
+        var namespaceURI = node.firstChild.namespaceURI;
+        elements = node.getElementsByTagNameNS(namespaceURI, name);
+    }
+    return elements;
+};
+
+xmldom.getElement = function(node, name) {
+    //var elements = node.getElementsByTagName(name);
+    var elements = this.getElementsByTagName(node, name);
     if (elements.length < 1) {
         return null;
     }
@@ -9,7 +20,8 @@ xmldom.getElement = function(node, name) {
 };
 
 xmldom.getElements = function(node, name) {
-    return node.getElementsByTagName(name);
+    //return node.getElementsByTagName(name);
+    return this.getElementsByTagName(node, name);
 };
 
 xmldom.getSubElements = function(node, name, subName) {
@@ -17,7 +29,8 @@ xmldom.getSubElements = function(node, name, subName) {
     if (element === null) {
         return [];
     }
-    return element.getElementsByTagName(subName);
+    //return element.getElementsByTagName(subName);
+    return this.getElements(element, subName);
 };
 
 xmldom.getChildNode = function (node, name) {
