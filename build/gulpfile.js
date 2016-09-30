@@ -62,7 +62,7 @@ gulp.task('lint', function() {
 });
 
 gulp.task('build', ['clean', 'package-info', 'lint'], function() {
-    sourcesGlob = sources.libs.concat(sourcesGlob);
+    sourcesGlob = sourcesGlob.concat(sources.libs);
     return gulp.src(sourcesGlob)
         .pipe(concat(pkg.name))
         .pipe(umd({
