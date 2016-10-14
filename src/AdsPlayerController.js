@@ -24,7 +24,7 @@ class AdsPlayerController {
         var fileLoader = new FileLoader(),
             vast = null;
 
-        return new Promise((resolve, /*reject*/) => {
+        return new Promise((resolve/*, reject*/) => {
             this._debug.log("Download VAST file: " + url);
             fileLoader.load(url).then(result => {
                     this._debug.log("Parse VAST file");
