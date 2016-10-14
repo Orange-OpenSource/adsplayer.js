@@ -1,5 +1,5 @@
-xmldom = {};
 
+var xmldom = {};
 
 xmldom.getElementsByTagName = function(node, name) {
     var elements = node.getElementsByTagName(name);
@@ -60,3 +60,6 @@ xmldom.getChildNodeTextValue = function (node, name) {
     }
     return this.getNodeTextValue(element);
 };
+
+
+export default xmldom;

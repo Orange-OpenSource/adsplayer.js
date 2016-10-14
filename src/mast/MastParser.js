@@ -1,99 +1,103 @@
 /**
- * MAST parser. This class parses MAST file in XML format
- * and construct the corresponding MAST object according to MAST data model.
- */
-AdsPlayer.mast.MastParser = function() {
-    "use strict";
+* MAST parser. This class parses MAST file in XML format
+* and construct the corresponding MAST object according to MAST data model.
+*/
 
-    var _getCondition = function(conditionNode) {
-            var condition = new AdsPlayer.mast.model.Trigger.Condition(),
-                conditionNodes,
-                i;
+import mast from './model/Mast';
+import xmldom from '../utils/xmldom';
 
-            condition.type = conditionNode.getAttribute('type');
-            condition.name = conditionNode.getAttribute('name');
-            condition.value = conditionNode.getAttribute('value');
-            condition.operator = conditionNode.getAttribute('operator');
-            conditionNodes = conditionNode.getElementsByTagName('condition');
-            for (i = 0; i < conditionNodes.length; i++) {
-                trigger.conditions.push(_getCondition(conditionNodes[i]));
-            }
+class MastParser {
 
-            return condition;
-        },
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
-        _getSource = function(sourceNode) {
-            var source = new AdsPlayer.mast.model.Trigger.Source(),
-                sourceNodes,
-                i;
+    _getCondition (conditionNode) {
+        let condition = new mast.Condition(),
+            conditionNodes;
 
-            source.uri = sourceNode.getAttribute('uri');
-            source.altReference = sourceNode.getAttribute('altReference');
-            source.format = sourceNode.getAttribute('format');
-            sourceNodes = sourceNode.getElementsByTagName('source');
-            for (i = 0; i < sourceNodes.length; i++) {
-                source.sources.push(_getSource(sourceNodes[i]));
-            }
-
-            return source;
-        },
-
-        _getTrigger = function(triggerNode) {
-            var trigger = new AdsPlayer.mast.model.Trigger(),
-                startConditionNodes = xmldom.getSubElements(triggerNode, 'startConditions', 'condition'),
-                endConditionNodes = xmldom.getSubElements(triggerNode, 'endConditions', 'condition'),
-                sourceNodes = xmldom.getSubElements(triggerNode, 'sources', 'source'),
-                condition,
-                i;
-
-            trigger.id = triggerNode.getAttribute('id');
-            trigger.description = triggerNode.getAttribute('description');
-
-            for (i = 0; i < startConditionNodes.length; i++) {
-                trigger.startConditions.push(_getCondition(startConditionNodes[i]));
-            }
-
-            for (i = 0; i < endConditionNodes.length; i++) {
-                trigger.endConditions.push(_getCondition(endConditionNodes[i]));
-            }
-
-            for (i = 0; i < sourceNodes.length; i++) {
-                trigger.sources.push(_getSource(sourceNodes[i]));
-            }
-
-            return trigger;
-        },
-
-        _getTriggers = function(mastNode, mast) {
-            var triggerNodes = xmldom.getSubElements(mastNode, 'triggers', 'trigger'),
-                i;
-
-            for (i = 0; i < triggerNodes.length; i++) {
-                mast.triggers.push(_getTrigger(triggerNodes[i]));
-            }
-        };
-
-    return {
-
-        /**
-        * Parses the MAST xml file and get the triggers.
-        * @param {object} xmlDom - the XML DOM to parse
-        */
-        parse: function(xmlDom) {
-            var mast = new AdsPlayer.mast.model.Mast(),
-                mastNode = xmldom.getElement(xmlDom, 'MAST');
-
-            if (mastNode === null) {
-                return mast;
-            }
-
-            _getTriggers(mastNode, mast);
-
-            return mast;
+        condition.type = conditionNode.getAttribute('type');
+        condition.name = conditionNode.getAttribute('name');
+        condition.value = conditionNode.getAttribute('value');
+        condition.operator = conditionNode.getAttribute('operator');
+        conditionNodes = conditionNode.getElementsByTagName('condition');
+        for (let i = 0; i < conditionNodes.length; i++) {
+            condition.conditions.push(this._getCondition(conditionNodes[i]));
         }
-    };
-};
 
-AdsPlayer.mast.MastParser.prototype = {
-    constructor: AdsPlayer.mast.MastParser
-};
+        return condition;
+    }
+
+    _getSource (sourceNode) {
+        let source = new mast.Source(),
+            sourceNodes;
+
+        source.uri = sourceNode.getAttribute('uri');
+        source.altReference = sourceNode.getAttribute('altReference');
+        source.format = sourceNode.getAttribute('format');
+        sourceNodes = sourceNode.getElementsByTagName('source');
+        for (let i = 0; i < sourceNodes.length; i++) {
+            source.sources.push(this._getSource(sourceNodes[i]));
+        }
+
+        return source;
+    }
+
+    _getTrigger (triggerNode) {
+        let trigger = new mast.Trigger(),
+            startConditionNodes = xmldom.getSubElements(triggerNode, 'startConditions', 'condition'),
+            endConditionNodes = xmldom.getSubElements(triggerNode, 'endConditions', 'condition'),
+            sourceNodes = xmldom.getSubElements(triggerNode, 'sources', 'source'),
+            i;
+
+        trigger.id = triggerNode.getAttribute('id');
+        trigger.description = triggerNode.getAttribute('description');
+
+        for (i = 0; i < startConditionNodes.length; i++) {
+            trigger.startConditions.push(this._getCondition(startConditionNodes[i]));
+        }
+
+        for (i = 0; i < endConditionNodes.length; i++) {
+            trigger.endConditions.push(this._getCondition(endConditionNodes[i]));
+        }
+
+        for (i = 0; i < sourceNodes.length; i++) {
+            trigger.sources.push(this._getSource(sourceNodes[i]));
+        }
+
+        return trigger;
+    }
+
+    _getTriggers (mastNode, mast) {
+        let triggerNodes = xmldom.getSubElements(mastNode, 'triggers', 'trigger');
+
+        for (let i = 0; i < triggerNodes.length; i++) {
+            mast.triggers.push(this._getTrigger(triggerNodes[i]));
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+
+    constructor() {
+    }
+
+    /**
+    * Parses the MAST xml file and get the triggers.
+    * @param {object} xmlDom - the XML DOM to parse
+    */
+    parse (xmlDom) {
+        let mast_ = new mast.Mast(),
+            mastNode = xmldom.getElement(xmlDom, 'MAST');
+
+        if (mastNode === null) {
+            return mast_;
+        }
+
+        this._getTriggers(mastNode, mast_);
+
+        return mast_;
+    }
+}
+
+
+export default MastParser;

@@ -1,316 +1,324 @@
 /**
- * The CreativePlayer manages:
- * - the playing of media files within a Creative (with the help of a Image/VideoPlayer)
- * - the tracking events (with the help of a TrackingEventsManager)
- * - the display of the ad skipping component
- * - the user clicks
- */
-AdsPlayer.vast.CreativePlayer = function() {
+* The CreativePlayer manages:
+* - the playing of media files within a Creative (with the help of a Image/VideoPlayer)
+* - the tracking events (with the help of a TrackingEventsManager)
+* - the display of the ad skipping component
+* - the user clicks
+*/
 
-    var _adPlayerContainer = null,
-        _mediaPlayer = null,
-        _trackingEventsManager = null,
-        _mainVideo = null,
-        _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
-        _debug = AdsPlayer.Debug.getInstance(),
-        _eventBus = AdsPlayer.EventBus.getInstance(),
+import TrackingEventsManager from './TrackingEventsManager';
+import VideoPlayer from '../media/VideoPlayer';
+import ImagePlayer from '../media/ImagePlayer';
+import Debug from '../Debug';
+import EventBus from '../EventBus';
 
-        _parseTime = function(str) {
-            var timeParts,
-                SECONDS_IN_HOUR = 60 * 60,
-                SECONDS_IN_MIN = 60;
+class CreativePlayer {
 
-            if (!str) {
-                return -1;
-            }
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
-            timeParts = str.split(':');
+    _parseTime (str) {
+        var timeParts,
+            SECONDS_IN_HOUR = 60 * 60,
+            SECONDS_IN_MIN = 60;
 
-            // Check time format, must be HH:MM:SS(.mmm)
-            if (timeParts.length !== 3) {
-                return -1;
-            }
+        if (!str) {
+            return -1;
+        }
 
-            return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) +
-                    (parseInt(timeParts[1]) * SECONDS_IN_MIN) +
-                    (parseFloat(timeParts[2]));
-        },
+        timeParts = str.split(':');
 
-        _onMediaPlay = function () {
+        // Check time format, must be HH:MM:SS(.mmm)
+        if (timeParts.length !== 3) {
+            return -1;
+        }
 
-            _debug.log("Creative media play");
+        return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) +
+                (parseInt(timeParts[1]) * SECONDS_IN_MIN) +
+                (parseFloat(timeParts[2]));
+    }
 
-            // Notify the creative has ended
-            _eventBus.dispatchEvent({
-                type: 'play',
-                data: {}
-            });
-        },
+    _onMediaPlay () {
 
-        _onMediaPause = function () {
+        this._debug.log("Creative media play");
 
-            _debug.log("Creative media pause");
+        // Notify the creative has ended
+        this._eventBus.dispatchEvent({
+            type: 'play',
+            data: {}
+        });
+    }
 
-            // Notify the creative has ended
-            _eventBus.dispatchEvent({
-                type: 'pause',
-                data: {}
-            });
-        },
+    _onMediaPause () {
 
-        _onMediaError = function () {
+        this._debug.log("Creative media pause");
 
-            _debug.log("Creative media error");
+        // Notify the creative has ended
+        this._eventBus.dispatchEvent({
+            type: 'pause',
+            data: {}
+        });
+    }
 
-            // Notify the creative has ended
-            _eventBus.dispatchEvent({
-                type: 'creativeEnd',
-                data: {}
-            });
-        },
+    _onMediaError () {
 
-        _onMediaEnded = function () {
+        this._debug.log("Creative media error");
 
-            _debug.log("creative media ended");
+        // Notify the creative has ended
+        this._eventBus.dispatchEvent({
+            type: 'creativeEnd',
+            data: {}
+        });
+    }
 
-            // Notify the creative has ended
-            _eventBus.dispatchEvent({
-                type: 'creativeEnd',
-                data: {}
-            });
-        },
+    _onMediaEnded () {
 
-        _onMediaTimeupdate = function () {
+        this._debug.log("creative media ended");
 
-            var currenttime = _mediaPlayer.getCurrentTime();
-            //_debug.log("Media timeupdate");
-        },
+        // Notify the creative has ended
+        this._eventBus.dispatchEvent({
+            type: 'creativeEnd',
+            data: {}
+        });
+    }
 
-        _onAdClick = function () {
-            // this = creative
-            if (!this.videoClicks) {
-                return;
-            }
+    _onMediaTimeupdate () {
 
-            _debug.log("Creative Click");
+        //this._debug.log("Media timeupdate: " + this._mediaPlayer.getCurrentTime());
+    }
 
-            // ClickThrough : send an event for the application to open the web page
-            if (this.videoClicks.clickThrough) {
-                _debug.log("Ad click, uri = " + this.videoClicks.clickThrough);
-                _eventBus.dispatchEvent({
-                    type: 'click',
-                    data: {
-                        uri: this.videoClicks.clickThrough
-                    }
-                });
-            }
+    _onAdClick () {
+        // this = creative
+        if (!this.videoClicks) {
+            return;
+        }
 
-            // ClickTracking
-            if (this.videoClicks.clickTracking) {
-                // TODO
-            }
-        },
+        this._debug.log("Creative Click");
 
-        _load = function (creative, baseUrl) {
-            var mediaFile,
-                isVideo,
-                isImage;
-
-            if (!creative) {
-                return false;
-            }
-
-            mediaFiles = creative.mediaFiles;
-            if (creative.mediaFiles.length === 0) {
-                return false;
-            }
-
-            mediaFile = creative.mediaFiles[0];
-
-            // Video or image media ?
-            isVideo = mediaFile.type.indexOf('video') !== -1;
-            isImage = mediaFile.type.indexOf('image') !== -1;
-
-            if (isVideo) {
-                _mediaPlayer = new AdsPlayer.media.VideoPlayer();
-            }
-            else if (isImage) {
-                _mediaPlayer = new AdsPlayer.media.ImagePlayer();
-            } else {
-                // Unknown/unsupported media type
-                return false;
-            }
-
-            // Load the media files
-            _debug.log("Creative load");
-            if (!_mediaPlayer.load(baseUrl, creative.mediaFiles)) {
-                _mediaPlayer = null;
-                return false;
-            }
-
-            _mediaPlayer.setDuration(_parseTime(creative.duration));
-            _mediaPlayer.addEventListener('play', _onMediaPlay);
-            _mediaPlayer.addEventListener('pause', _onMediaPause);
-            _mediaPlayer.addEventListener('error', _onMediaError);
-            _mediaPlayer.addEventListener('timeupdate', _onMediaTimeupdate);
-            _mediaPlayer.addEventListener('ended', _onMediaEnded);
-
-            // Add tracking events
-            if (creative.trackingEvents) {
-                _trackingEventsManager = new AdsPlayer.vast.TrackingEventsManager();
-                _trackingEventsManager.init(creative.trackingEvents, _mediaPlayer);
-                _trackingEventsManager.start();
-            }
-
-            // Notify a creative is starting to play
-            _eventBus.dispatchEvent({
-                type: 'creativeStart',
-                data: {}
-            });
-
-            // Notify a media element has been created and appended into document
-            _eventBus.dispatchEvent({
-                type: 'addElement',
+        // ClickThrough : send an event for the application to open the web page
+        if (this.videoClicks.clickThrough) {
+            this._debug.log("Ad click, uri = " + this.videoClicks.clickThrough);
+            this._eventBus.dispatchEvent({
+                type: 'click',
                 data: {
-                    element: _mediaPlayer.getElement(),
-                    type: _mediaPlayer.getType()
+                    uri: this.videoClicks.clickThrough
                 }
             });
+        }
 
-            // Add the media player DOM element
-            _adPlayerContainer.appendChild(_mediaPlayer.getElement());
+        // TODO
+        // ClickTracking
+        // if (this.videoClicks.clickTracking) {
+        // }
+    }
 
-            // Listener for click
-            if (creative.videoClicks) {
-                if (creative.videoClicks.clickThrough) {
-                    _mediaPlayer.getElement().style.cursor = 'pointer';
-                }
-                _mediaPlayer.getElement().addEventListener('click', _onAdClick.bind(creative));
+    _load (creative, baseUrl) {
+        var mediaFile,
+            isVideo,
+            isImage;
+
+        if (!creative) {
+            return false;
+        }
+
+        if (creative.mediaFiles.length === 0) {
+            return false;
+        }
+
+        mediaFile = creative.mediaFiles[0];
+
+        // Video or image media ?
+        isVideo = mediaFile.type.indexOf('video') !== -1;
+        isImage = mediaFile.type.indexOf('image') !== -1;
+
+        if (isVideo) {
+            this._mediaPlayer = new VideoPlayer();
+        }
+        else if (isImage) {
+            this._mediaPlayer = new ImagePlayer();
+        } else {
+            // Unknown/unsupported media type
+            return false;
+        }
+
+        // Load the media files
+        this._debug.log("Creative load");
+        if (!this._mediaPlayer.load(baseUrl, creative.mediaFiles)) {
+            this._mediaPlayer = null;
+            return false;
+        }
+
+        this._mediaPlayer.setDuration(this._parseTime(creative.duration));
+        this._mediaPlayer.addEventListener('play', this._onMediaPlayListener);
+        this._mediaPlayer.addEventListener('pause', this._onMediaPauseListener);
+        this._mediaPlayer.addEventListener('error', this._onMediaErrorListener);
+        this._mediaPlayer.addEventListener('timeupdate', this._onMediaTimeupdateListener);
+        this._mediaPlayer.addEventListener('ended', this. _onMediaEndedListener);
+
+        // Add tracking events
+        if (creative.trackingEvents) {
+            this._trackingEventsManager = new TrackingEventsManager();
+            this._trackingEventsManager.init(creative.trackingEvents, this._mediaPlayer);
+            this._trackingEventsManager.start();
+        }
+
+        // Notify a creative is starting to play
+        this._eventBus.dispatchEvent({
+            type: 'creativeStart',
+            data: {}
+        });
+
+        // Notify a media element has been created and appended into document
+        this._eventBus.dispatchEvent({
+            type: 'addElement',
+            data: {
+                element: this._mediaPlayer.getElement(),
+                type: this._mediaPlayer.getType()
             }
+        });
 
-            // Align media volume to main video volume
-            _onMainVideoVolumeChange();
+        // Add the media player DOM element
+        this._adPlayerContainer.appendChild(this._mediaPlayer.getElement());
 
-            // Start playing the media
-            _play();
-
-            return true;
-        },
-
-        _play = function () {
-
-            if (!_mediaPlayer) {
-                return;
+        // Listener for click
+        if (creative.videoClicks) {
+            if (creative.videoClicks.clickThrough) {
+                this._mediaPlayer.getElement().style.cursor = 'pointer';
             }
+            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(creative).bind(this));
+        }
 
-            _debug.log("Creative play");
+        // Align media volume to main video volume
+        this._onMainVideoVolumeChange();
 
-            // Play the media player
-            _mediaPlayer.play();
-        },
+        // Start playing the media
+        this._play();
 
-        _pause = function () {
+        return true;
+    }
 
-            if (!_mediaPlayer) {
-                return;
+    _play () {
+
+        if (!this._mediaPlayer) {
+            return;
+        }
+
+        this._debug.log("Creative play");
+
+        // Play the media player
+        this._mediaPlayer.play();
+    }
+
+    _pause () {
+
+        if (!this._mediaPlayer) {
+            return;
+        }
+
+        this._debug.log("Creative pause");
+
+        // Pause the media player
+        this._mediaPlayer.pause();
+    }
+
+    _stop () {
+
+        if (!this._mediaPlayer) {
+            return;
+        }
+
+        this._debug.log("Creative stop");
+
+        // Stop the media player
+        this._mediaPlayer.removeEventListener('play', this._onMediaPlayListener);
+        this._mediaPlayer.removeEventListener('pause', this._onMediaPauseListener);
+        this._mediaPlayer.removeEventListener('error', this._onMediaErrorListener);
+        this._mediaPlayer.removeEventListener('timeupdate', this._onMediaTimeupdateListener);
+        this._mediaPlayer.removeEventListener('ended', this._onMediaEndedListener);
+        this._mediaPlayer.stop();
+
+        // Notify a media element has been created and appended into document
+        this._eventBus.dispatchEvent({
+            type: 'removeElement',
+            data: {
+                element: this._mediaPlayer.getElement(),
+                type: this._mediaPlayer.getType()
             }
+        });
 
-            _debug.log("Creative pause");
+        // Remove the element from the DOM
+        this._adPlayerContainer.removeChild(this._mediaPlayer.getElement());
 
-            // Pause the media player
-            _mediaPlayer.pause();
-        },
+        // Reset the media player
+        this._mediaPlayer.reset();
+        this._mediaPlayer = null;
 
-        _stop = function () {
+        // Stop the TrackingEvents manager
+        if (this._trackingEventsManager) {
+            this._trackingEventsManager.stop();
+            this._trackingEventsManager = null;
+        }
+    }
 
-            if (!_mediaPlayer) {
-                return;
-            }
-
-            _debug.log("Creative stop");
-
-            // Stop the media player
-            _mediaPlayer.removeEventListener('play', _onMediaPlay);
-            _mediaPlayer.removeEventListener('pause', _onMediaPause);
-            _mediaPlayer.removeEventListener('error', _onMediaError);
-            _mediaPlayer.removeEventListener('timeupdate', _onMediaTimeupdate);
-            _mediaPlayer.removeEventListener('ended', _onMediaEnded);
-            _mediaPlayer.stop();
-
-            // Notify a media element has been created and appended into document
-            _eventBus.dispatchEvent({
-                type: 'removeElement',
-                data: {
-                    element: _mediaPlayer.getElement(),
-                    type: _mediaPlayer.getType()
-                }
-            });
-
-            // Remove the element from the DOM
-            _adPlayerContainer.removeChild(_mediaPlayer.getElement());
-
-            // Reset the media player
-            _mediaPlayer.reset();
-            _mediaPlayer = null;
-
-            // Stop the TrackingEvents manager
-            if (_trackingEventsManager) {
-                _trackingEventsManager.stop();
-                _trackingEventsManager = null;
-            }
-        },
-
-        _onMainVideoVolumeChange = function() {
-            if (!_mediaPlayer) {
-                return;
-            }
-            _mediaPlayer.setVolume(_mainVideo.muted ? 0 : _mainVideo.volume);
-        };
+    _onMainVideoVolumeChange () {
+        if (!this._mediaPlayer) {
+            return;
+        }
+        this._mediaPlayer.setVolume(this._mainVideo.muted ? 0 : this._mainVideo.volume);
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
-    return {
+    constructor() {
+        this._adPlayerContainer = null;
+        this._mediaPlayer = null;
+        this._trackingEventsManager = null;
+        this._mainVideo = null;
+        this._debug = Debug.getInstance();
+        this._eventBus = EventBus.getInstance();
 
-        /**
-         * Initializes the creative player.
-         * @method init
-         * @access public
-         * @memberof CreativePlayer#
-         * @param {Object} creative - the creative element to play
-         * @param {String} baseUrl - the base URL for media files
-         */
-        init: function(adPlayerContainer, mainVideo) {
-            _adPlayerContainer = adPlayerContainer;
-            _mainVideo = mainVideo;
-            _mainVideo.addEventListener('volumechange', _onMainVideoVolumeChange);
-        },
+        this._onMediaPlayListener = this._onMediaPlay.bind(this);
+        this._onMediaPauseListener = this._onMediaPause.bind(this);
+        this._onMediaErrorListener = this._onMediaError.bind(this);
+        this._onMediaTimeupdateListener = this._onMediaTimeupdate.bind(this);
+        this._onMediaEndedListener = this._onMediaEnded.bind(this);
+    }
 
-        load: function(creative, baseUrl) {
-            return _load(creative, baseUrl);
-        },
+    /**
+     * Initializes the creative player.
+     * @method init
+     * @access public
+     * @memberof CreativePlayer#
+     * @param {Object} creative - the creative element to play
+     * @param {String} baseUrl - the base URL for media files
+     */
+    init (adPlayerContainer, mainVideo) {
+        this._adPlayerContainer = adPlayerContainer;
+        this._mainVideo = mainVideo;
+        this._mainVideo.addEventListener('volumechange', this._onMainVideoVolumeChange.bind(this));
+    }
 
-        play: function() {
-            _play();
-        },
+    load (creative, baseUrl) {
+        return this._load(creative, baseUrl);
+    }
 
-        pause: function() {
-            _pause();
-        },
+    play () {
+        this._play();
+    }
 
-        stop: function() {
-            _stop();
-        },
+    pause () {
+        this._pause();
+    }
 
-        reset: function() {
-            _mainVideo.removeEventListener('volumechange', _onMainVideoVolumeChange);
-            _mainVideo = null;
-        }
+    stop () {
+        this._stop();
+    }
 
-    };
+    reset () {
+        this._mainVideo.removeEventListener('volumechange', this._onMainVideoVolumeChange);
+        this._mainVideo = null;
+    }
+}
 
-};
-
-AdsPlayer.vast.CreativePlayer.prototype = {
-    constructor: AdsPlayer.vast.CreativePlayer
-};
+export default CreativePlayer;

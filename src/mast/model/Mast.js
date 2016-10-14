@@ -1,13 +1,54 @@
+/**
+* @class Mast
+* @ignore
+*/
+class Mast {
+    constructor () {
+        this.baseUrl = '';
+        this.triggers = [];     // pointer to any number of Ad objects
+    }
+}
+
+/**
+* @class Trigger
+* @ignore
+*/
+class Trigger {
+    constructor () {
+        this.id = '';
+        this.description = 0;
+        this.startConditions = [];      // pointer to a list of start conditions to  : AdsPlayer.mast.model.Trigger.Condition
+        this.endConditions = [];        // pointer to a list of end conditions : AdsPlayer.mast.model.Trigger.Condition
+        this.sources = [];              // pointer to a list of sources : AdsPlayer.mast.model.Trigger.Source
+        this.alreadyProcessed = false;  // mainly in the seeked case : do not replay trigger already played
+        this.vasts = [];
+        this.activated = false;
+    }
+}
+
+/**
+* @class Condition
+* @ignore
+*/
+class Condition {
+    constructor () {
+        this.type = '';
+        this.name = '';
+        this.value = '';
+        this.operator = '';
+        this.conditions = [];
+    }
+}
 
 // ConditionType
-var ConditionType = {
+Condition.TYPE = {
     EVENT: 'event',
     PROPERTY: 'property'
 
 };
 
 // ConditionName
-var ConditionName = {
+Condition.NAME = {
     ON_ITEM_START: 'OnItemStart',
     ON_ITEM_END: 'OnItemEnd',
     POSITION: 'Position',
@@ -15,7 +56,7 @@ var ConditionName = {
 };
 
 // ConditionOperator
-var ConditionOperator = {
+Condition.OPERATOR = {
     EQ:  'EQ',  // equal
     NEQ: 'NEQ', // not equal
     GTR: 'GTR', // greater
@@ -25,71 +66,33 @@ var ConditionOperator = {
     MOD: 'MOD'  // modulo
 };
 
+/**
+* @class Source
+* @ignore
+*/
+class Source {
+    constructor () {
+        this.uri = '';
+        this.altReference = '';
+        this.format = '';
+        this.sources = [];
+        // this.targets = [];
+    }
+}
+
 // SourceFormat
-var SourceFormat = {
+Source.FORMAT = {
     VAST: 'vast',
     UIF: 'uif'
 };
 
-/**
- * [Mast description]
- */
-AdsPlayer.mast.model.Mast = function () {
-    "use strict";
-    this.baseUrl = '';
-    this.triggers = [];     // pointer to any number of Ad objects
-};
 
-/**
- * [Trigger description]
- */
-AdsPlayer.mast.model.Trigger = function() {
-    "use strict";
+var mast = {};
 
-    this.id = '';
-    this.description = 0;
-    this.startConditions = []; // pointer to a list of start conditions to  : AdsPlayer.mast.model.Trigger.Condition
-    this.endConditions = []; // pointer to a list of end conditions : AdsPlayer.mast.model.Trigger.Condition
-    this.sources = []; // pointer to a list of sources : AdsPlayer.mast.model.Trigger.Source
-    this.alreadyProcessed = false; // mainly in the seeked case : do not replay trigger already played
-    this.vasts = [];
-    this.activated = false;
-};
+mast.Mast = Mast;
+mast.Trigger = Trigger;
+mast.Condition = Condition;
+mast.Source = Source;
 
-AdsPlayer.mast.model.Trigger.prototype = {
-    constructor: AdsPlayer.mast.model.Trigger
-};
-
-/**
- * [Condition description]
- */
-AdsPlayer.mast.model.Trigger.Condition = function() {
-    "use strict";
-
-    this.type = '';
-    this.name = '';
-    this.value = '';
-    this.operator = '';
-    this.conditions = [];
-};
-
-AdsPlayer.mast.model.Trigger.Condition.prototype = {
-    constructor: AdsPlayer.mast.model.Trigger.Condition
-};
-
-/**
- * [Source description]
- */
-AdsPlayer.mast.model.Trigger.Source = function() {
-    "use strict";
-
-    this.uri = '';
-    this.altReference = '';
-    this.format = '';
-    this.sources = [];
-    // this.targets = [];
-};
-
-AdsPlayer.mast.model.Trigger.Source.prototype = {
-    constructor: AdsPlayer.mast.model.Trigger.Source
-};
+export default mast;
+export { Mast, Trigger, Condition, Source };

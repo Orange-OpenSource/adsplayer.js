@@ -1,79 +1,88 @@
 /**
- * Errors and warning notifications handler.
- */
-AdsPlayer.ErrorHandler = (function() {
-    "use strict";
-    var instance;
+* Errors and warning notifications handler.
+*/
 
-    function createInstance() {
+import Debug from './Debug';
+import EventBus from './EventBus';
 
-        var _eventBus = AdsPlayer.EventBus.getInstance(),
-            _debug = AdsPlayer.Debug.getInstance();
+let _instance = null;
 
-        return {
 
-            /**
-             * [sendWarning description]
-             * @param  {[type]} code    [description]
-             * @param  {[type]} message [description]
-             * @param  {[type]} data    [description]
-             * @return {[type]}         [description]
-             */
-            sendWarning: function(code, message, data) {
-                _eventBus.dispatchEvent({
-                    type: 'warning',
-                    data: {
-                        code: code,
-                        message: message,
-                        data: data
-                    }
-                });
-                _debug.warn("[Warn] Code: " + code + ", Message: " + message + ", Data: " + JSON.stringify(data, null, '\t'));
-            },
+class ErrorHandler {
 
-            /**
-             * [sendError description]
-             * @param  {[type]} code    [description]
-             * @param  {[type]} message [description]
-             * @param  {[type]} data    [description]
-             * @return {[type]}         [description]
-             */
-            sendError: function(code, message, data) {
-                _eventBus.dispatchEvent({
-                    type: 'error',
-                    data: {
-                        code: code,
-                        message: message,
-                        data: data
-                    }
-                });
-                _debug.error("[Error] Code: " + code + ", Message: " + message + ", Data: " + JSON.stringify(data, null, '\t'));
-            }
-        };
-    }
-    return {
-        getInstance: function() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+
+    static getInstance() {
+        if (_instance === null) {
+            _instance = new ErrorHandler();
         }
-    };
-})();
 
-/*
-AdsPlayer.ErrorHandler.prototype = {
-    constructor: AdsPlayer.ErrorHandler
-};*/
+        return _instance;
+    }
+
+    constructor() {
+
+        if (_instance !== null) {
+            return _instance;
+        }
+
+        this._eventBus = EventBus.getInstance();
+        this._debug = Debug.getInstance();
+
+        _instance = this;
+        return _instance;
+    }
+
+    /**
+     * [sendWarning description]
+     * @param  {[type]} code    [description]
+     * @param  {[type]} message [description]
+     * @param  {[type]} data    [description]
+     * @return {[type]}         [description]
+     */
+    sendWarning (code, message, data) {
+        this._eventBus.dispatchEvent({
+            type: 'warning',
+            data: {
+                code: code,
+                message: message,
+                data: data
+            }
+        });
+        this._debug.warn("[Warn] Code: " + code + ", Message: " + message + ", Data: " + JSON.stringify(data, null, '\t'));
+    }
+
+    /**
+     * [sendError description]
+     * @param  {[type]} code    [description]
+     * @param  {[type]} message [description]
+     * @param  {[type]} data    [description]
+     * @return {[type]}         [description]
+     */
+    sendError (code, message, data) {
+        this._eventBus.dispatchEvent({
+            type: 'error',
+            data: {
+                code: code,
+                message: message,
+                data: data
+            }
+        });
+        this._debug.error("[Error] Code: " + code + ", Message: " + message + ", Data: " + JSON.stringify(data, null, '\t'));
+    }
+}
 
 // File Loader errors
-AdsPlayer.ErrorHandler.DOWNLOAD_ERR_FILES = "DOWNLOAD_ERR_FILES";
-AdsPlayer.ErrorHandler.DOWNLOAD_ERR_NOT_XML = "DOWNLOAD_ERR_NOT_XML";
+ErrorHandler.DOWNLOAD_ERR_FILES = "DOWNLOAD_ERR_FILES";
+ErrorHandler.DOWNLOAD_ERR_NOT_XML = "DOWNLOAD_ERR_NOT_XML";
 
-AdsPlayer.ErrorHandler.LOAD_VAST_FAILED = "LOAD_VAST_FAILED";
+ErrorHandler.LOAD_VAST_FAILED = "LOAD_VAST_FAILED";
 
 // Media Player errors
-AdsPlayer.ErrorHandler.NO_VALID_MEDIA_FOUND = "NO_VALID_MEDIA_FOUND";
-AdsPlayer.ErrorHandler.LOAD_MEDIA_FAILED = "LOAD_MEDIA_FAILED";
-AdsPlayer.ErrorHandler.UNSUPPORTED_MEDIA_FILE = "UNSUPPORTED_MEDIA_FILE";
-AdsPlayer.ErrorHandler.UNAVAILABLE_LINK = "UNAVAILABLE_LINK";
+ErrorHandler.NO_VALID_MEDIA_FOUND = "NO_VALID_MEDIA_FOUND";
+ErrorHandler.LOAD_MEDIA_FAILED = "LOAD_MEDIA_FAILED";
+ErrorHandler.UNSUPPORTED_MEDIA_FILE = "UNSUPPORTED_MEDIA_FILE";
+ErrorHandler.UNAVAILABLE_LINK = "UNAVAILABLE_LINK";
+
+export default ErrorHandler;
