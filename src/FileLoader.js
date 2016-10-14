@@ -1,126 +1,139 @@
 /**
- * File downloader utility class.
- */
- AdsPlayer.FileLoader = function() {
-    "use strict";
+* File downloader utility class.
+*/
 
-    var deferred = null,
-        request = null,
+import ErrorHandler from './ErrorHandler';
 
-        _parseBaseUrl = function(url) {
-            var base = null;
+class FileLoader {
 
-            if (url.indexOf("/") !== -1) {
-                if (url.indexOf("?") !== -1) {
-                    url = url.substring(0, url.indexOf("?"));
-                }
-                base = url.substring(0, url.lastIndexOf("/") + 1);
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
+
+    _parseBaseUrl (url) {
+        var base = null;
+
+        if (url.indexOf("/") !== -1) {
+            if (url.indexOf("?") !== -1) {
+                url = url.substring(0, url.indexOf("?"));
+            }
+            base = url.substring(0, url.lastIndexOf("/") + 1);
+        }
+
+        return base;
+    }
+
+    _abort () {
+        if (this._request !== null && this._request.readyState > 0 && this._request.readyState < 4) {
+            this._request.abort();
+        }
+    }
+
+    _load (url, resolve, reject) {
+        let baseUrl = this._parseBaseUrl(url),
+            needFailureReport = true,
+            onload = null,
+            report = null,
+            onabort = null,
+            self = this;
+
+        onabort = function() {
+            this.aborted = true;
+        };
+
+        onload = function() {
+            if (this.status < 200 || this.status > 299) {
+                return;
             }
 
-            return base;
-        },
+            if (this.status === 200 && this.readyState === 4) {
 
-        _abort = function() {
-            if (request !== null && request.readyState > 0 && request.readyState < 4) {
-                request.abort();
-            }
-        },
-
-        _load = function(url) {
-            var baseUrl = _parseBaseUrl(url),
-                needFailureReport = true,
-                onload = null,
-                report = null,
-                onabort = null,
-                self = this;
-
-            onabort = function() {
-                request.aborted = true;
-            };
-
-            onload = function() {
-                if (request.status < 200 || request.status > 299) {
+                // Check if response is in XML format.
+                if (this.responseXML === null) {
+                    needFailureReport = true;
                     return;
                 }
 
-                if (request.status === 200 && request.readyState === 4) {
-
-                    // test if the file is in xml format.
-                    if (request.responseXML === null) {
-                        needFailureReport = true;
-                        return;
-                    }
-
-                    // Get the redirection URL and use it as base URL
-                    if (request.responseURL) {
-                        baseUrl = _parseBaseUrl(request.responseURL);
-                    }
-
-                    needFailureReport = false;
-
-                    // return XML DOM (as input to parsers)
-                    deferred.resolve({
-                        response: request.responseXML,
-                        baseUrl: baseUrl
-                    });
-
+                // Get the redirection URL and use it as base URL
+                if (this.responseURL) {
+                    baseUrl = self._parseBaseUrl(this.responseURL);
                 }
-            };
 
-            report = function() {
-                if (!needFailureReport) {
-                    return;
-                }
                 needFailureReport = false;
 
-                if (request.aborted) {
-                    deferred.reject();
-                } else if (request.status < 200 || request.status > 299) {
-                    deferred.reject({
-                        name: AdsPlayer.ErrorHandler.DOWNLOAD_ERR_FILES,
-                        message: "Failed to download file",
-                        data: {
-                            url: url,
-                            status: request.status
-                        }
-                    });
-                } else if (request.responseXML === null) {
-                    // status not useful
-                    deferred.reject({
-                        name: AdsPlayer.ErrorHandler.DOWNLOAD_ERR_NOT_XML,
-                        message: "The downloaded file format is not in xml format",
-                        data: {
-                            url: url
-                        }
-                    });
-                }
-            };
+                // Return XML DOM (as input to parsers)
+                resolve({
+                    response: this.responseXML,
+                    baseUrl: baseUrl
+                });
 
-            try {
-                request.onload = onload;
-                request.onloadend = report;
-                request.onerror = report;
-                request.onabort = onabort;
-                request.open("GET", url, true);
-                request.timeout = 10000;
-                request.send();
-            } catch (e) {
-                request.onerror();
             }
         };
 
-    return {
-        load: function(url) {
-            deferred = Q.defer();
-            request = new XMLHttpRequest();
-            _load.call(this, url);
-            return deferred.promise;
-        },
+        report = function() {
+            if (!needFailureReport) {
+                return;
+            }
+            needFailureReport = false;
 
-        abort: _abort
-    };
-};
+            if (this.aborted) {
+                // Request has been aborted => reject without error
+                reject();
+            } else if (this.status < 200 || this.status > 299) {
+                // Request has failed => reject with error
+                reject({
+                    name: ErrorHandler.DOWNLOAD_ERR_FILES,
+                    message: "Failed to download file",
+                    data: {
+                        url: url,
+                        status: this.status
+                    }
+                });
+            } else if (this.responseXML === null) {
+                // Response was not in XML format => reject with error
+                reject({
+                    name: ErrorHandler.DOWNLOAD_ERR_NOT_XML,
+                    message: "The downloaded file format is not in xml format",
+                    data: {
+                        url: url
+                    }
+                });
+            }
+        };
 
-AdsPlayer.FileLoader.prototype = {
-    constructor: AdsPlayer.utils.FileLoader
-};
+        try {
+            this._request = new XMLHttpRequest();
+            this._request.onload = onload;
+            this._request.onloadend = report;
+            this._request.onerror = report;
+            this._request.onabort = onabort;
+            this._request.open("GET", url, true);
+            this._request.timeout = 10000;
+            this._request.send();
+        } catch (e) {
+            this._request.onerror();
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+
+    constructor() {
+        this._request = null;
+    }
+
+    load (url) {
+        return new Promise((resolve, reject) => {
+            this._load(url, resolve, reject);
+        });
+    }
+
+    abort () {
+        if (this._request !== null &&
+            this._request.readyState > 0 &&
+            this._request.readyState < 4) {
+            this._request.abort();
+        }
+    }
+}
+
+export default FileLoader;
