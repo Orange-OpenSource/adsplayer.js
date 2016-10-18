@@ -36,6 +36,7 @@ var config = {
 };
 
 var moduleFilename = './index.js';
+
 var browserifyAgs = {
     entries: moduleFilename,
     transform: [['babelify', { 'presets': ['es2015'] }]],
@@ -127,13 +128,13 @@ gulp.task('watch', function () {
     var args = merge(watchify.args, browserifyAgs),
         bundler = watchify(browserify(args));
 
-    bundler.error('error', function (error) {
+    bundler.on('error', function (error) {
         console.log(error);
         this.end();
     });
 
     bundler.on('update', function () {
-        bundle_js(bundler);
+        bundle_js(bundler, pkg.name, false);
     });
 
     bundle_js(bundler, pkg.name, false);
