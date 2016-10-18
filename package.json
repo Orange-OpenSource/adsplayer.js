@@ -4,6 +4,7 @@
   "description": "Plugin for hasplayer.js used to handle ad-insertion in MAST/VAST format",
   "scripts": {
     "build": "gulp",
+    "watch": "gulp watch",
     "doc": "gulp doc"
   },
   "repository": {
