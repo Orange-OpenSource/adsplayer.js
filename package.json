@@ -3,8 +3,8 @@
   "version": "0.5.0-dev",
   "description": "Plugin for hasplayer.js used to handle ad-insertion in MAST/VAST format",
   "scripts": {
-    "build": "cd build && gulp",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "build": "gulp",
+    "doc": "gulp doc"
   },
   "repository": {
     "type": "git",
