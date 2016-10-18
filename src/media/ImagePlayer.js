@@ -174,15 +174,19 @@ class ImagePlayer {
         return this._currentTime;
     }
 
+    setVolume (/*volume*/) {
+        // NA
+    }
+
+    getVolume () {
+        return 0;
+    }
+
     play () {
         if (!this._image) {
             return;
         }
         this._startTimer();
-    }
-
-    setVolume (/*volume*/) {
-        // NA
     }
 
     pause () {

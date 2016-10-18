@@ -112,6 +112,20 @@ class VideoPlayer {
         return this._video.currentTime;
     }
 
+    getVolume () {
+        if (!this._video) {
+            return 0;
+        }
+        return this._video.muted ? 0 : this._video.volume;
+    }
+
+    setVolume (volume) {
+        if (!this._video) {
+            return;
+        }
+        this._video.volume = volume;
+    }
+
     play () {
         if (!this._video) {
             return;
@@ -131,13 +145,6 @@ class VideoPlayer {
             return;
         }
         this._video.pause();
-    }
-
-    setVolume (volume) {
-        if (!this._video) {
-            return;
-        }
-        this._video.volume = volume;
     }
 
     reset () {
