@@ -30,7 +30,7 @@ The DOM element in which &lt;video&gt; and &lt;img&gt; HTML components for playi
 
 ``` js
 var mediaPlayer = new MediaPlayer();
-var adsPlayer = new AdsPlayer(document.getElementById('adsplayer-container'));
+var adsPlayer = new adsplayer.AdsPlayer(document.getElementById('adsplayer-container'));
 mediaPlayer.addPlugin(adsPlayer);
 ```
 
