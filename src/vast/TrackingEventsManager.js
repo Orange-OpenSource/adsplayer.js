@@ -71,9 +71,6 @@ class TrackingEventsManager {
                         };
                         this._addEventListener(this._adMediaPlayer, 'play', trackingEvent);
                         break;
-                    case 'complete':
-                        this._addEventListener(this._adMediaPlayer, 'ended', trackingEvent);
-                        break;
                     case 'firstQuartile':
                         trackingEvent.oneShot = true;
                         trackingEvent.condition = () => {
@@ -97,6 +94,18 @@ class TrackingEventsManager {
                             return ((this._adMediaPlayer.getCurrentTime() / this._adMediaPlayer.getDuration()) >= 0.75);
                         };
                         this._addEventListener(this._adMediaPlayer, 'timeupdate', trackingEvent);
+                        break;
+                    case 'rewind':
+                        trackingEvent.oneShot = false;
+                        trackingEvent.condition = () => {
+                            let res = (this._adMediaPlayer.getCurrentTime() < this._currentTime);
+                            this._currentTime = this._adMediaPlayer.getCurrentTime();
+                            return res;
+                        };
+                        this._addEventListener(this._adMediaPlayer, 'timeupdate', trackingEvent);
+                        break;
+                    case 'complete':
+                        this._addEventListener(this._adMediaPlayer, 'ended', trackingEvent);
                         break;
                     case 'mute':
                         trackingEvent.oneShot = false;
@@ -145,6 +154,7 @@ class TrackingEventsManager {
         this._trackingEvents = null;
         this._adMediaPlayer = null;
         this._mute = false;
+        this._currentTime = -1;
         this._debug = Debug.getInstance();
         this._eventListeners = [];
     }
