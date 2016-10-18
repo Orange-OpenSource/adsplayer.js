@@ -110,18 +110,20 @@ class TrackingEventsManager {
                     case 'mute':
                         trackingEvent.oneShot = false;
                         trackingEvent.condition = () => {
-                            this._mute = (this._mute === false) & (this._adMediaPlayer.volume === 0);
-                            return this._mute;
+                            let res = !this._mute && (this._adMediaPlayer.getVolume() === 0);
+                            this._mute = (this._adMediaPlayer.getVolume() === 0);
+                            return res;
                         };
-                        this._addEventListener(this._adMediaPlayer, 'volumechanged', trackingEvent);
+                        this._addEventListener(this._adMediaPlayer, 'volumechange', trackingEvent);
                         break;
                     case 'unmute':
                         trackingEvent.oneShot = false;
                         trackingEvent.condition = () => {
-                            this._mute = (this._mute === true) & (this._adMediaPlayer.volume > 0);
-                            return this._mute;
+                            let res = !this._unmute && (this._adMediaPlayer.getVolume() > 0);
+                            this._unmute = (this._adMediaPlayer.getVolume() > 0);
+                            return res;
                         };
-                        this._addEventListener(this._adMediaPlayer, 'volumechanged', trackingEvent);
+                        this._addEventListener(this._adMediaPlayer, 'volumechange', trackingEvent);
                         break;
                     case 'fullscreen':
                         trackingEvent.oneShot = false;
@@ -153,8 +155,9 @@ class TrackingEventsManager {
     constructor() {
         this._trackingEvents = null;
         this._adMediaPlayer = null;
-        this._mute = false;
         this._currentTime = -1;
+        this._mute = -1;
+        this._unmute = -1;
         this._debug = Debug.getInstance();
         this._eventListeners = [];
     }
@@ -170,7 +173,8 @@ class TrackingEventsManager {
     init (trackingEvents, adMediaPlayer) {
         this._trackingEvents = trackingEvents;
         this._adMediaPlayer = adMediaPlayer;
-        this._mute = (this._adMediaPlayer.volume === 0);
+        this._mute = (this._adMediaPlayer.getVolume() === 0);
+        this._unmute = (this._adMediaPlayer.getVolume() > 0);
     }
 
     start () {
