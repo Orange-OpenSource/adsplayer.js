@@ -53,6 +53,12 @@ adsPlayer.addEventListener("start", function (e) {
 adsPlayer.addEventListener("end", function (e) {
     // Ad(s) playback has ended => hide ad(s) player container and show main video
 });
+adsPlayer.addEventListener("addElement", function (e) {
+    // a DOM element for playing an ad has been created and will be appended in the ads player container. The element can be either a &lt;video&gt; or an &lt;img&gt; element
+});
+adsPlayer.addEventListener("removeElement", function (e) {
+    // the DOM element for playing an ad is being removed from the ads player container and deleted
+});
 adsPlayer.addEventListener("play", function (e) {
     // An ad's media playback is starting => update play/pause button
 });
