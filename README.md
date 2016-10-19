@@ -1,6 +1,6 @@
 # adsplayer.js
 
-adsplayer.js is a plugin for hasplayer.js [https://github.com/Orange-OpenSource/hasplayer.js] that handles ad-insertion when playing streams with hasplayer.js player.
+adsplayer.js is a plugin/module for hasplayer.js [https://github.com/Orange-OpenSource/hasplayer.js] that handles ad-insertion when playing streams with hasplayer.js player.
 adsplayer.js is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
 When opening a new stream with hasplayer.js, the adsplayer.js plugin handles ad-insertion in the cast a MAST description is provided.
 
@@ -77,6 +77,12 @@ AdsPlayer propose some more specific API methods in order to interact with the a
 adsPlayer.pause(); // Pause the playback of the current ad media
 adsPlayer.play();  // Play/resume the playback of the current ad media
 ```
+
+## License
+
+All code in this repository is covered by the [BSD-3 license](http://opensource.org/licenses/BSD-3-Clause).
+See LICENSE file for copyright details.
+
 
 ## Documentation
 
