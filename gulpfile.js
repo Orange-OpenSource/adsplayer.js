@@ -13,7 +13,7 @@ var gulp = require('gulp'),
     header = require('gulp-header'),
     git = require('gulp-git'),
     gulpif = require('gulp-if'),
-    jsdoc = require('gulp-jsdoc'),
+    jsdoc = require('gulp-jsdoc3'),
     jshint = require('gulp-jshint'),
     //rename = require('gulp-rename'),
     replace = require('gulp-replace'),
@@ -24,39 +24,54 @@ var gulp = require('gulp'),
     pkg = require('./package.json');
 
 
-var config = {
-    name: "AdsPlayer",
-    distDir: './dist',
-    doc: {
-        dir: './dist/doc/',
-        template: './node_modules/gulp-jsdoc/node_modules/ink-docstrap/template',
-        readMe: './README.md',
-        fileSource: './src/AdsPlayer.js'
-    }
+var sources = {
+    main: './src/AdsPlayer.js',
+    all: [
+        './src/AdsPlayer.js',
+        './src/**/*.js'
+    ]
 };
 
-var moduleFilename = './index.js';
+var outDir = './dist';
 
-var browserifyAgs = {
-    entries: moduleFilename,
+var browserifyArgs = {
+    entries: './index.js',
     transform: [['babelify', { 'presets': ['es2015'] }]],
     debug: true
 };
-
-var sources = [
-    "./src/AdsPlayer.js",
-    "./src/**/*.js"
-];
 
 var banner = ['<%= pkg.copyright %>\n\n/* Last build : <%= pkg.gitDate %>_<%= pkg.gitTime %> / git revision : <%= pkg.gitRevision %> */\n\n'].join('\n');
 
 var jshint_ignore_start = '/* jshint ignore:start */\n';
 var jshint_ignore_end = '\n/* jshint ignore:end */';
 
+var jsdocConfig = {
+    'tags': {
+        'allowUnknownTags': true
+    },
+    'opts': {
+        'destination': './dist/doc'
+    },
+    'plugins': [
+        'plugins/markdown'
+    ],
+    'templates': {
+        'cleverLinks': false,
+        'monospaceLinks': false,
+        'default': {
+            'outputSourceFiles': true
+        },
+        'path': 'ink-docstrap',
+        'theme': 'united',
+        'navType': 'vertical',
+        'linenums': true,
+        'dateFormat': 'MMMM Do YYYY, h:mm:ss a'
+    }
+};
 
 gulp.task('clean', function(done) {
     return (function() {
-        del([config.distDir + '**/*'], {
+        del([outDir + '**/*'], {
             force: true,
             dot: true
         });
@@ -66,7 +81,7 @@ gulp.task('clean', function(done) {
 
 gulp.task('clean-temp', function(done) {
     return (function() {
-        del([config.distDir + 'temp/*'], {
+        del([outDir + 'temp/*'], {
             force: true,
             dot: true
         });
@@ -77,7 +92,7 @@ gulp.task('clean-temp', function(done) {
 gulp.task('gitRevision', function() {
     // Get last abbreviated commit hash
     git.exec({args: 'log -1 --format=%h', quiet: true}, function (err, stdout) {
-        pkg.gitRevision = stdout.replace(/(\r\n|\n|\r)/gm,"");
+        pkg.gitRevision = stdout.replace(/(\r\n|\n|\r)/gm,'');
     });
 });
 
@@ -102,7 +117,7 @@ gulp.task('package-info', function() {
 });
 
 gulp.task('lint', function() {
-    return gulp.src(sources)
+    return gulp.src(sources.all)
     .pipe(jshint())
     .pipe(jshint.reporter('jshint-stylish'));
 });
@@ -121,11 +136,11 @@ function bundle_js(bundler, name, build) {
         .pipe(gulpif(build, footer(jshint_ignore_end)))
         .pipe(gulpif(build, header(banner, { pkg : pkg })))
         .pipe(sourcemaps.write('.'))
-        .pipe(gulp.dest(config.distDir));
+        .pipe(gulp.dest(outDir));
 }
 
 gulp.task('watch', function () {
-    var args = merge(watchify.args, browserifyAgs),
+    var args = merge(watchify.args, browserifyArgs),
         bundler = watchify(browserify(args));
 
     bundler.on('error', function (error) {
@@ -142,36 +157,30 @@ gulp.task('watch', function () {
 
 gulp.task('build', ['clean', 'package-info', 'lint'], function() {
 
-    return bundle_js(browserify(browserifyAgs), pkg.name, true);
+    return bundle_js(browserify(browserifyArgs), pkg.name, true);
 });
 
 gulp.task('releases-notes', function() {
     return gulp.src('./RELEASES NOTES.txt')
-        .pipe(gulp.dest(config.distDir));
+        .pipe(gulp.dest(outDir));
 });
 
 gulp.task('zip', function() {
-    return gulp.src(config.distDir + '/**/*')
+    return gulp.src(outDir + '/**/*')
         .pipe(zip(pkg.name + '.zip'))
-        .pipe(gulp.dest(config.distDir));
+        .pipe(gulp.dest(outDir));
 });
 
-gulp.task('doc', function() {
-    return gulp.src([config.doc.fileSource, config.doc.readMe])
-        .pipe(jsdoc(config.doc.dir, {
-            path: config.doc.template,
-            'theme': 'united',
-            'linenums': true,
-            'navType': 'vertical'
-        }))
-        .pipe(gulp.dest(config.doc.dir));
+gulp.task('doc', function () {
+    gulp.src(['README.md', sources.main], {read: false})
+        .pipe(jsdoc(jsdocConfig));
 });
 
 gulp.task('version', function() {
-    fs.writeFileSync(config.distDir + '/version.properties', 'VERSION=' + pkg.version);
+    fs.writeFileSync(outDir + '/version.properties', 'VERSION=' + pkg.version);
 });
 
-gulp.task("default", function(cb) {
+gulp.task('default', function(cb) {
     runSequence('build', ['doc'],
         'releases-notes',
         'zip',
