@@ -20,6 +20,25 @@
             return base;
         },
 
+        _parseXml = function(data) {
+
+            if (!window.DOMParser) {
+                return null;
+            }
+
+            try {
+                var parser = new window.DOMParser();
+
+                var xmlDoc = parser.parseFromString(data, "text/xml");
+                if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                    throw new Error('Error parsing XML');
+                }
+                return xmlDoc;
+            } catch (e) {
+                return null;
+            }
+        },
+
         _abort = function() {
             if (request !== null && request.readyState > 0 && request.readyState < 4) {
                 request.abort();
@@ -45,8 +64,10 @@
 
                 if (request.status === 200 && request.readyState === 4) {
 
-                    // test if the file is in xml format.
-                    if (request.responseXML === null) {
+                    // Parse responseText in case of wrong response Content-Type
+                    var xmlDoc = request.responseXML || _parseXml(request.responseText);
+
+                    if (xmlDoc === null) {
                         needFailureReport = true;
                         return;
                     }
@@ -60,7 +81,7 @@
 
                     // return XML DOM (as input to parsers)
                     deferred.resolve({
-                        response: request.responseXML,
+                        response: xmlDoc,
                         baseUrl: baseUrl
                     });
 
