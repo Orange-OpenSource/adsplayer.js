@@ -61,7 +61,7 @@ class AdsPlayerController {
                 // Push vast objects in the trigger in the original order
                 // (this = promises returned objects)
                 for (var i = 0; i < vasts.length; i++) {
-                    if (vasts[i]) {
+                    if (vasts[i] && vasts[i].ad) {
                         trigger.vasts.push(vasts[i]);
                     }
                 }

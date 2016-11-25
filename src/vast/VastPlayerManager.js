@@ -94,6 +94,11 @@ class VastPlayerManager {
         var vast = this._vasts[index],
             ad = vast.ad;
 
+        if (ad === null) {
+            // Empty VAST
+            return;
+        }
+
         this._vastIndex = index;
         this._debug.log("Play Vast - index = " + this._vastIndex + ", Ad id = " + ad.id);
 
