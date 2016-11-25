@@ -3,9 +3,12 @@ var xmldom = {};
 
 xmldom.getElementsByTagName = function(node, name) {
     var elements = node.getElementsByTagName(name);
-    if (elements.length < 1 && node.firstChild) {
-        var namespaceURI = node.firstChild.namespaceURI;
-        elements = node.getElementsByTagNameNS(namespaceURI, name);
+    if (elements.length < 1) {
+        var child = node.firstElementChild || node.firstChild;
+        if (child) {
+            var namespaceURI = child.namespaceURI;
+            elements = node.getElementsByTagNameNS(namespaceURI, name);
+        }
     }
     return elements;
 };
