@@ -94,6 +94,11 @@ AdsPlayer.vast.VastPlayerManager = function() {
             var vast = _vasts[index];
                 ad = vast.ad;
 
+            if (ad === null) {
+                // Empty VAST
+                return;
+            }
+
             _vastIndex = index;
             _debug.log("Play Vast - index = " + _vastIndex + ", Ad id = " + ad.id);
 
