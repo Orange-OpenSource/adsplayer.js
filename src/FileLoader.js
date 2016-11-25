@@ -22,6 +22,25 @@ class FileLoader {
         return base;
     }
 
+    _parseXml (data) {
+
+        if (!window.DOMParser) {
+            return null;
+        }
+
+        try {
+            let parser = new window.DOMParser();
+
+            let xmlDoc = parser.parseFromString(data, "text/xml");
+            if (xmlDoc.getElementsByTagName('parsererror').length > 0) {
+                throw new Error('Error parsing XML');
+            }
+            return xmlDoc;
+        } catch (e) {
+            return null;
+        }
+    }
+
     _abort () {
         if (this._request !== null && this._request.readyState > 0 && this._request.readyState < 4) {
             this._request.abort();
@@ -47,8 +66,11 @@ class FileLoader {
 
             if (this.status === 200 && this.readyState === 4) {
 
+                // Parse responseText in case of wrong response Content-Type
+                let xmlDoc = this.responseXML || self._parseXml(this.responseText);
+
                 // Check if response is in XML format.
-                if (this.responseXML === null) {
+                if (xmlDoc === null) {
                     needFailureReport = true;
                     return;
                 }
@@ -62,7 +84,7 @@ class FileLoader {
 
                 // Return XML DOM (as input to parsers)
                 resolve({
-                    response: this.responseXML,
+                    response: xmlDoc,
                     baseUrl: baseUrl
                 });
 
