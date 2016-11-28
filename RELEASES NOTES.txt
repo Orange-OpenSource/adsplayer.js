@@ -1,5 +1,11 @@
+### Release Notes v1.0.0 (2016/11/28)
+* Source code migration to ES6
+* Add 'rewind' tracking event handler
+* Bugs fixing:
+* - Correct mute/unmute tracking events handling
+
 ### Release Notes v0.5.0 (2016/11/25)
-* - Parse XML when XHR response not as XML DOM (responseXML), in case of not valid XML 'content-type' in response header fields
+* Parse XML when XHR response not as XML DOM (responseXML), in case of not valid XML 'content-type' in response header fields
 * Bugs fixing:
 * - Correct XML parsing (namespace resolution) for Firefox and IE11 browsers
 * - Do not consider empty VASTs

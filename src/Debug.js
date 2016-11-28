@@ -1,6 +1,35 @@
+/*
+* The copyright in this software module is being made available under the BSD License, included
+* below. This software module may be subject to other third party and/or contributor rights,
+* including patent rights, and no such rights are granted under this license.
+*
+* Copyright (c) 2016, Orange
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without modification, are permitted
+* provided that the following conditions are met:
+* - Redistributions of source code must retain the above copyright notice, this list of conditions
+*   and the following disclaimer.
+* - Redistributions in binary form must reproduce the above copyright notice, this list of
+*   conditions and the following disclaimer in the documentation and/or other materials provided
+*   with the distribution.
+* - Neither the name of Orange nor the names of its contributors may be used to endorse or promote
+*   products derived from this software module without specific prior written permission.
+*
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR
+* IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+* FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER O
+* CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+* DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+* WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+* WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 /**
- * Debug utility class.
- */
+* Debug utility class.
+*/
 Date.prototype.HHMMSSmmm = function() {
 
     var h = this.getHours().toString(),
@@ -47,165 +76,158 @@ MemoryLogger.prototype.getLogs = function() {
     return this.logArray;
 };
 
-AdsPlayer.Debug = (function() {
-    var instance;
 
-    function createInstance() {
-
-        // ORANGE: add level
-        var NONE = 0,
-            ERROR = 1,
-            WARN = 2,
-            INFO = 3,
-            DEBUG = 4,
-            ALL = 4,
-            level = 0,
-            showTimestamp = true,
-            showElapsedTime = false,
-            startTime = new Date(),
-            // default logger set to console
-            _logger = console,
-
-            _log = function(logLevel, args) {
-                if (logLevel <= getLevel()) {
-
-                    var message = _prepareLog(logLevel, args);
-
-                    switch (logLevel) {
-                        case ERROR:
-                            _logger.error(message);
-                            break;
-                        case WARN:
-                            _logger.warn(message);
-                            break;
-                        case INFO:
-                            _logger.info(message);
-                            break;
-                        case DEBUG:
-                            _logger.debug(message);
-                            break;
-                    }
-
-                }
-
-            },
-
-            _prepareLog = function(logLevel, args) {
-                var message = "",
-                    logTime = null;
-
-                if (showTimestamp) {
-                    logTime = new Date();
-                    message += "[" + logTime.HHMMSSmmm() + "]";
-                }
-
-                if (_logger && _logger.showLevel) {
-                    message += "[" + _getStringLevel(logLevel) + "]";
-                }
-
-                if (showElapsedTime) {
-                    message += "[" + new Date(logTime - startTime).MMSSmmm() + "]";
-                }
-
-                message += "[AdsPlayer] ";
-
-                Array.apply(null, args).forEach(function(item) {
-                    message += item + " ";
-                });
-
-                return message;
-            },
-
-            _getStringLevel = function(level) {
-                switch (level) {
-                    case ERROR:
-                        return "ERROR";
-                    case WARN:
-                        return "WARN";
-                    case INFO:
-                        return "INFO";
-                    case DEBUG:
-                        return "DEBUG";
-                    default:
-                        return "";
-                }
-            },
+const NONE = 0;
+const ERROR = 1;
+const WARN = 2;
+const INFO = 3;
+const DEBUG = 4;
+const ALL = 4;
 
 
-            getLevel = function() {
-                return level;
-            },
+let _instance = null;
 
-            getLogger = function() {
-                return _logger;
-            };
+class Debug {
 
-        return {
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
-            // ORANGE: add level
-            NONE: NONE,
-            ERROR: ERROR,
-            WARN: WARN,
-            INFO: INFO,
-            DEBUG: DEBUG,
-            ALL: ALL,
-
-            getLevel: getLevel,
-            getLogger: getLogger,
-
-            setLevel: function(value) {
-                level = value;
-            },
-
-            setLogger: function(type) {
-                switch (type) {
-                    case 'log4javascript':
-                        var appender = new log4javascript.PopUpAppender();
-                        var layout = new log4javascript.PatternLayout("%d{HH:mm:ss.SSS} %-5p - %m%n");
-                        appender.setLayout(layout);
-                        _logger.addAppender(appender);
-                        _logger.setLevel(log4javascript.Level.ALL);
-                        _logger.initialized = true;
-                        break;
-
-                    case 'memory':
-                        _logger = new MemoryLogger();
-                        break;
-
-                    case 'console':
-                        _logger = console;
-                        break;
-
-                    default:
-                        _logger = null;
-                }
-            },
-
-            error: function() {
-                _log.call(this, ERROR, arguments);
-            },
-
-            warn: function() {
-                _log.call(this, WARN, arguments);
-            },
-
-            info: function() {
-                _log.call(this, INFO, arguments);
-            },
-
-            // Keep this function for compatibility
-            log: function() {
-                _log.call(this, DEBUG, arguments);
-            }
-        };
+    _getStringLevel(level) {
+        switch (level) {
+            case NONE:
+                return "";
+            case ERROR:
+                return "ERROR";
+            case WARN:
+                return "WARN";
+            case INFO:
+                return "INFO";
+            case DEBUG:
+            case ALL:
+                return "DEBUG";
+            default:
+                return "";
+        }
     }
 
-    return {
-        getInstance: function() {
-            if (!instance) {
-                instance = createInstance();
-            }
-            return instance;
+    _prepareLog(logLevel, args) {
+        let message = "",
+            logTime = null;
+
+        if (this.showTimestamp) {
+            logTime = new Date();
+            message += "[" + logTime.HHMMSSmmm() + "]";
         }
-    };
-})();
+
+        if (this._logger && this._logger.showLevel) {
+            message += "[" + this._getStringLevel(logLevel) + "]";
+        }
+
+        if (this.showElapsedTime) {
+            message += "[" + new Date(logTime - this._startTime).MMSSmmm() + "]";
+        }
+
+        message += "[AdsPlayer] ";
+
+        Array.apply(null, args).forEach(function(item) {
+            message += item + " ";
+        });
+
+        return message;
+    }
+
+    _log (logLevel, args) {
+        if (logLevel <= this.getLevel()) {
+
+            let message = this._prepareLog(logLevel, args);
+
+            switch (logLevel) {
+                case ERROR:
+                    this._logger.error(message);
+                    break;
+                case WARN:
+                    this._logger.warn(message);
+                    break;
+                case INFO:
+                    this._logger.info(message);
+                    break;
+                case DEBUG:
+                    this._logger.debug(message);
+                    break;
+            }
+        }
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+
+    static getInstance() {
+        if (_instance === null) {
+            _instance = new Debug();
+        }
+
+        return _instance;
+    }
+
+    constructor() {
+
+        if (_instance !== null) {
+            return _instance;
+        }
+
+        this._level = 4;
+        this._showTimestamp = true;
+        this._showElapsedTime = false;
+        this._startTime = new Date();
+        this._logger = console;
+
+        _instance = this;
+        return _instance;
+    }
+
+    getLevel () {
+        return this._level;
+    }
+
+    setLevel (value) {
+        this._level = value;
+    }
+
+    getLogger () {
+        return this._logger;
+    }
+
+    setLogger (type) {
+        switch (type) {
+            case 'memory':
+                this._logger = new MemoryLogger();
+                break;
+
+            case 'console':
+                this._logger = console;
+                break;
+
+            default:
+                this._logger = null;
+        }
+    }
+
+    error() {
+        this._log(ERROR, arguments);
+    }
+
+    warn () {
+        this._log(WARN, arguments);
+    }
+
+    info () {
+        this._log(INFO, arguments);
+    }
+
+    // Keep this function for compatibility
+    log () {
+        this._log(DEBUG, arguments);
+    }
+}
+
+export default Debug;

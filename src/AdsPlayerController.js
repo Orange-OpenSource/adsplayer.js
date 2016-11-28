@@ -1,389 +1,436 @@
+/*
+* The copyright in this software module is being made available under the BSD License, included
+* below. This software module may be subject to other third party and/or contributor rights,
+* including patent rights, and no such rights are granted under this license.
+*
+* Copyright (c) 2016, Orange
+* All rights reserved.
+*
+* Redistribution and use in source and binary forms, with or without modification, are permitted
+* provided that the following conditions are met:
+* - Redistributions of source code must retain the above copyright notice, this list of conditions
+*   and the following disclaimer.
+* - Redistributions in binary form must reproduce the above copyright notice, this list of
+*   conditions and the following disclaimer in the documentation and/or other materials provided
+*   with the distribution.
+* - Neither the name of Orange nor the names of its contributors may be used to endorse or promote
+*   products derived from this software module without specific prior written permission.
+*
+*
+* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS “AS IS” AND ANY EXPRESS OR
+* IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND
+* FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER O
+* CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+* DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+* DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY,
+* WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY
+* WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+*/
+
 /**
- * AdsPlayerController is th main controller class for AdsPlayer module.
- * It is in charge of downloading the MAST/VAST files and orchestrates the
- * detection of triggers and playing of ad(s).
- */
-AdsPlayer.AdsPlayerController = function() {
+* AdsPlayerController is th main controller class for AdsPlayer module.
+* It is in charge of downloading the MAST/VAST files and orchestrates the
+* detection of triggers and playing of ad(s).
+*/
 
-    var _mainPlayer = null,
-        _mainVideo = null,
-        _adsPlayerContainer = null,
-        _mast = null,
-        _fileLoaders = [],
-        _triggerManagers = [],
-        _vastPlayerManager = null,
-        _mastParser = new AdsPlayer.mast.MastParser(),
-        _vastParser = new AdsPlayer.vast.VastParser(),
-        _errorHandler = AdsPlayer.ErrorHandler.getInstance(),
-        _debug = AdsPlayer.Debug.getInstance(),
-        _eventBus = AdsPlayer.EventBus.getInstance(),
+import Debug from './Debug';
+import FileLoader from './FileLoader';
+import ErrorHandler from './ErrorHandler';
+import EventBus from './EventBus';
+import MastParser from './mast/MastParser';
+import TriggerManager from './mast/TriggerManager';
+import VastParser from './vast/VastParser';
+import VastPlayerManager from './vast/VastPlayerManager';
 
 
-        _loadVast = function(url) {
-            var deferred = Q.defer(),
-                fileLoader = new AdsPlayer.FileLoader(),
-                vast = null;
+class AdsPlayerController {
 
-            _debug.log("Download VAST file: " + url);
-            fileLoader.load(url).then(
-                function(result) {
-                    _debug.log("Parse VAST file");
-                    vast = _vastParser.parse(result.response);
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
+
+    _loadVast (url) {
+        var fileLoader = new FileLoader(),
+            vast = null;
+
+        return new Promise((resolve/*, reject*/) => {
+            this._debug.log("Download VAST file: " + url);
+            fileLoader.load(url).then(result => {
+                    this._debug.log("Parse VAST file");
+                    vast = this._vastParser.parse(result.response);
                     vast.baseUrl = result.baseUrl;
-                    deferred.resolve(vast);
-                },
-                function(error) {
+                    resolve(vast);
+                }).catch(error => {
                     if (error) {
-                        _errorHandler.sendWarning(AdsPlayer.ErrorHandler.LOAD_VAST_FAILED, "Failed to load VAST file", error);
+                        this._errorHandler.sendWarning(ErrorHandler.LOAD_VAST_FAILED, "Failed to load VAST file", error);
                     }
-                    deferred.resolve(null);
+                    resolve(null);
                 }
             );
-            _fileLoaders.push(fileLoader);
-            return deferred.promise;
-        },
+            this._fileLoaders.push(fileLoader);
+        });
+    }
 
-        _loadTriggerVasts = function(trigger) {
-            var deferred = Q.defer(),
-                i,
-                deferLoadVasts = [],
-                uri;
+    _loadTriggerVasts (trigger) {
+        var loadVastPromises = [],
+            i,
+            uri;
 
-            for (i = 0; i < trigger.sources.length; i++) {
-                uri = trigger.sources[i].uri;
-                // Check for relative uri path
-                if (uri.indexOf('http://') === -1) {
-                    uri = _mast.baseUrl + uri;
-                }
-                deferLoadVasts.push(_loadVast(uri));
+        for (i = 0; i < trigger.sources.length; i++) {
+            uri = trigger.sources[i].uri;
+            // Check for relative uri path
+            if (uri.indexOf('http://') === -1) {
+                uri = this._mast.baseUrl + uri;
             }
+            loadVastPromises.push(this._loadVast(uri));
+        }
 
-            Q.all(deferLoadVasts).then((function() {
+        return new Promise((resolve, reject) => {
+            Promise.all(loadVastPromises).then(vasts => {
                 // Push vast objects in the trigger in the original order
                 // (this = promises returned objects)
-                for (var i = 0; i < this.length; i++) {
-                    if (this[i] && this[i].ad) {
-                        trigger.vasts.push(this[i]);
+                for (var i = 0; i < vasts.length; i++) {
+                    if (vasts[i] && vasts[i].ad) {
+                        trigger.vasts.push(vasts[i]);
                     }
                 }
-                deferred.resolve();
-            }).bind(deferLoadVasts));
+                resolve();
+            }).catch(() => {
+                reject();
+            });
+        });
+    }
 
-            return deferred.promise;
-        },
+    _parseMastFile (mastContent, mastBaseUrl) {
+        var triggerManager,
+            i;
 
-        _parseMastFile = function(mastContent, mastBaseUrl) {
-            var triggerManager,
-                i;
+        // Parse the MAST file
+        this._mast = this._mastParser.parse(mastContent);
 
-            // Parse the MAST file
-            _mast = _mastParser.parse(mastContent);
+        if (!this._mast) {
+            return;
+        }
 
-            if (!_mast) {
-                return;
+        // Store base URL for subsequent VATS files download
+        this._mast.baseUrl = mastBaseUrl;
+
+        // Initialize the trigger managers
+        for (i = 0; i < this._mast.triggers.length; i++) {
+            triggerManager = new TriggerManager();
+            triggerManager.init(this._mast.triggers[i]);
+            this._triggerManagers.push(triggerManager);
+        }
+    }
+
+    _onVideoPlaying () {
+        if (this._vastPlayerManager) {
+            this._debug.log("Pause main video");
+            this._mainVideo.pause();
+        }
+    }
+
+    _onVideoTimeupdate () {
+        var trigger = this._checkTriggersStart();
+        if (trigger !== null) {
+            this._activateTrigger(trigger);
+        }
+    }
+
+    _onVideoEnded () {
+        // Check for end-roll triggers
+        var trigger = this._checkTriggersStart();
+        if (trigger !== null) {
+            this._activateTrigger(trigger);
+        }
+
+        this._checkTriggersEnd();
+    }
+
+    _pauseVideo  () {
+        if (!this._mainVideo.paused) {
+            this._debug.log("Pause main video");
+            this._mainVideo.pause();
+        }
+    }
+
+    _resumeVideo  () {
+        if (this._mainVideo.paused) {
+            this._debug.log("Resume main video");
+            this._mainVideo.play();
+        }
+    }
+
+    _onTriggerEnd  () {
+        this._debug.log('End playing trigger');
+
+        // Delete VAST player manager
+        if (this._vastPlayerManager) {
+            this._vastPlayerManager.reset();
+            this._vastPlayerManager = null;
+        }
+
+        // Check if another trigger has to be activated
+        var trigger = this._checkTriggersStart();
+        if (trigger !== null) {
+            this._activateTrigger(trigger);
+        } else {
+            // Notifies the application ad(s) playback has ended
+            this._eventBus.dispatchEvent({type: 'end', data: null});
+
+            if (!this._mainVideo.ended) {
+                // Resume the main video element
+                this._resumeVideo();
             }
+        }
+    }
 
-            // Store base URL for subsequent VATS files download
-            _mast.baseUrl = mastBaseUrl;
+    _playTrigger  (trigger) {
+        if (trigger.vasts.length === 0) {
+            return;
+        }
 
-            // Initialize the trigger managers
-            for (i = 0; i < _mast.triggers.length; i++) {
-                triggerManager = new AdsPlayer.mast.TriggerManager();
-                triggerManager.init(_mast.triggers[i]);
-                _triggerManagers.push(triggerManager);
+        // Pause the main video element
+        this._pauseVideo();
+
+        // Notifies the application ad(s) playback starts
+        this._eventBus.dispatchEvent({type: 'start', data: null});
+
+        // Play the trigger
+        this._debug.log('Start playing trigger ' + trigger.id);
+        this._vastPlayerManager = new VastPlayerManager();
+        this._vastPlayerManager.init(trigger.vasts, this._adsPlayerContainer, this._mainVideo);
+        this._vastPlayerManager.start();
+    }
+
+    _activateTrigger  (trigger) {
+
+        // Check if a trigger is not already activated
+        if (this._vastPlayerManager) {
+            return;
+        }
+
+        this._debug.log('Activate trigger ' + trigger.id);
+
+        trigger.activated = true;
+
+        if (trigger.vasts.length === 0) {
+            // Download VAST files
+            this._loadTriggerVasts(trigger).then(() => {
+                this._playTrigger(trigger);
+            });
+        } else {
+            this._playTrigger(trigger);
+        }
+    }
+
+    _checkTriggersStart () {
+        for (var i = 0; i < this._triggerManagers.length; i++) {
+            if (this._triggerManagers[i].checkStartConditions(this._mainVideo)) {
+                return this._triggerManagers[i].getTrigger();
             }
-        },
+        }
+        return null;
+    }
 
-        _onVideoPlaying = function() {
-            if (_vastPlayerManager) {
-                _debug.log("Pause main video");
-                _mainVideo.pause();
+    _checkTriggersEnd () {
+        for (var i = 0; i < this._triggerManagers.length; i++) {
+            if (this._triggerManagers[i].checkEndConditions(this._mainVideo)) {
+                // Remove trigger manager => will not be activated anymore
+                this._triggerManagers.splice(0, 1);
+                i--;
             }
-        },
+        }
+    }
 
-        _onVideoTimeupdate = function() {
-            var trigger = _checkTriggersStart();
-            if (trigger !== null) {
-                _activateTrigger(trigger);
-            }
-        },
+    _start () {
+        if (!this._mast) {
+            return;
+        }
 
-        _onVideoEnded = function() {
-            // Check for end-roll triggers
-            var trigger = _checkTriggersStart();
-            if (trigger !== null) {
-                _activateTrigger(trigger);
-            }
+        if (this._mast.triggers.length === 0) {
+            this._debug.warn('No trigger in MAST');
+        }
 
-            _checkTriggersEnd();
-        },
-
-        _pauseVideo = function () {
-            if (!_mainVideo.paused) {
-                _debug.log("Pause main video");
-                _mainVideo.pause();
-            }
-        },
-
-        _resumeVideo = function () {
-            if (_mainVideo.paused) {
-                _debug.log("Resume main video");
-                _mainVideo.play();
-            }
-        },
-
-        _onTriggerEnd = function () {
-            _debug.log('End playing trigger');
-
-            // Delete VAST player manager
-            if (_vastPlayerManager) {
-                _vastPlayerManager.reset();
-                _vastPlayerManager = null;
-            }
-
-            // Check if another trigger has to be activated
-            var trigger = _checkTriggersStart();
-            if (trigger !== null) {
-                _activateTrigger(trigger);
-            } else {
-                // Notifies the application ad(s) playback has ended
-                _eventBus.dispatchEvent({type: 'end', data: null});
-
-                if (!_mainVideo.ended) {
-                    // Resume the main video element
-                    _resumeVideo();
-                }
-            }
-        },
-
-        _playTrigger = function (trigger) {
-            if (trigger.vasts.length === 0) {
-                return;
-            }
-
-            // Pause the main video element
-            _pauseVideo();
-
-            // Notifies the application ad(s) playback starts
-            _eventBus.dispatchEvent({type: 'start', data: null});
-
-            // Wait for trigger end
-            _eventBus.addEventListener('triggerEnd', _onTriggerEnd);
-
-            // Play the trigger
-            _debug.log('Start playing trigger ' + trigger.id);
-            _vastPlayerManager = new AdsPlayer.vast.VastPlayerManager();
-            _vastPlayerManager.init(trigger.vasts, _adsPlayerContainer, _mainVideo);
-            _vastPlayerManager.start();
-        },
-
-        _activateTrigger = function (trigger) {
-
-            // Check if a trigger is not already activated
-            if (_vastPlayerManager) {
-                return;
-            }
-
-            _debug.log('Activate trigger ' + trigger.id);
-
-            trigger.activated = true;
-
-            if (trigger.vasts.length === 0) {
-                // Download VAST files
-                _loadTriggerVasts(trigger).then(function () {
-                    _playTrigger(trigger);
-                });
-            } else {
-                _playTrigger(trigger);
-            }
-        },
-
-        _checkTriggersStart = function() {
-            for (var i = 0; i < _triggerManagers.length; i++) {
-                if (_triggerManagers[i].checkStartConditions(_mainVideo)) {
-                    return _triggerManagers[i].getTrigger();
-                }
-            }
-            return null;
-        },
-
-        _checkTriggersEnd = function() {
-            for (var i = 0; i < _triggerManagers.length; i++) {
-                if (_triggerManagers[i].checkEndConditions(_mainVideo)) {
-                    // Remove trigger manager => will not be activated anymore
-                    _triggerManagers.splice(0, 1);
-                    i--;
-                }
-            }
-        },
-
-        _start = function() {
-            if (!_mast) {
-                return;
-            }
-
-            if (_mast.triggers.length === 0) {
-                _debug.warn('No trigger in MAST');
-            }
-
-            // Check for pre-roll trigger
-            var trigger = _checkTriggersStart();
-            if (trigger !== null) {
-                _activateTrigger(trigger);
-            }
-        };
+        // Check for pre-roll trigger
+        var trigger = this._checkTriggersStart();
+        if (trigger !== null) {
+            this._activateTrigger(trigger);
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
-    return {
+    constructor () {
 
-        /**
-         * Initialize the Ads Player Controller.
-         * @method init
-         * @access public
-         * @memberof AdsPlayerController#
-         * @param {Object} mainVideo - the HTML5 video element used by the main media player
-         * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
-         */
-        init : function(player, adsPlayerContainer) {
-            _mainPlayer = player;
-            _mainVideo = player.getVideoModel().getElement();
-            _adsPlayerContainer = adsPlayerContainer;
+        this._mainPlayer = null;
+        this._mainVideo = null;
+        this._adsPlayerContainer = null;
+        this._mast = null;
+        this._fileLoaders = [];
+        this._triggerManagers = [];
+        this._vastPlayerManager = null;
+        this._mastParser = new MastParser();
+        this._vastParser = new VastParser();
+        this._errorHandler = ErrorHandler.getInstance();
+        this._debug = Debug.getInstance();
+        this._eventBus = EventBus.getInstance();
 
-            // Add <video> event listener
-            _mainVideo.addEventListener('playing', _onVideoPlaying);
-            _mainVideo.addEventListener('timeupdate', _onVideoTimeupdate);
-            _mainVideo.addEventListener('seeking', _onVideoTimeupdate);
-            _mainVideo.addEventListener('ended', _onVideoEnded);
+        this._onVideoPlayingListener = this._onVideoPlaying.bind(this);
+        this._onVideoTimeupdateListener = this._onVideoTimeupdate.bind(this);
+        this._onVideoEndedListener = this._onVideoEnded.bind(this);
+        this._onTriggerEndListener = this._onTriggerEnd.bind(this);
+    }
 
-            _debug.setLevel(4);
-        },
+    /**
+     * Initialize the Ads Player Controller.
+     * @method init
+     * @access public
+     * @memberof AdsPlayerController#
+     * @param {Object} mainVideo - the HTML5 video element used by the main media player
+     * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
+     */
+    init (player, adsPlayerContainer) {
+        this._mainPlayer = player;
+        this._mainVideo = player.getVideoModel().getElement();
+        this._adsPlayerContainer = adsPlayerContainer;
+
+        // Add <video> event listener
+        this._mainVideo.addEventListener('playing', this._onVideoPlayingListener);
+        this._mainVideo.addEventListener('timeupdate', this._onVideoTimeupdateListener);
+        this._mainVideo.addEventListener('seeking', this._onVideoTimeupdateListener);
+        this._mainVideo.addEventListener('ended', this._onVideoEndedListener);
+
+        // Add trigger end event listener
+        this._eventBus.addEventListener('triggerEnd', this._onTriggerEndListener);
+
+        this._debug.setLevel(4);
+    }
 
 
-        /**
-         * Load/open a MAST file.
-         * @method load
-         * @access public
-         * @memberof AdsPlayerController#
-         * @param {string} mastUrl - the MAST file url
-         */
-        load : function(url) {
-            var deferred = Q.defer(),
-                fileLoader = new AdsPlayer.FileLoader();
+    /**
+     * Load/open a MAST file.
+     * @method load
+     * @access public
+     * @memberof AdsPlayerController#
+     * @param {string} mastUrl - the MAST file url
+     */
+    load (url) {
+        let fileLoader = new FileLoader();
 
-            // Reset the MAST and trigger managers
-            _mast = null;
-            _triggerManagers = [];
+        // Reset the MAST and trigger managers
+        this._mast = null;
+        this._triggerManagers = [];
 
-            // Download and parse MAST file
-            _debug.log("Download MAST file: " + url);
-            fileLoader.load(url).then(function(result) {
-                _debug.log("Parse MAST file");
-                _parseMastFile(result.response, result.baseUrl);
+        // Download and parse MAST file
+        this._debug.log("Download MAST file: " + url);
+
+        return new Promise((resolve, reject) => {
+            fileLoader.load(url).then(result => {
+                this._debug.log("Parse MAST file");
+                this._parseMastFile(result.response, result.baseUrl);
                 // Start managing triggers and ads playing
-                _debug.log("Start");
-                _start();
-                deferred.resolve();
-            }, function(error) {
+                this._debug.log("Start");
+                this._start();
+                resolve();
+            }).catch(error => {
                 if (error) {
-                    _errorHandler.sendError(error.name, error.message, error.data);
-                    deferred.reject(error);
+                    this._errorHandler.sendError(error.name, error.message, error.data);
+                    reject(error);
                 } else {
-                    deferred.resolve();
+                    resolve();
                 }
             });
-            _fileLoaders.push(fileLoader);
+            this._fileLoaders.push(fileLoader);
+        });
+    }
 
-            return deferred.promise;
-        },
+    /**
+     * Stops and resets the Ads player.
+     * @method reset
+     * @access public
+     * @memberof AdsPlayerController#
+     */
+    stop () {
 
-        /**
-         * Stops and resets the Ads player.
-         * @method reset
-         * @access public
-         * @memberof AdsPlayerController#
-         */
-        stop : function() {
+        this._debug.log("Stop");
 
-            _debug.log("Stop");
-
-            // Stop/abort the file loaders
-            for (var i = 0; i < _fileLoaders.length; i++) {
-                _fileLoaders[i].abort();
-            }
-            _fileLoaders = [];
-
-            // Stop the ad player
-            if (_vastPlayerManager) {
-                _vastPlayerManager.stop();
-                _vastPlayerManager.reset();
-                _vastPlayerManager = null;
-
-                // Notifies the application ad(s) playback has ended
-                _eventBus.dispatchEvent({type: 'end', data: null});
-            }
-        },
-
-        reset : function() {
-
-            _debug.log("Reset");
-
-            this.stop();
-
-            // Reset the trigger managers
-            _triggerManagers = [];
-
-            // Reset the MAST
-            _mast = null;
-        },
-
-        destroy: function() {
-
-            _debug.log("Destroy");
-
-            this.reset();
-
-            // Remove <video> event listener
-            _mainVideo.removeEventListener('playing', _onVideoPlaying);
-            _mainVideo.removeEventListener('timeupdate', _onVideoTimeupdate);
-            _mainVideo.removeEventListener('seeking', _onVideoTimeupdate);
-            _mainVideo.removeEventListener('ended', _onVideoEnded);
-        },
-
-        /**
-         * Plays/resumes the playback of the current ad.
-         * @method reset
-         * @access public
-         * @memberof AdsPlayerController#
-         */
-        play : function() {
-
-            _debug.log("Play");
-            // Play the ad player
-            if (_vastPlayerManager) {
-                _vastPlayerManager.play();
-            }
-        },
-
-        /**
-         * Pauses the playback of the current ad.
-         * @method reset
-         * @access public
-         * @memberof AdsPlayerController#
-         */
-        pause : function() {
-
-            _debug.log("Pause");
-            // Stop the ad player
-            if (_vastPlayerManager) {
-                _vastPlayerManager.pause();
-            }
+        // Stop/abort the file loaders
+        for (var i = 0; i < this._fileLoaders.length; i++) {
+            this._fileLoaders[i].abort();
         }
-    };
+        this._fileLoaders = [];
 
-};
+        // Stop the ad player
+        if (this._vastPlayerManager) {
+            this._vastPlayerManager.stop();
+            this._vastPlayerManager.reset();
+            this._vastPlayerManager = null;
 
-AdsPlayer.AdsPlayerController.prototype = {
-    constructor: AdsPlayer.AdsPlayerController
-};
+            // Notifies the application ad(s) playback has ended
+            this._eventBus.dispatchEvent({type: 'end', data: null});
+        }
+    }
+
+    reset () {
+
+        this._debug.log("Reset");
+
+        this.stop();
+
+        // Reset the trigger managers
+        this._triggerManagers = [];
+
+        // Reset the MAST
+        this._mast = null;
+    }
+
+    destroy () {
+
+        this._debug.log("Destroy");
+
+        this.reset();
+
+        // Remove <video> event listener
+        this._mainVideo.removeEventListener('playing', this._onVideoPlayingListener);
+        this._mainVideo.removeEventListener('timeupdate', this._onVideoTimeupdateListener);
+        this._mainVideo.removeEventListener('seeking', this._onVideoTimeupdateListener);
+        this._mainVideo.removeEventListener('ended', this._onVideoEndedListener);
+
+        // Remove trigger end event listener
+        this._eventBus.removeEventListener('triggerEnd', this._onTriggerEndListener);
+    }
+
+    /**
+     * Plays/resumes the playback of the current ad.
+     * @method reset
+     * @access public
+     * @memberof AdsPlayerController#
+     */
+    play () {
+
+        this._debug.log("Play");
+        // Play the ad player
+        if (this._vastPlayerManager) {
+            this._vastPlayerManager.play();
+        }
+    }
+
+    /**
+     * Pauses the playback of the current ad.
+     * @method reset
+     * @access public
+     * @memberof AdsPlayerController#
+     */
+    pause () {
+
+        this._debug.log("Pause");
+        // Stop the ad player
+        if (this._vastPlayerManager) {
+            this._vastPlayerManager.pause();
+        }
+    }
+}
+
+export default AdsPlayerController;

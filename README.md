@@ -1,7 +1,7 @@
 # adsplayer.js
 
-adsplayer.js is a plugin for hasplayer.js [https://github.com/Orange-OpenSource/hasplayer.js] that handles ad-insertion when playing streams with hasplayer.js player.
-adsplayer.js is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
+adsplayer.js is a plugin/module for hasplayer.js [https://github.com/Orange-OpenSource/hasplayer.js] that handles ad-insertion when playing streams with hasplayer.js player.
+adsplayer.js v1.0.0 is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
 When opening a new stream with hasplayer.js, the adsplayer.js plugin handles ad-insertion in the cast a MAST description is provided.
 
 The adsplayer.js plugin takes charge of:
@@ -30,16 +30,16 @@ The DOM element in which &lt;video&gt; and &lt;img&gt; HTML components for playi
 
 ``` js
 var mediaPlayer = new MediaPlayer();
-var adsPlayer = new AdsPlayer(document.getElementById('adsplayer-container'));
+var adsPlayer = new adsplayer.AdsPlayer(document.getElementById('adsplayer-container'));
 mediaPlayer.addPlugin(adsPlayer);
 ```
 
-When opening a stream with the MediaPlayer, the URL for MAST file has to be provided in the 'mastUrl' stream parameter.
+When opening a stream with the MediaPlayer, the URL for MAST file has to be provided in the 'adsUrl' stream parameter.
 
 ``` js
 var stream = {
     url: "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",
-    mastUrl: "<mast-file-url>"
+    adsUrl: "<mast-file-url>"
 };
 mediaPlayer.load(stream);
 ```
@@ -52,6 +52,12 @@ adsPlayer.addEventListener("start", function (e) {
 });
 adsPlayer.addEventListener("end", function (e) {
     // Ad(s) playback has ended => hide ad(s) player container and show main video
+});
+adsPlayer.addEventListener("addElement", function (e) {
+    // a DOM element for playing an ad has been created and will be appended in the ads player container. The element can be either a &lt;video&gt; or an &lt;img&gt; element
+});
+adsPlayer.addEventListener("removeElement", function (e) {
+    // the DOM element for playing an ad is being removed from the ads player container and deleted
 });
 adsPlayer.addEventListener("play", function (e) {
     // An ad's media playback is starting => update play/pause button
@@ -71,6 +77,12 @@ AdsPlayer propose some more specific API methods in order to interact with the a
 adsPlayer.pause(); // Pause the playback of the current ad media
 adsPlayer.play();  // Play/resume the playback of the current ad media
 ```
+
+## License
+
+All code in this repository is covered by the [BSD-3 license](http://opensource.org/licenses/BSD-3-Clause).
+See LICENSE file for copyright details.
+
 
 ## Documentation
 
