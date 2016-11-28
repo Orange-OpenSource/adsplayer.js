@@ -108,11 +108,11 @@ class AdsPlayer {
     * @method load
     * @access public
     * @memberof AdsPlayer#
-    * @param {object} stream - the stream contaning all stream informations (url, protData, mastUrl)
+    * @param {object} stream - the stream contaning all stream informations (url, protData, adsUrl)
     */
     load (stream, callback) {
-        if (stream.mastUrl) {
-            this._adsPlayerController.load(stream.mastUrl).then(function () {
+        if (stream.adsUrl) {
+            this._adsPlayerController.load(stream.adsUrl).then(function () {
                 callback();
             }).catch(function () {
                 callback();

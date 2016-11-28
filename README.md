@@ -1,7 +1,7 @@
 # adsplayer.js
 
 adsplayer.js is a plugin/module for hasplayer.js [https://github.com/Orange-OpenSource/hasplayer.js] that handles ad-insertion when playing streams with hasplayer.js player.
-adsplayer.js is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
+adsplayer.js v1.0.0 is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
 When opening a new stream with hasplayer.js, the adsplayer.js plugin handles ad-insertion in the cast a MAST description is provided.
 
 The adsplayer.js plugin takes charge of:
@@ -34,12 +34,12 @@ var adsPlayer = new adsplayer.AdsPlayer(document.getElementById('adsplayer-conta
 mediaPlayer.addPlugin(adsPlayer);
 ```
 
-When opening a stream with the MediaPlayer, the URL for MAST file has to be provided in the 'mastUrl' stream parameter.
+When opening a stream with the MediaPlayer, the URL for MAST file has to be provided in the 'adsUrl' stream parameter.
 
 ``` js
 var stream = {
     url: "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",
-    mastUrl: "<mast-file-url>"
+    adsUrl: "<mast-file-url>"
 };
 mediaPlayer.load(stream);
 ```
