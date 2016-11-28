@@ -1,3 +1,9 @@
+### Release Notes v0.5.0 (2016/11/25)
+* Parse XML when XHR response not as XML DOM (responseXML), in case of not valid XML 'content-type' in response header fields
+* Bugs fixing:
+* - Correct XML parsing (namespace resolution) for Firefox and IE11 browsers
+* - Do not consider empty VASTs
+
 ### Release Notes v0.4.0 (2016/09/30)
 * Bugs fixing:
 * - Correct XML parsing (namespace resolution) for Firefox and IE11 browsers
