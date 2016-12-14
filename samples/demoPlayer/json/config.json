@@ -1,0 +1,75 @@
+jsonAdsDescription = '[ { "name": "No ad insertion",                                                      \
+                          "url" : ""},                                                                    \
+                                                                                                          \
+                        { "name": "Custom",                                                               \
+                          "url" : ""},                                                                    \
+                                                                                                          \
+                        { "name": "Preroll",                                                              \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll.xml"},       \
+                                                                                                          \
+                        { "name": "Preroll-double-vast2",                                                 \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-double-vast2.xml"},       \
+                                                                                                          \
+                        { "name": "Midroll 20 seconds",                                                   \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/midroll.xml"},       \
+                                                                                                          \
+                        { "name": "Preroll - Midroll 20 seconds",                                         \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-midroll.xml"},\
+                                                                                                          \
+                        { "name": "Postroll",                                                             \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/postroll.xml"},      \
+                                                                                                          \
+                        { "name": "Preroll image",                                                        \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-image.xml"}, \
+                                                                                                          \
+                        { "name": "Preroll image - Preroll",                                              \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-image-preroll.xml"},\
+                                                                                                          \
+                        { "name": "Preroll image - Preroll-double-vast2",                                 \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-image-preroll-doublevast2.xml"},\
+                                                                                                          \
+                        { "name": "Preroll VAST30",                                                       \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-vast30.xml"},\
+                                                                                                          \
+                        { "name": "Preroll VAST30 AdPods",                                                \
+                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-vast30AdPods.xml"}      \
+]';
+
+jsonStreamsDescription = '[{ "name" : "custom",                                                                       \
+              "url" : "",                                                                                             \
+              "licenser" : { "url" : "", "drm" : "none"} },                                                           \
+                                                                                                                      \
+            { "name" : "vod MSS",                                                                                     \
+              "url" : "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",  \
+              "licenser" : { "url" : "", "drm" : "none"} },                                                           \
+                                                                                                                      \
+            { "name" : "vod MSS multi audio",                                                                         \
+              "url" : "http://harmonic2.e2e.purpledrm.com.edgesuite.net/Content/SS/Live/Channel(Tvaas-4A-Euronews).isml/Manifest",  \
+              "licenser" : { "url" : "", "drm" : "none"} },                                                           \
+                                                                                                                      \
+            { "name" : "vod MSS multi subtitle",                                                                         \
+              "url" : "https://d2q16vxo4u6ubi.cloudfront.net/mss/Microsoft/Elephants+Dream+H.264+720p/ElephantsDream.ism/Manifest",  \
+              "licenser" : { "url" : "", "drm" : "none"} },                                                           \
+                                                                                                                      \
+            { "name" : "live MSS ",                                                                                   \
+              "url" : "http://harmonic2.e2e.purpledrm.com.edgesuite.net/Content/SS/Live/Channel(Tvaas-MB-Gulli).isml/Manifest",  \
+              "licenser" : { "url" : "", "drm" : "none"} },                                                           \
+                                                                                                                      \
+            { "name" : "live MSS multi subtitle",                                                                      \
+              "url" : "http://harmonic2.e2e.purpledrm.com.edgesuite.net/Content/SS/Live/Channel(Tvaas-1S2A-sita-teletext).isml/Manifest",  \
+              "licenser" : { "url" : "", "drm" : "none"} },                                                           \
+                                                                                                                      \
+            { "name" : "vod MSS/PR multi audio",                                                                      \
+              "url" : "http://harmonic2.e2e.purpledrm.com.edgesuite.net/Content/SS/Live/Channel(Tvaas-MA-Euronews).isml/Manifest", \
+              "licenser" : [{ "url" : "http://proxy.e2e.purpledrm.com:9001/license?env=tvaas-test", "drm" : "com.widevine.alpha" }, \
+                            { "url" : "http://proxy.e2e.purpledrm.com:9001/license?env=tvaas-test", "drm" : "com.microsoft.playready" }]} ,\
+                                                                                                                      \
+            { "name" : "DASH common init",                                                                            \
+              "url" : "http://rdmedia.bbc.co.uk/dash/ondemand/bbb/2/client_manifest-common_init.mpd",                 \
+              "licenser" : { "url" : "", "drm" : "none"} },                                                           \
+                                                                                                                      \
+            { "name" : "HLS",                                                                                         \
+              "url" : "http://qthttp.apple.com.edgesuite.net/1010qwoeiuryfg/sl.m3u8",                                 \
+              "licenser" : { "url" : "", "drm" : "none"} }                                                            \
+]';
+
