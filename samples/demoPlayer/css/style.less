@@ -1,0 +1,35 @@
+@colorwhite: #fff;
+@colorred: red;
+@colorblack: black;
+@font1:bold 12px;
+@font-fam:Arial, Helvetica, sans-serif;
+@body-font-size:10pt;
+@body-small-font-size:8pt;
+@padding-size: 40px;
+
+body { 
+  margin: 0;
+  background: @colorwhite;
+  font-family:@font-fam;
+  color: @colorblack;
+  font-size: @body-font-size;
+}
+
+.headerform{
+background-image:url(../img/px.jpg); background-repeat:repeat;
+top:0;
+width:100%;
+position: fixed;
+z-index:5000;
+}
+
+.headerform select {
+margin-top:5px;
+margin-left:@padding-size;
+}
+
+.content {
+overflow:scroll;
+padding: @padding-size;
+font: 9pt courier;
+}
