@@ -90,7 +90,7 @@ class AdsPlayerController {
                 // Push vast objects in the trigger in the original order
                 // (this = promises returned objects)
                 for (var i = 0; i < vasts.length; i++) {
-                    if (vasts[i] && vasts[i].ad) {
+                    if (vasts[i] && vasts[i].ads) {
                         trigger.vasts.push(vasts[i]);
                     }
                 }
@@ -164,6 +164,9 @@ class AdsPlayerController {
     _onTriggerEnd  () {
         this._debug.log('End playing trigger');
 
+        // Remove trigger end event listener
+        this._eventBus.removeEventListener('triggerEnd', this._onTriggerEndListener);
+
         // Delete VAST player manager
         if (this._vastPlayerManager) {
             this._vastPlayerManager.reset();
@@ -195,6 +198,9 @@ class AdsPlayerController {
 
         // Notifies the application ad(s) playback starts
         this._eventBus.dispatchEvent({type: 'start', data: null});
+
+        // Add trigger end event listener
+        this._eventBus.addEventListener('triggerEnd', this._onTriggerEndListener);
 
         // Play the trigger
         this._debug.log('Start playing trigger ' + trigger.id);
@@ -302,9 +308,6 @@ class AdsPlayerController {
         this._mainVideo.addEventListener('seeking', this._onVideoTimeupdateListener);
         this._mainVideo.addEventListener('ended', this._onVideoEndedListener);
 
-        // Add trigger end event listener
-        this._eventBus.addEventListener('triggerEnd', this._onTriggerEndListener);
-
         this._debug.setLevel(4);
     }
 
@@ -319,12 +322,13 @@ class AdsPlayerController {
     load (url) {
         let fileLoader = new FileLoader();
 
+        this._debug.log("(AdsPlayerController) load: " + url);
+
         // Reset the MAST and trigger managers
         this._mast = null;
         this._triggerManagers = [];
 
         // Download and parse MAST file
-        this._debug.log("Download MAST file: " + url);
 
         return new Promise((resolve, reject) => {
             fileLoader.load(url).then(result => {
@@ -354,7 +358,7 @@ class AdsPlayerController {
      */
     stop () {
 
-        this._debug.log("Stop");
+        this._debug.log("(AdsPlayerController) stop");
 
         // Stop/abort the file loaders
         for (var i = 0; i < this._fileLoaders.length; i++) {
@@ -365,17 +369,15 @@ class AdsPlayerController {
         // Stop the ad player
         if (this._vastPlayerManager) {
             this._vastPlayerManager.stop();
-            this._vastPlayerManager.reset();
             this._vastPlayerManager = null;
 
-            // Notifies the application ad(s) playback has ended
-            this._eventBus.dispatchEvent({type: 'end', data: null});
+            this._onTriggerEnd();
         }
     }
 
     reset () {
 
-        this._debug.log("Reset");
+        this._debug.log("(AdsPlayerController) reset");
 
         this.stop();
 
@@ -388,7 +390,7 @@ class AdsPlayerController {
 
     destroy () {
 
-        this._debug.log("Destroy");
+        this._debug.log("(AdsPlayerController) destroy");
 
         this.reset();
 
@@ -398,8 +400,6 @@ class AdsPlayerController {
         this._mainVideo.removeEventListener('seeking', this._onVideoTimeupdateListener);
         this._mainVideo.removeEventListener('ended', this._onVideoEndedListener);
 
-        // Remove trigger end event listener
-        this._eventBus.removeEventListener('triggerEnd', this._onTriggerEndListener);
     }
 
     /**
@@ -410,7 +410,7 @@ class AdsPlayerController {
      */
     play () {
 
-        this._debug.log("Play");
+        this._debug.log("(AdsPlayerController) play");
         // Play the ad player
         if (this._vastPlayerManager) {
             this._vastPlayerManager.play();
@@ -425,7 +425,7 @@ class AdsPlayerController {
      */
     pause () {
 
-        this._debug.log("Pause");
+        this._debug.log("(AdsPlayerController) pause");
         // Stop the ad player
         if (this._vastPlayerManager) {
             this._vastPlayerManager.pause();

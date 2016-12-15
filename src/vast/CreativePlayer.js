@@ -182,7 +182,7 @@ class CreativePlayer {
         this._mediaPlayer.addEventListener('pause', this._onMediaPauseListener);
         this._mediaPlayer.addEventListener('error', this._onMediaErrorListener);
         this._mediaPlayer.addEventListener('timeupdate', this._onMediaTimeupdateListener);
-        this._mediaPlayer.addEventListener('ended', this. _onMediaEndedListener);
+        this._mediaPlayer.addEventListener('ended', this._onMediaEndedListener);
 
         // Add tracking events
         if (creative.trackingEvents) {
@@ -248,6 +248,24 @@ class CreativePlayer {
 
         // Pause the media player
         this._mediaPlayer.pause();
+    }
+
+    _abort  () {
+        if (!this._mediaPlayer) {
+            return;
+        }
+        var abort_event = new Event('abort');
+        this._mediaPlayer.getElement().dispatchEvent(abort_event);
+        this._stop();
+    }
+
+    _reset () {
+        if (!this._mediaPlayer) {
+            return;
+        }
+
+        this._mainVideo.removeEventListener('volumechange', this._onMainVideoVolumeChange.bind(this));
+        this._mainVideo = null;
     }
 
     _stop () {
@@ -344,9 +362,12 @@ class CreativePlayer {
         this._stop();
     }
 
+    abort() {
+        this._abort();
+    }
+
     reset () {
-        this._mainVideo.removeEventListener('volumechange', this._onMainVideoVolumeChange);
-        this._mainVideo = null;
+        this._reset();
     }
 }
 

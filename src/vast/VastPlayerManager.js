@@ -35,115 +35,80 @@
 */
 
 
-import CreativePlayer from './CreativePlayer';
+import AdPlayer from './AdPlayer';
 import Debug from '../Debug';
-import ErrorHandler from '../ErrorHandler';
 import EventBus from '../EventBus';
 
 class VastPlayerManager {
 
-
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
-    _sendImpressions (impressions) {
-        let impression;
+    _onAdEnd() {
 
-        if (impressions.length === 0) {
-            return;
-        }
+        this._debug.log("(VastPlayerManager) _onAdEnd");
 
-        for (let i = 0; i < impressions.length; i++) {
-            impression = impressions[i];
-            if (impression.uri && impression.uri.length > 0) {
-                this._debug.log("Send Impression, uri = " + impression.uri);
-                let http = new XMLHttpRequest();
-                http.open("GET", impression.uri, true);
-                http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-                http.send();
-            }
-        }
+        this._eventBus.removeEventListener('adEnd', this._onAdEndListener);
+
+        // Stop the current ad
+        this._stopAd();
+
+        // Play next ad
+        this._playNextAd();
     }
 
-    _onCreativeEnd () {
+    _pauseAd() {
+        this._debug.log("(VastPlayerManager) _pauseAd");
 
-        this._debug.log("Creative ended");
-
-        // Stop the current creative media
-        this._stopCreative();
-
-        // Play next creative
-        this._playNextCreative();
-    }
-
-    _pauseCreative () {
-        if (!this._creativePlayer) {
-            return;
-        }
-        this._creativePlayer.pause();
-    }
-
-    _resumeCreative () {
-        if (!this._creativePlayer) {
-            return;
-        }
-        this._creativePlayer.play();
-    }
-
-    _stopCreative () {
-        if (!this._creativePlayer) {
-            return;
-        }
-        this._eventBus.removeEventListener('creativeEnd', this._onCreativeEndListener);
-        this._creativePlayer.stop();
-    }
-
-    _playCreative (index) {
-        var creative = this._vasts[this._vastIndex].ad.inLine.creatives[index],
-            linear;
-
-        this._creativeIndex = index;
-        this._debug.log("Play Creative - index = " + this._creativeIndex);
-
-        // Play Linear element
-        linear = creative.linear;
-
-        if (linear) {
-            this._debug.log("Play Linear Ad, duration = " + linear.duration);
-            this._eventBus.addEventListener('creativeEnd', this._onCreativeEndListener);
-            if (!this._creativePlayer.load(creative.linear, this._vasts[this._vastIndex].baseUrl)) {
-                this._playNextCreative();
-            }
-        } else {
-            this._playNextCreative();
-        }
-    }
-
-    _playVast (index) {
-        var vast = this._vasts[index],
-            ad = vast.ad;
-
-        if (ad === null) {
-            // Empty VAST
-            return;
+        if (this._adPlayer) {
+            this._adPlayer.pause();
         }
 
-        this._vastIndex = index;
-        this._debug.log("Play Vast - index = " + this._vastIndex + ", Ad id = " + ad.id);
-
-        // Send Impressions tracking
-        this._sendImpressions(ad.inLine.impressions);
-
-        // Play first Creative
-        this._playCreative(0);
     }
 
-    _playNextVast () {
+    _resumeAd () {
+        this._debug.log("(VastPlayerManager) _resumeAd");
 
-        this._vastIndex++;
+        if (this._adPlayer) {
+            this._adPlayer.play();
+        }
 
-        if (this._vastIndex < this._vasts.length) {
-            this._playVast(this._vastIndex);
+    }
+
+    _resetAd () {
+        this._debug.log("(VastPlayerManager) _resetAd");
+
+        if (this._adPlayer) {
+            this._adPlayer.reset();
+        }
+
+    }
+
+    _stopAd () {
+        this._debug.log("(VastPlayerManager) _stopAd");
+
+        if (this._adPlayer) {
+            this._adPlayer.stop();
+        }
+
+    }
+
+    _playAd (index) {
+
+        this._debug.log("(VastPlayerManager) _playAd(" + index + ")");
+
+        this._adPlayer = new AdPlayer(this._vasts[0].ads[index], this._adPlayerContainer,this._mainVideo,this._vasts[0].baseUrl);
+
+        this._eventBus.addEventListener('adEnd', this._onAdEndListener);
+        this._adPlayer.start();
+    }
+
+    _playNextAd () {
+
+        let index = this._getNextAdIndex();
+
+        if (index < this._vasts[0].ads.length) {
+           this._playAd(index);
         } else {
             // Notify end of trigger
             this._eventBus.dispatchEvent({
@@ -153,49 +118,98 @@ class VastPlayerManager {
         }
     }
 
-    _playNextCreative () {
-        var ad = this._vasts[this._vastIndex].ad;
+    _getNextAdIndex () {
 
-        this._creativeIndex++;
+        if (this._isAdPods === true) {
 
-        if (this._creativeIndex < ad.inLine.creatives.length) {
-            this._playCreative(this._creativeIndex);
+            let indexNextSeq = Number.MAX_VALUE;
+            let currSeqNumber = this._vasts[0].ads[this._adIndex].sequence;
+            let minSuperiorSeqNumber = Number.MAX_VALUE;
+
+            this._vasts[0].ads.forEach(function(ad,index){
+
+                // Store the index of the minimum superior sequence number.
+                if ( (ad.sequence > currSeqNumber) && (ad.sequence < minSuperiorSeqNumber) ) {
+                    indexNextSeq=index;
+                    minSuperiorSeqNumber = ad.sequence;
+                }
+            });
+            this._adIndex = indexNextSeq;
+
         } else {
-            this._playNextVast();
+            this._adIndex++;
         }
+
+        this._debug.log("(VastPlayerManager) Next ad index: "+this._adIndex);
+
+        return this._adIndex;
+    }
+
+    _getFirstAdIndex () {
+
+        let minSeq=Number.MAX_VALUE;
+        let indexMinSeq=0;
+
+        // Do we have an ad pods in this vast?
+        for (let i=0;i<this._vasts[0].ads.length;i++) {
+            if (this._vasts[0].ads[i].sequence !== null) {
+                this._isAdPods = true;
+            }
+
+            // Store the index of the minimum sequence number.
+            if (this._vasts[0].ads[i].sequence < minSeq) {
+                minSeq=this._vasts[0].ads[i].sequence;
+                indexMinSeq=i;
+            }
+        }
+
+        // If an ad pods is present
+        if (this._isAdPods === true) {
+            // The first one to play is the one with smallest sequence number
+            this._adIndex=indexMinSeq;
+            this._debug.log("(VastPlayerManager) adpods detected");
+        } else {
+            this._debug.log("(VastPlayerManager) No adpods");
+            this._adIndex=0;
+        }
+
+        this._debug.log("(VastPlayerManager) First ad index: "+this._adIndex);
+
+        return this._adIndex;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
-    constructor() {
-        this._vasts = [];
-        this._adPlayerContainer = null;
-        this._vastIndex = -1;
-        this._creativeIndex = -1;
-        this._creativePlayer = new CreativePlayer();
-        this._errorHandler = ErrorHandler.getInstance();
-        this._debug = Debug.getInstance();
-        this._eventBus = EventBus.getInstance();
-        this._mediaPlayer = null;
-        this._onCreativeEndListener = this._onCreativeEnd.bind(this);
-    }
-
     /**
      * Initializes the VastPlayerManager.
-     * @method init
+     * @method constructor
      * @access public
      * @memberof VastPlayerManager#
      * @param {Array} vasts - the array of Vast components to play
-     * @param {Array} adPlayerContainer - the HTML DOM container for ads player components
+     * @param {Object} adPlayerContainer - the HTML DOM container for ads player components
+     * @param {Object} mainVideo - the HTML DOM container for video player components
      */
-    init (vasts, adPlayerContainer, mainVideo) {
-        this._vasts = vasts;
-        this._adPlayerContainer = adPlayerContainer;
-        this._creativePlayer.init(this._adPlayerContainer, mainVideo);
+    constructor(){
+
+        this._vasts = [];
+        this._adPlayerContainer = null;
+        this._adIndex = 0;
+        this._isAdPods = false;
+        this._adPlayer = null;
+        this._debug = Debug.getInstance();
+        this._eventBus = EventBus.getInstance();
+
+        this._onAdEndListener = this._onAdEnd.bind(this);
     }
 
-    start () {
+    init(vasts, adPlayerContainer, mainVideo){
+        this._vasts = vasts;
+        this._adPlayerContainer = adPlayerContainer;
+        this._mainVideo = mainVideo;
+    }
+
+    start() {
         if (!this._vasts || this._vasts.length === 0) {
             return;
         }
@@ -206,23 +220,27 @@ class VastPlayerManager {
             data: {}
         });
 
-        this._playVast(0);
+        this._playAd(this._getFirstAdIndex());
     }
 
-    play () {
-        this._resumeCreative();
+    play() {
+        this._resumeAd();
     }
 
-    pause () {
-        this._pauseCreative();
+    pause() {
+        this._pauseAd();
     }
 
-    stop () {
-        this._stopCreative();
+    stop() {
+        this._stopAd();
     }
 
-    reset () {
-        this._creativePlayer.reset();
+    reset() {
+        this._resetAd();
+        this._eventBus.removeEventListener('adEnd', this._onAdEndListener);
+        this._mainVideo = null;
+        this._adPlayerContainer = null;
+        this._vasts = null;
     }
 }
 
