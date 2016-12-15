@@ -27,7 +27,7 @@ class WebPlayer {
         this.mediaPlayer.setDefaultAudioLang('fra');
         this.mediaPlayer.setDefaultSubtitleLang('fre');
         this.mediaPlayer.enableSubtitles(false);
-        document.getElementById('cswebplayer_version').textContent = this.mediaPlayer.getVersion();
+        document.getElementById('cswebplayer_version').textContent +=" " + this.mediaPlayer.getVersion();
     }
 
     /**
