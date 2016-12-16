@@ -1,0 +1,36 @@
+table.dashboard {
+	width : 100%;
+}
+table.dashboard tr td {
+	border:1px solid #dadada;
+}
+
+table.dashboard tr th {
+	border:1px solid #dadada;
+	background-color:whiteSmoke;
+}
+
+table.invisible tr td {
+    border:0px;
+}
+ 
+table.dashboard th.sorted a,th.sortable a {
+	background-position: right;
+	display: block;
+	width: 100%;
+}
+
+table.dashboard th.sortable a {
+	background-image: url(images/ui/arrow_off.png);
+    background-repeat: no-repeat;
+}
+
+table.dashboard th.order1 a {
+	background-image: url(images/ui/arrow_down.png);
+    background-repeat: no-repeat;
+}
+
+table.dashboard th.order2 a {
+	background-image: url(images/ui/arrow_up.png);
+    background-repeat: no-repeat;
+}
