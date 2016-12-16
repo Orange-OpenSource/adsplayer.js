@@ -34,7 +34,7 @@
 						</VideoClicks>
 						<MediaFiles>
 							<MediaFile id="video1" delivery="progressive" type="video/mp4">
-								<![CDATA[../../vo_ad_2.mp4]]>
+								<![CDATA[../../media/vo_ad_2.mp4]]>
 							</MediaFile>
 						</MediaFiles>
 					</Linear>
