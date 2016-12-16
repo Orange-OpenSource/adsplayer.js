@@ -116,21 +116,19 @@ class CreativePlayer {
         //this._debug.log("Media timeupdate: " + this._mediaPlayer.getCurrentTime());
     }
 
-    _onAdClick () {
-        // this = creative
-        if (!this.videoClicks) {
+    _onAdClick (creative) {
+        // this = creative player
+        if (!creative.videoClicks) {
             return;
         }
-
         this._debug.log("Creative Click");
-
         // ClickThrough : send an event for the application to open the web page
-        if (this.videoClicks.clickThrough) {
-            this._debug.log("Ad click, uri = " + this.videoClicks.clickThrough);
+        if (creative.videoClicks.clickThrough) {
+            this._debug.log("Ad click, uri = " + creative.videoClicks.clickThrough);
             this._eventBus.dispatchEvent({
                 type: 'click',
                 data: {
-                    uri: this.videoClicks.clickThrough
+                    uri: creative.videoClicks.clickThrough
                 }
             });
         }
@@ -214,7 +212,7 @@ class CreativePlayer {
             if (creative.videoClicks.clickThrough) {
                 this._mediaPlayer.getElement().style.cursor = 'pointer';
             }
-            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(creative).bind(this));
+            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(this, creative));
         }
 
         // Align media volume to main video volume
