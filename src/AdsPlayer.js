@@ -37,8 +37,9 @@ import AdsPlayerController from './AdsPlayerController';
 import EventBus from './EventBus';
 
 const NAME = 'AdsPlayer';
-const VERSION = '';
-const GIT_TAG = '@@REVISION';
+const VERSION = '@@VERSION';
+const GIT_TAG = '@@GITTAG';
+const GIT_REVISION = '@@REVISION';
 const BUILD_DATE = '@@TIMESTAMP';
 
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -166,7 +167,7 @@ class AdsPlayer {
     * @return {string} the plugin version
     */
     getVersion () {
-        return VERSION;
+        return GIT_TAG+' (from '+NAME+' '+VERSION+')';
     }
 
     /**
@@ -176,8 +177,8 @@ class AdsPlayer {
     * @return {string} the full plugin version, including git revision
     */
     getVersionFull  () {
-        if (GIT_TAG.indexOf("@@") === -1) {
-            return VERSION + '_' + GIT_TAG;
+        if (GIT_REVISION.indexOf("@@") === -1) {
+            return VERSION + '_' + GIT_REVISION;
         } else {
             return VERSION;
         }
@@ -200,7 +201,7 @@ class AdsPlayer {
 
     /**
     * Plays/resumes the playback of the current ad.
-    * @method pause
+    * @method play
     * @access public
     * @memberof AdsPlayer#
     */

@@ -32,6 +32,7 @@ var sources = {
     ]
 };
 
+var outName = "csadsplugin.js";
 var outDir = './dist';
 
 var browserifyArgs = {
@@ -112,9 +113,18 @@ gulp.task('copyright', function() {
     });
 });
 
-gulp.task('package-info', function() {
-    runSequence('gitRevision', 'gitDate', 'copyright');
+// Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive **/
+gulp.task('gitTag', function() {
+    //Get last tag information
+    git.exec({args: 'describe --tags --dirty', quiet: true}, function (err, stdout) {
+        pkg.gitTag = stdout.replace(/(\r\n|\n|\r)/gm,"");
+    });
 });
+
+gulp.task('package-info', function() {
+    runSequence('gitRevision','gitTag', 'gitDate', 'copyright');
+});
+//end
 
 gulp.task('lint', function() {
     return gulp.src(sources.all)
@@ -128,6 +138,7 @@ function bundle_js(bundler, name, build) {
         .pipe(source(name))
         .pipe(buffer())
         .pipe(gulpif(build, replace(/VERSION[\s*]=[\s*]['\\](.*)['\\]/g, 'VERSION = \'' + pkg.version + '\'')))
+        .pipe(gulpif(build, replace(/@@GITTAG/, pkg.gitTag)))
         .pipe(gulpif(build, replace(/@@TIMESTAMP/, pkg.gitDate + '_' + pkg.gitTime)))
         .pipe(gulpif(build, replace(/@@REVISION/, pkg.gitRevision)))
         .pipe(sourcemaps.init({loadMaps: true}))
@@ -149,16 +160,40 @@ gulp.task('watch', function () {
     });
 
     bundler.on('update', function () {
-        bundle_js(bundler, pkg.name, false);
+        bundle_js(bundler, outName, false);
     });
 
-    bundle_js(bundler, pkg.name, false);
+    bundle_js(bundler, outName, false);
 });
 
 gulp.task('build', ['clean', 'package-info', 'lint'], function() {
 
-    return bundle_js(browserify(browserifyArgs), pkg.name, true);
+    return bundle_js(browserify(browserifyArgs), outName, true);
 });
+
+// Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive **/
+// sample build
+gulp.task('build-samples', ['build-adsTestsPlayer', 'build-demoPlayer'], function() {
+    return gulp.src(['samples/cswebplayer.js'])
+    .pipe(gulp.dest(outDir + '/samples/'));
+});
+
+var replaceSourcesByBuild = function() {
+    return replace(/<!-- sources -->([\s\S]*?)<!-- endsources -->/, '<script src="../../' + outName + '"></script>');
+};
+
+gulp.task('build-adsTestsPlayer', function() {
+    return gulp.src(['samples/adsTestsPlayer/**'])
+        .pipe(replaceSourcesByBuild())
+        .pipe(gulp.dest(outDir + '/samples/adsTestsPlayer/'));
+});
+
+gulp.task('build-demoPlayer', function() {
+    return gulp.src(['samples/demoPlayer/**'])
+        .pipe(replaceSourcesByBuild())
+        .pipe(gulp.dest(outDir + '/samples/demoPlayer/'));
+});
+// end
 
 gulp.task('releases-notes', function() {
     return gulp.src('./RELEASES NOTES.txt')
@@ -167,7 +202,7 @@ gulp.task('releases-notes', function() {
 
 gulp.task('zip', function() {
     return gulp.src(outDir + '/**/*')
-        .pipe(zip(pkg.name + '.zip'))
+        .pipe(zip(outName + '.zip'))
         .pipe(gulp.dest(outDir));
 });
 
@@ -177,11 +212,11 @@ gulp.task('doc', function () {
 });
 
 gulp.task('version', function() {
-    fs.writeFileSync(outDir + '/version.properties', 'VERSION=' + pkg.version);
+    fs.writeFileSync(outDir + '/version.properties', 'GITTAG=' + pkg.gitTag+'\nVERSION=' + pkg.version);
 });
 
 gulp.task('default', function(cb) {
-    runSequence('build', ['doc'],
+    runSequence('build', ['build-samples', 'doc'],
         'releases-notes',
         'zip',
         'version',
