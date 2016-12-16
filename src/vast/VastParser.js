@@ -45,7 +45,18 @@ class VastParser {
 
         trackingEvent.event = trackingNode.getAttribute('event');
         trackingEvent.uri = xmldom.getNodeTextValue(trackingNode);
-
+        /** Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive **/
+        if (trackingEvent.event == "progress") {
+            var offsetValue = trackingNode.getAttribute('offset');
+            if (offsetValue.indexOf("%") == -1) {
+                /* convert HH:MM:SS ( or HH:MM:SS.mmm) in seconds */
+                trackingEvent.offsetInSeconds = new Date('1970-01-01T' + offsetValue + 'Z').getTime() / 1000;
+            }
+            else {
+                trackingEvent.offsetPercent = offsetValue.substring(0, offsetValue.indexOf("%")) / 100;
+            }
+        }
+        /** end **/
         return trackingEvent;
     }
 
