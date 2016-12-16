@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<VAST version="3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="vast3_draft.xsd">
+    <Ad id="preroll-1 vo_ad_2">
+        <InLine>
+            <AdSystem version="3.0">Viaccess-Orca ad VAST 3.0</AdSystem>
+            <AdTitle><![CDATA[event tracking test]]></AdTitle>
+            <Description><![CDATA[Linear ad event tracking test]]></Description>
+            <Survey></Survey>
+            <Error/>
+            <Impression id="DART"><![CDATA[http://localhost/log?impression]]></Impression>
+            <Creatives>
+                 <Creative sequence="1" AdID="">
+                    <Linear>
+                        <Duration>00:00:05</Duration>
+                        <TrackingEvents> <!-- ok -->
+                            <Tracking event="complete">http://cswebplayer.viaccess.fr/adsserver/js?event=complete</Tracking>
+                            <Tracking event="creativeView">http://cswebplayer.viaccess.fr/adsserver/js?event=creativeView</Tracking>
+                            <Tracking event="start">http://cswebplayer.viaccess.fr/adsserver/js?event=start</Tracking>
+                            <Tracking event="midpoint">http://cswebplayer.viaccess.fr/adsserver/js?event=midpoint</Tracking>
+                            <Tracking event="firstQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=firstQuartile</Tracking>
+                            <Tracking event="thirdQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=thirdQuartile</Tracking>
+                            <Tracking event="mute">http://cswebplayer.viaccess.fr/adsserver/js?event=mute</Tracking>
+                            <Tracking event="unmute">http://cswebplayer.viaccess.fr/adsserver/js?event=unmute</Tracking>
+                            <Tracking event="pause">http://cswebplayer.viaccess.fr/adsserver/js?event=pause</Tracking>
+                            <Tracking event="resume">http://cswebplayer.viaccess.fr/adsserver/js?event=resume</Tracking>
+                            <Tracking event="fullscreen">http://cswebplayer.viaccess.fr/adsserver/js?event=fullscreen</Tracking>
+                            <Tracking event="progress" offset="00:00:10">http://cswebplayer.viaccess.fr/adsserver/js?event=progress</Tracking>     
+                            <Tracking event="progress" offset="30%"><![CDATA[http://cswebplayer.viaccess.fr/adsserver/js?event=progress]]></Tracking>   
+                            <Tracking event="progress" offset="00:00:03">http://cswebplayer.viaccess.fr/adsserver/js?event=progress</Tracking>         
+                            <Tracking event="progress" offset="00:00:06.123">http://cswebplayer.viaccess.fr/adsserver/js?event=progress</Tracking>     
+                            <Tracking event="rewind">http://cswebplayer.viaccess.fr/adsserver/js?event=rewind</Tracking>
+                            <Tracking event="exitFullscreen">http://cswebplayer.viaccess.fr/adsserver/js?event=exitFullscreen</Tracking>     
+                            <Tracking event="closeLinear">http://cswebplayer.viaccess.fr/adsserver/js?event=closeLinear</Tracking>
+                            <Tracking event="acceptInvitationLinear">http://cswebplayer.viaccess.fr/adsserver/js?event=acceptInvitationLinear</Tracking>
+                            <!-- Nok -->
+                            <Tracking event="expand">http://cswebplayer.viaccess.fr/adsserver/js?event=expand</Tracking>
+                            <Tracking event="collapse">http://cswebplayer.viaccess.fr/adsserver/js?event=collapse</Tracking>
+                            <Tracking event="skip">http://cswebplayer.viaccess.fr/adsserver/js?event=skip</Tracking>                           
+                        </TrackingEvents>
+                        <VideoClicks>
+                            <ClickThrough>
+                                <![CDATA[http://www.viaccess-orca.com]]>
+                            </ClickThrough>
+                            <ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking0</ClickTracking>
+                            <ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking1</ClickTracking>
+                            <ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking2</ClickTracking>
+                        </VideoClicks>
+                        <MediaFiles>
+                            <MediaFile id="video1" delivery="progressive" type="video/mp4" width="700" height="300">
+                                <![CDATA[../../media/vo_ad_2.mp4]]>
+                            </MediaFile>
+                        </MediaFiles>
+                    </Linear>
+                </Creative>
+            </Creatives>
+        </InLine>
+    </Ad>
+</VAST>
