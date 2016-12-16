@@ -23,13 +23,4 @@ class DrmSelector {
 			document.getElementById("customData").style.display = "none";
 		}
     }
-
-    /*getSelected() {
-        return new Ad(this.ads_data[this.select.selectedIndex]);
-    }
-
-    
-    getUrl() {
-        return this.ads_data[this.select.selectedIndex].url;
-    }*/
 }

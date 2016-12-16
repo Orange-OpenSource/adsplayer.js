@@ -8,7 +8,6 @@ class WebPlayer {
 
     constructor(adsPlugin) {
 
-        //MediaPlayer is NOT an ES6 class, then can't use extends MediaPlayer
         this.mediaPlayer = new MediaPlayer();
 
         this.mediaPlayer.init(document.getElementById('videoplayer-container'));
