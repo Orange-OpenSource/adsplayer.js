@@ -167,7 +167,7 @@ class TrackingEventsManager {
                     case 'fullscreen':
                         trackingEvent.oneShot = false;
                         trackingEvent.condition = () => {
-                            return (document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen);
+                            return (document.fullScreen===true || document.mozFullScreen===true || document.webkitIsFullScreen===true);
                         };
                         this._addEventListener(document, 'webkitfullscreenchange', trackingEvent);
                         this._addEventListener(document, 'mozfullscreenchange', trackingEvent);
@@ -180,7 +180,7 @@ class TrackingEventsManager {
                     case 'exitFullscreen':
                         trackingEvent.oneShot = false;
                         trackingEvent.condition = () => {
-                            return (!document.fullScreen || !document.mozFullScreen || !document.webkitIsFullScreen);
+                            return (document.fullScreen===false || document.mozFullScreen===false || document.webkitIsFullScreen===false);
                         };
                         this._addEventListener(document, 'webkitfullscreenchange', trackingEvent);
                         this._addEventListener(document, 'mozfullscreenchange', trackingEvent);
