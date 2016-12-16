@@ -167,7 +167,9 @@ class TrackingEventsManager {
                     case 'fullscreen':
                         trackingEvent.oneShot = false;
                         trackingEvent.condition = () => {
+                            /** Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive **/
                             return (document.fullScreen===true || document.mozFullScreen===true || document.webkitIsFullScreen===true);
+                            /** end **/
                         };
                         this._addEventListener(document, 'webkitfullscreenchange', trackingEvent);
                         this._addEventListener(document, 'mozfullscreenchange', trackingEvent);
@@ -212,7 +214,7 @@ class TrackingEventsManager {
 
                     case 'closeLinear':
                         trackingEvent.oneShot = false;
-                        this._addEventListener(this._adMediaPlayer, 'abort', trackingEvent);
+                        this._addEventListener(window, 'beforeunload', trackingEvent);
                         break;
 
                     /** end **/
