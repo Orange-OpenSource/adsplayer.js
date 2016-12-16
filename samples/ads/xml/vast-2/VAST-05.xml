@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<VAST version="2.0">
+	<Ad id="vo_ad_2">
+        <InLine>
+			<AdSystem>Viaccess-Orca ad VAST 2.0</AdSystem>
+			<AdTitle/>
+			<Description/>
+			<Error/>
+			<Impression>http://tv-has.orange-labs.fr/adserver/tracking/impression</Impression>       
+			<Creatives>
+				<Creative id="MY1A11172920|TRAILER" sequence="1">
+					<Linear>
+						<Duration>00:00:5</Duration>
+						<TrackingEvents>
+							<Tracking event="complete">http://cswebplayer.viaccess.fr/adsserver/js?event=complete</Tracking>
+							<Tracking event="creativeView">http://cswebplayer.viaccess.fr/adsserver/js?event=creativeView</Tracking>
+							<Tracking event="start">http://cswebplayer.viaccess.fr/adsserver/js?event=start</Tracking>
+							<Tracking event="midpoint">http://cswebplayer.viaccess.fr/adsserver/js?event=midpoint</Tracking>
+							<Tracking event="firstQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=firstQuartile</Tracking>
+							<Tracking event="thirdQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=thirdQuartile</Tracking>
+							<Tracking event="mute">http://cswebplayer.viaccess.fr/adsserver/js?event=mute</Tracking>
+							<Tracking event="unmute">http://cswebplayer.viaccess.fr/adsserver/js?event=unmute</Tracking>
+							<Tracking event="pause">http://cswebplayer.viaccess.fr/adsserver/js?event=pause</Tracking>
+							<Tracking event="resume">http://cswebplayer.viaccess.fr/adsserver/js?event=resume</Tracking>
+							<Tracking event="fullscreen">http://cswebplayer.viaccess.fr/adsserver/js?event=fullscreen</Tracking>
+						</TrackingEvents>
+						<VideoClicks>
+							<ClickThrough>
+								<![CDATA[http://www.viaccess-orca.com]]>
+							</ClickThrough>
+							<ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking0</ClickTracking>
+							<ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking1</ClickTracking>
+							<ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking2</ClickTracking>
+						</VideoClicks>
+						<MediaFiles>
+							<MediaFile id="video1" delivery="progressive" type="video/mp4">
+								<![CDATA[../../vo_ad_2.mp4]]>
+							</MediaFile>
+						</MediaFiles>
+					</Linear>
+				</Creative>
+			</Creatives>
+		</InLine>
+	</Ad>
+	<Ad id="vo_ad_4">
+		<InLine>
+			<AdSystem>Viaccess-Orca ad VAST 2.0</AdSystem>
+			<AdTitle/>
+			<Description/>
+			<Error/>
+			<Impression>http://tv-has.orange-labs.fr/adserver/tracking/impression</Impression>       
+			<Creatives>
+				<Creative id="MY1A11172920|TRAILER" sequence="1">
+					<Linear>
+						<Duration>00:00:5</Duration>
+						<TrackingEvents>
+							<Tracking event="complete">http://cswebplayer.viaccess.fr/adsserver/js?event=complete</Tracking>
+							<Tracking event="creativeView">http://cswebplayer.viaccess.fr/adsserver/js?event=creativeView</Tracking>
+							<Tracking event="start">http://cswebplayer.viaccess.fr/adsserver/js?event=start</Tracking>
+							<Tracking event="midpoint">http://cswebplayer.viaccess.fr/adsserver/js?event=midpoint</Tracking>
+							<Tracking event="firstQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=firstQuartile</Tracking>
+							<Tracking event="thirdQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=thirdQuartile</Tracking>
+							<Tracking event="mute">http://cswebplayer.viaccess.fr/adsserver/js?event=mute</Tracking>
+							<Tracking event="unmute">http://cswebplayer.viaccess.fr/adsserver/js?event=unmute</Tracking>
+							<Tracking event="pause">http://cswebplayer.viaccess.fr/adsserver/js?event=pause</Tracking>
+							<Tracking event="resume">http://cswebplayer.viaccess.fr/adsserver/js?event=resume</Tracking>
+							<Tracking event="fullscreen">http://cswebplayer.viaccess.fr/adsserver/js?event=fullscreen</Tracking>
+						</TrackingEvents>
+						<VideoClicks>
+							<ClickThrough>
+								<![CDATA[http://www.viaccess-orca.com]]>
+							</ClickThrough>
+							<ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking0</ClickTracking>
+							<ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking1</ClickTracking>
+							<ClickTracking>http://tv-has.orange-labs.fr/adserver/tracking/clickTracking2</ClickTracking>
+						</VideoClicks>
+						<MediaFiles>
+							<MediaFile id="video2" delivery="progressive" type="video/mp4">
+								<![CDATA[http://cswebplayer.viaccess.fr/adsserver/media/vo_ad_4.mp4]]>
+							</MediaFile>
+						</MediaFiles>
+					</Linear>
+				</Creative>
+			</Creatives>
+		</InLine>
+	</Ad>
+</VAST>

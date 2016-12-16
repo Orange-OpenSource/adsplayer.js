@@ -5,34 +5,34 @@ jsonAdsDescription = '[ { "name": "No ad insertion",                            
                           "url" : ""},                                                                    \
                                                                                                           \
                         { "name": "Preroll",                                                              \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll.xml"},       \
+                          "url" : "../../samples/ads/xml/mast/preroll.xml"},                              \
                                                                                                           \
                         { "name": "Preroll-double-vast2",                                                 \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-double-vast2.xml"},       \
+                          "url" : "../../samples/ads/xml/mast/preroll-double-vast2.xml"},                 \
                                                                                                           \
                         { "name": "Midroll 20 seconds",                                                   \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/midroll.xml"},       \
+                          "url" : "../../samples/ads/xml/mast/midroll.xml"},                              \
                                                                                                           \
                         { "name": "Preroll - Midroll 20 seconds",                                         \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-midroll.xml"},\
+                          "url" : "../../samples/ads/xml/mast/preroll-midroll.xml"},                      \
                                                                                                           \
                         { "name": "Postroll",                                                             \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/postroll.xml"},      \
+                          "url" : "../../samples/ads/xml/mast/postroll.xml"},                             \
                                                                                                           \
                         { "name": "Preroll image",                                                        \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-image.xml"}, \
+                          "url" : "../../samples/ads/xml/mast/preroll-image.xml"},                        \
                                                                                                           \
                         { "name": "Preroll image - Preroll",                                              \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-image-preroll.xml"},\
+                          "url" : "../../samples/ads/xml/mast/preroll-image-preroll.xml"},                \
                                                                                                           \
                         { "name": "Preroll image - Preroll-double-vast2",                                 \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-image-preroll-doublevast2.xml"},\
+                          "url" : "../../samples/ads/xml/mast/preroll-image-preroll-doublevast2.xml"},    \
                                                                                                           \
                         { "name": "Preroll VAST30",                                                       \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-vast30.xml"},\
+                          "url" : "../../samples/ads/xml/mast/preroll-vast30.xml"},                       \
                                                                                                           \
                         { "name": "Preroll VAST30 AdPods",                                                \
-                          "url" : "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-vast30AdPods.xml"}      \
+                          "url" : "../../samples/ads/xml/mast/preroll-vast30AdPods.xml"}                  \
 ]';
 
 jsonStreamsDescription = '[{ "name" : "custom",                                                                       \

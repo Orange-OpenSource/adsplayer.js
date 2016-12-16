@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<VAST version="3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="vast3_draft.xsd">
+    <Ad id="preroll-2" sequence="2">
+        <InLine>
+            <AdSystem version="1.0">cswebplayer ads server</AdSystem>
+            <AdTitle>Unitary test ad</AdTitle>
+            <Description>This ad is used to test VastParser.js</Description>
+            <Advertiser>Viaccess-Orca</Advertiser>
+            <Pricing model="CPM" currency="USD">50</Pricing>
+            <Survey></Survey>
+            <Error><![CDATA[http://qa.jwplayer.com/~alex/pixel.gif?err=[ERRORCODE]]]></Error>
+            <Impression id="DART"><![CDATA[http://localhost/log?impression]]></Impression>
+            <Creatives>
+                <Creative id="cswebplayer ads server" sequence="1" AdID="toto" apiFramework="api5.0">
+                    <Linear skipoffset="00:00:03">
+                        <Duration>00:00:10</Duration>
+                        <TrackingEvents>
+                          <Tracking event="creativeView">http://cswebplayer.viaccess.fr/adsserver/js?event=creativeView</Tracking>        
+                          <Tracking event="start">http://cswebplayer.viaccess.fr/adsserver/js?event=start</Tracking>
+                          <Tracking event="firstQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=firstQuartile</Tracking>
+                          <Tracking event="progress" offset="30%">http://cswebplayer.viaccess.fr/adsserver/js?event=progress</Tracking>
+                          <Tracking event="progress" offset="00:00:03">http://cswebplayer.viaccess.fr/adsserver/js?event=progress</Tracking>
+                          <Tracking event="midpoint">http://cswebplayer.viaccess.fr/adsserver/js?event=midpoint</Tracking>
+                          <Tracking event="progress" offset="00:00:06.123">http://cswebplayer.viaccess.fr/adsserver/js?event=progress</Tracking> 
+                          <Tracking event="thirdQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=thirdQuartile</Tracking>
+                          <Tracking event="complete">http://cswebplayer.viaccess.fr/adsserver/js?event=complete</Tracking>
+                          <Tracking event="pause">http://cswebplayer.viaccess.fr/adsserver/js?event=pause</Tracking>
+                          <Tracking event="resume">http://cswebplayer.viaccess.fr/adsserver/js?event=resume</Tracking>
+                          <Tracking event="mute">http://cswebplayer.viaccess.fr/adsserver/js?event=mute</Tracking>
+                          <Tracking event="unmute">http://cswebplayer.viaccess.fr/adsserver/js?event=unmute</Tracking>
+                          <Tracking event="fullscreen">http://cswebplayer.viaccess.fr/adsserver/js?event=fullscreen</Tracking>
+                          <Tracking event="exitFullscreen">http://cswebplayer.viaccess.fr/adsserver/js?event=exitFullscreen</Tracking>
+                          <Tracking event="skip">http://cswebplayer.viaccess.fr/adsserver/js?event=skip</Tracking>                       
+                        </TrackingEvents>
+                        <AdParameters xmlEncoded="false">this is an AdParameter</AdParameters>
+                        <VideoClicks>
+                            <ClickThrough id="click1"><![CDATA[http://www.jwplayer.com/]]></ClickThrough>
+                            <ClickTracking id="click2"><![CDATA[http://qa.jwplayer.com/]]></ClickTracking>
+                            <CustomClick id="click3"><![CDATA[http://thisisadummuuri.com]]></CustomClick>
+                        </VideoClicks>
+                        <MediaFiles>
+                            <MediaFile id="1" delivery="progressive" type="video/mp4" bitrate="0" width="640" height="360" scalable="false" maintainAspectRatio="false" codec="avc1" apiFramework="thisisanapiframework"><![CDATA[../../media/vo_ad_4.mp4]]></MediaFile>
+                        </MediaFiles>
+                    </Linear>
+                </Creative>
+                <Creative AdID="601364-Companion">
+                    <CompanionAds>
+                        <Companion id="0" width="728" height="90">
+                            <StaticResource creativeType="image/jpg"><![CDATA[http://demo.jwplayer.com.s3.amazonaws.com/player-demos/assets/banner-728x90.jpg]]></StaticResource>
+                            <TrackingEvents>
+                            <Tracking event="creativeView">http://myTrackingURL/firstCompanion</Tracking>
+                            </TrackingEvents>
+                            <CompanionClickThrough>http://www.jwplayer.com</CompanionClickThrough>
+                        </Companion>
+                    </CompanionAds>
+                </Creative>
+            </Creatives>
+            <Extensions>
+                <Extension type="DART">
+                <AdServingData>
+                <DeliveryData>
+                <GeoData><![CDATA[ct=US&st=NY&ac=212&zp=10021&bw=3&dma=3&city=13275]]></GeoData>
+                </DeliveryData>
+                </AdServingData>
+                </Extension>
+            </Extensions>
+        </InLine>
+    </Ad>
+    <Ad id="preroll-1" sequence="1">
+        <InLine>
+            <AdSystem version="2.0">Alex_Vast</AdSystem>
+            <AdTitle></AdTitle>
+            <Description></Description>
+            <Survey></Survey>
+            <Error><![CDATA[http://qa.jwplayer.com/~alex/pixel.gif?err=[ERRORCODE]]]></Error>
+            <Impression id="DART"><![CDATA[http://qa.jwplayer.com/~alex/pixel.gif?2]]></Impression>
+            <Creatives>
+                <Creative sequence="1" AdID="">
+                    <Linear skipoffset="00:00:05">
+                        <Duration>00:00:30</Duration>
+                        <TrackingEvents>
+                            <Tracking event="start">http://cswebplayer.viaccess.fr/adsserver/js?event=start</Tracking>
+                            <Tracking event="firstQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=firstQuartile</Tracking>
+                            <Tracking event="midpoint">http://cswebplayer.viaccess.fr/adsserver/js?event=midpoint</Tracking>
+                            <Tracking event="thirdQuartile">http://cswebplayer.viaccess.fr/adsserver/js?event=thirdQuartile</Tracking>
+                            <Tracking event="complete">http://cswebplayer.viaccess.fr/adsserver/js?event=complete</Tracking>
+                            <Tracking event="pause">http://cswebplayer.viaccess.fr/adsserver/js?event=pause</Tracking>
+                            <Tracking event="mute">http://cswebplayer.viaccess.fr/adsserver/js?event=mute</Tracking>
+                            <Tracking event="fullscreen">http://cswebplayer.viaccess.fr/adsserver/js?event=fullscreen</Tracking>
+                        </TrackingEvents>
+                        <AdParameters></AdParameters>
+                        <VideoClicks>
+                            <ClickThrough><![CDATA[http://www.jwplayer.com/]]></ClickThrough>
+                            <ClickTracking id="Alex"><![CDATA[http://qa.jwplayer.com/~alex/pixel.gif?10]]></ClickTracking>
+                        </VideoClicks>
+                        <MediaFiles>
+                            <MediaFile id="1" delivery="progressive" type="video/mp4" bitrate="0" width="640" height="360"><![CDATA[../../media/vo_ad_2.mp4]]></MediaFile>
+                        </MediaFiles>
+                    </Linear>
+                </Creative>
+                <Creative sequence="1" AdID="">
+                    <CompanionAds>
+                        <Companion id="1" width="728" height="90">
+                            <StaticResource creativeType="image/jpeg"><![CDATA[http://demo.jwplayer.com.s3.amazonaws.com/player-demos/assets/banner-728x90-blue.jpg]]></StaticResource>
+                            <CompanionClickThrough><![CDATA[http://www.jwplayer.com/]]></CompanionClickThrough>
+                            <AltText></AltText>
+                            <AdParameters></AdParameters>
+                        </Companion>
+                    </CompanionAds>
+                </Creative>
+            </Creatives>
+            <Extensions>
+                <Extension type="DART">
+                    <AdServingData>
+                        <DeliveryData>
+                            <GeoData><![CDATA[ct=US&st=NY&ac=212&zp=10021&bw=3&dma=3&city=13275]]></GeoData>
+                        </DeliveryData>
+                    </AdServingData>
+                </Extension>
+            </Extensions>
+        </InLine>
+    </Ad>
+</VAST>
