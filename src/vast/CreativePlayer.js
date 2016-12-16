@@ -180,7 +180,7 @@ class CreativePlayer {
         this._mediaPlayer.addEventListener('pause', this._onMediaPauseListener);
         this._mediaPlayer.addEventListener('error', this._onMediaErrorListener);
         this._mediaPlayer.addEventListener('timeupdate', this._onMediaTimeupdateListener);
-        this._mediaPlayer.addEventListener('ended', this. _onMediaEndedListener);
+        this._mediaPlayer.addEventListener('ended', this._onMediaEndedListener);
 
         // Add tracking events
         if (creative.trackingEvents) {
