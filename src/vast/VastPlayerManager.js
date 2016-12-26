@@ -93,11 +93,11 @@ class VastPlayerManager {
 
     }
 
-    _playAd (index) {
+    _playAd (vastIndex,adIndex) {
 
-        this._debug.log("(VastPlayerManager) _playAd(" + index + ")");
+        this._debug.log("(VastPlayerManager) _playAd(" + vastIndex + "," + adIndex + ")");
 
-        this._adPlayer = new AdPlayer(this._vasts[0].ads[index], this._adPlayerContainer,this._mainVideo,this._vasts[0].baseUrl);
+        this._adPlayer = new AdPlayer(this._vasts[vastIndex].ads[adIndex], this._adPlayerContainer,this._mainVideo,this._vasts[vastIndex].baseUrl);
 
         this._eventBus.addEventListener('adEnd', this._onAdEndListener);
         this._adPlayer.start();
@@ -105,28 +105,38 @@ class VastPlayerManager {
 
     _playNextAd () {
 
-        let index = this._getNextAdIndex();
+        let currentVastIndex = this._vastIndex;
+        let nextAdIndex = this._getNextAdIndex(currentVastIndex);
 
-        if (index < this._vasts[0].ads.length) {
-           this._playAd(index);
+        if (nextAdIndex < this._vasts[currentVastIndex].ads.length) {
+            // play next ad in the current vast
+            this._playAd(currentVastIndex,nextAdIndex);
         } else {
-            // Notify end of trigger
-            this._eventBus.dispatchEvent({
-                type: 'triggerEnd',
-                data: {}
-            });
+            let nextVastIndex = this._getNextVastIndex();
+            if (nextVastIndex < this._vasts.length) {
+                // play next ad in the current vast
+                let firstAdIndex = this._getFirstAdIndex(nextVastIndex);
+                this._playAd(nextVastIndex, firstAdIndex);
+            } else {
+
+                // Notify end of trigger
+                this._eventBus.dispatchEvent({
+                    type: 'triggerEnd',
+                    data: {}
+                });
+            }
         }
     }
 
-    _getNextAdIndex () {
+    _getNextAdIndex (vastIndex) {
 
         if (this._isAdPods === true) {
 
             let indexNextSeq = Number.MAX_VALUE;
-            let currSeqNumber = this._vasts[0].ads[this._adIndex].sequence;
+            let currSeqNumber = this._vasts[vastIndex].ads[this._adIndex].sequence;
             let minSuperiorSeqNumber = Number.MAX_VALUE;
 
-            this._vasts[0].ads.forEach(function(ad,index){
+            this._vasts[vastIndex].ads.forEach(function(ad,index){
 
                 // Store the index of the minimum superior sequence number.
                 if ( (ad.sequence > currSeqNumber) && (ad.sequence < minSuperiorSeqNumber) ) {
@@ -145,20 +155,20 @@ class VastPlayerManager {
         return this._adIndex;
     }
 
-    _getFirstAdIndex () {
+    _getFirstAdIndex (vastIndex) {
 
         let minSeq=Number.MAX_VALUE;
         let indexMinSeq=0;
 
         // Do we have an ad pods in this vast?
-        for (let i=0;i<this._vasts[0].ads.length;i++) {
-            if (this._vasts[0].ads[i].sequence !== null) {
+        for (let i=0;i<this._vasts[vastIndex].ads.length;i++) {
+            if (this._vasts[vastIndex].ads[i].sequence !== null) {
                 this._isAdPods = true;
             }
 
             // Store the index of the minimum sequence number.
-            if (this._vasts[0].ads[i].sequence < minSeq) {
-                minSeq=this._vasts[0].ads[i].sequence;
+            if (this._vasts[vastIndex].ads[i].sequence < minSeq) {
+                minSeq=this._vasts[vastIndex].ads[i].sequence;
                 indexMinSeq=i;
             }
         }
@@ -178,6 +188,16 @@ class VastPlayerManager {
         return this._adIndex;
     }
 
+    _getNextVastIndex () {
+        this._vastIndex++;
+        return this._vastIndex;
+    }
+
+    _getFirstVastIndex () {
+        this._vastIndex = 0;
+        return this._vastIndex;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
@@ -194,6 +214,7 @@ class VastPlayerManager {
 
         this._vasts = [];
         this._adPlayerContainer = null;
+        this._vastIndex = 0;
         this._adIndex = 0;
         this._isAdPods = false;
         this._adPlayer = null;
@@ -220,7 +241,7 @@ class VastPlayerManager {
             data: {}
         });
 
-        this._playAd(this._getFirstAdIndex());
+        this._playAd(this._getFirstVastIndex(),this._getFirstAdIndex(this._getFirstVastIndex()));
     }
 
     play() {

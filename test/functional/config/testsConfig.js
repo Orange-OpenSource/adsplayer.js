@@ -5,17 +5,16 @@ define(function(require) {
     var _createInstance = function() {
         return {
             // Common tests suite configuration fields
-            asyncTimeout: 10,                                                               // TODO: what it is for?
-            adsDuration : 10,                                                               // TODO: what it is for?
-            testPageUrl : "http://cswebplayer.viaccess.fr/functionnalTests/tobedefined",    //url of the html page under test
-                                                                                            // TODO: use a common html page
+            asyncTimeout: 10,                                                                                           // TODO: what it is for?
+            adsDuration : 10,                                                                                           // TODO: what it is for?
+            testPageUrl : "http://cswebplayer.viaccess.fr/functionnalTests/samples/testsPlayer",                        // url of the html page under test
             streamUrl   : "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",// url of the main stream
                                                                                                                         // take care using one with video.currentTime = 0 at the beginning
                                                                                                                         // for the pre-roll tests
             tests : {
                 // Test suite trackingEvents specific configuration fields
                 trackingEvents: {
-                    testPageUrl : "http://cswebplayer.viaccess.fr/functionnalTests/adsplugin/adsTestsPlayer/",  //url of the html page under test
+                    testPageUrl : "http://cswebplayer.viaccess.fr/functionnalTests/adsplugin/adsTestsPlayer/",          // TODO: use the common html page
                     play: {
                         streams: [
                             streams.MAST_NONE,
@@ -58,22 +57,25 @@ define(function(require) {
 
                 // Test suite multipleAds specific configuration fields
                 multipleAds: {
-                    //testPageUrl : "http://localhost/csadsplugin/samples/adPodsTestsPlayer",
-                    testPageUrl : "http://cswebplayer.viaccess.fr/functionnalTests/csadsplugin/samples/adPodsTestsPlayer",
                     adPod: {
-                        mastUrl: "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-vast30AdPods.xml",
-                        ads: [  {media: "http://cswebplayer.viaccess.fr/adsserver/media/vo_ad_2.mp4", duration : 6000},
-                                {media: "http://cswebplayer.viaccess.fr/adsserver/media/vo_ad_4.mp4", duration : 4000}]
+                        mastUrl: "../ads/xml/mast/preroll-vast30-adPods.xml",
+                        ads: [  {media: "../ads/media/vo_ad_2.mp4", duration : 6000},
+                                {media: "../ads/media/vo_ad_4.mp4", duration : 4000}]
                     },
                     doubleAdsInVast: {
-                        mastUrl: "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll-double-vast2.xml",
-                        ads: [  {media: "http://cswebplayer.viaccess.fr/adsserver/media/vo_ad_2.mp4", duration : 6000},
-                                {media: "http://cswebplayer.viaccess.fr/adsserver/media/vo_ad_4.mp4", duration : 4000}]
+                        mastUrl: "../ads/xml/mast/preroll-double-vast2.xml",
+                        ads: [  {media: "../ads/adsserver/media/vo_ad_2.mp4", duration : 6000},
+                                {media: "../ads/adsserver/media/vo_ad_4.mp4", duration : 4000}]
                     },
                     doubleTriggersInMast: {
-                        mastUrl: "http://cswebplayer.viaccess.fr/adsserver/xml/mast/preroll1-preroll2.xml",
-                        ads: [  {media: "http://cswebplayer.viaccess.fr/adsserver/media/vo_ad_2.mp4", duration : 6000},
-                                {media: "http://cswebplayer.viaccess.fr/adsserver/media/vo_ad_4.mp4", duration : 4000}]
+                        mastUrl: "../ads/xml/mast/preroll1-preroll2.xml",
+                        ads: [  {media: "../ads/adsserver/media/vo_ad_2.mp4", duration : 6000},
+                                {media: "../ads/adsserver/media/vo_ad_4.mp4", duration : 4000}]
+                    },
+                    doubleVastsInTrigger: {
+                        mastUrl: "../ads/xml/mast/preroll-vast30-doubleVastsInTrigger.xml",
+                        ads: [  {media: "../ads/adsserver/media/vo_ad_2.mp4", duration : 6000},
+                                {media: "../ads/adsserver/media/vo_logo.png", duration : 5000}]
                     }
                 }
             }
