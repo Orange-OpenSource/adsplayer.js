@@ -200,7 +200,7 @@ class AdsPlayer {
 
     /**
     * Plays/resumes the playback of the current ad.
-    * @method pause
+    * @method play
     * @access public
     * @memberof AdsPlayer#
     */
