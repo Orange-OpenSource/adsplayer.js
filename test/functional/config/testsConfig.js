@@ -5,55 +5,11 @@ define(function(require) {
     var _createInstance = function() {
         return {
             // Common tests suite configuration fields
-            asyncTimeout: 10,                                                                                           // TODO: what it is for?
-            adsDuration : 10,                                                                                           // TODO: what it is for?
-            testPageUrl : "http://cswebplayer.viaccess.fr/functionnalTests/CSAdsPlugin-Dev/samples/testsPlayer",        // url of the html page under test
+            testPageUrl : "http://localhost/csadsplugin/samples/testsPlayer",        // url of the html page under test
             streamUrl   : "http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest",// url of the main stream
                                                                                                                         // take care using one with video.currentTime = 0 at the beginning
                                                                                                                         // for the pre-roll tests
             tests : {
-                // Test suite trackingEvents specific configuration fields
-                trackingEvents: {
-                    testPageUrl : "http://cswebplayer.viaccess.fr/functionnalTests/adsplugin/adsTestsPlayer/",          // TODO: use the common html page
-                    play: {
-                        streams: [
-                            streams.MAST_NONE,
-                            streams.MAST_PREROLL_VAST2_LINEAR,
-                            streams.MAST_PREROLL_VAST2_LINEAR_IMAGE,
-                            streams.MAST_PREROLL_VAST3_LINEAR
-                        ]
-                    },
-                    pause: {
-                        streams: [
-                            streams.MAST_PREROLL_VAST3_LINEAR_PAUSE
-                        ]
-                    },
-                    mute: {
-                        streams: [
-                            streams.MAST_PREROLL_VAST3_LINEAR_MUTE
-                        ]
-                    },
-                    closeLinear: {
-                        streams: [
-                            streams.MAST_PREROLL_VAST3_LINEAR_CLOSE
-                        ]
-                    },
-                    rewind: {
-                        streams: [
-                            streams.MAST_PREROLL_VAST3_LINEAR_REWIND
-                        ]
-                    },
-                    fullscreen: {
-                        streams: [
-                            streams.MAST_PREROLL_VAST3_LINEAR_FULLSCREEN
-                        ]
-                    },
-                    acceptInvitationLinear: {
-                        streams: [
-                            streams.MAST_PREROLL_VAST3_LINEAR_ACCEPTINVITATION
-                        ]
-                    }
-                },
 
                 // Test suite multipleAds specific configuration fields
                 multipleAds: {
