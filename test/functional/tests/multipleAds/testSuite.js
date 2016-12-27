@@ -21,7 +21,6 @@ define(function(require) {
 
     registerSuite(function(){
         var command = null;
-        const adDurationDelta = 1000; /* the amount of time to wait after the end of the first ad */
         return {
             name: "TEST_MULTIPLE_ADS",
 
@@ -37,12 +36,10 @@ define(function(require) {
                 return command;
             },
 
-            teardown: function () {
-                // executes after suite ends;
-            },
+
 
             beforeEach: function (test) {
-                // executes before each test
+
 
                 return (command
                     // type the ad url
