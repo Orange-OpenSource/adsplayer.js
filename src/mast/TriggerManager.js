@@ -107,7 +107,7 @@ class TriggerManager {
          *  Detected on windows10-edge and sometimes on linux-chrome
          */
         /*if (video.currentTime === 0 && condition.type === Condition.TYPE.EVENT && condition.name === Condition.NAME.ON_ITEM_START) {*/
-        if (video.currentTime < 0.1 && condition.type === Condition.TYPE.EVENT && condition.name === Condition.NAME.ON_ITEM_START) {
+        if (video.currentTime < 0.5 && condition.type === Condition.TYPE.EVENT && condition.name === Condition.NAME.ON_ITEM_START) {
             res = true;
         }
 
