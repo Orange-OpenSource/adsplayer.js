@@ -116,27 +116,27 @@ class CreativePlayer {
         //this._debug.log("Media timeupdate: " + this._mediaPlayer.getCurrentTime());
     }
 
-    _onAdClick () {
-        if (!this._videoClicks) {
+    _onAdClick (creative) {
+        if (!creative.videoClicks) {
             return;
         }
 
         this._debug.log("Creative Click");
 
         // ClickThrough : send an event for the application to open the web page
-        if (this._videoClicks.clickThrough) {
-            this._debug.log("Ad click, uri = " + this._videoClicks.clickThrough.uri);
+        if (creative.videoClicks.clickThrough) {
+            this._debug.log("Ad click, uri = " + creative.videoClicks.clickThrough.uri);
             this._eventBus.dispatchEvent({
                 type: 'click',
                 data: {
-                    uri: this._videoClicks.clickThrough.uri
+                    uri: creative.videoClicks.clickThrough.uri
                 }
             });
         }
 
         // TODO
         // ClickTracking
-        // if (this._videoClicks.clickTracking) {
+        // if (this.videoClicks.clickTracking) {
         // }
     }
 
@@ -210,11 +210,10 @@ class CreativePlayer {
 
         // Listener for click
         if (creative.videoClicks) {
-            this._videoClicks = creative.videoClicks;
             if (creative.videoClicks.clickThrough) {
                 this._mediaPlayer.getElement().style.cursor = 'pointer';
             }
-            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(this));
+            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(this, creative));
         }
 
         // Align media volume to main video volume
@@ -305,8 +304,6 @@ class CreativePlayer {
             this._trackingEventsManager.stop();
             this._trackingEventsManager = null;
         }
-
-        this._videoClicks = null;
     }
 
     _onMainVideoVolumeChange () {
@@ -324,7 +321,6 @@ class CreativePlayer {
         this._mediaPlayer = null;
         this._trackingEventsManager = null;
         this._mainVideo = null;
-        this._videoClicks = null;
         this._debug = Debug.getInstance();
         this._eventBus = EventBus.getInstance();
 
