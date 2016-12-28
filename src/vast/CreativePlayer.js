@@ -117,27 +117,26 @@ class CreativePlayer {
     }
 
     _onAdClick () {
-        // this = creative
-        if (!this.videoClicks) {
+        if (!this._videoClicks) {
             return;
         }
 
         this._debug.log("Creative Click");
 
         // ClickThrough : send an event for the application to open the web page
-        if (this.videoClicks.clickThrough) {
-            this._debug.log("Ad click, uri = " + this.videoClicks.clickThrough);
+        if (this._videoClicks.clickThrough) {
+            this._debug.log("Ad click, uri = " + this._videoClicks.clickThrough.uri);
             this._eventBus.dispatchEvent({
                 type: 'click',
                 data: {
-                    uri: this.videoClicks.clickThrough
+                    uri: this._videoClicks.clickThrough.uri
                 }
             });
         }
 
         // TODO
         // ClickTracking
-        // if (this.videoClicks.clickTracking) {
+        // if (this._videoClicks.clickTracking) {
         // }
     }
 
@@ -211,10 +210,11 @@ class CreativePlayer {
 
         // Listener for click
         if (creative.videoClicks) {
+            this._videoClicks = creative.videoClicks;
             if (creative.videoClicks.clickThrough) {
                 this._mediaPlayer.getElement().style.cursor = 'pointer';
             }
-            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(creative).bind(this));
+            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(this));
         }
 
         // Align media volume to main video volume
@@ -305,6 +305,8 @@ class CreativePlayer {
             this._trackingEventsManager.stop();
             this._trackingEventsManager = null;
         }
+
+        this._videoClicks = null;
     }
 
     _onMainVideoVolumeChange () {
@@ -322,6 +324,7 @@ class CreativePlayer {
         this._mediaPlayer = null;
         this._trackingEventsManager = null;
         this._mainVideo = null;
+        this._videoClicks = null;
         this._debug = Debug.getInstance();
         this._eventBus = EventBus.getInstance();
 
