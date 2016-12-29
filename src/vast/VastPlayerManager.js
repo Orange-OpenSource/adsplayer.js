@@ -27,6 +27,14 @@
 * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/** Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive
+ *
+ * Reason: VAST-3.0 support for Linear Ads.
+ * Author: alain.lebreton@viaccess-orca.com
+ * Ref: CSWP-28
+ *
+ */
+
 /**
 * The VastPlayerManager manages the sequencing of playing creatives of a single VAST.
 * It takes as input the list of Vast objects as returned by the VAST parser.
