@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- sources under test-->
+        <script src="../../dist/adsplayer.js"></script>
+        <!-- uses cswebplayer-->
+        <script src="../hasplayer.min.js"></script>
+    </head>
+
+    <body>
+        <div id="container" style="min-height: 300px">
+            <video id="videoplayer-container" width="700" height="300" controls>  </video>
+            <div id="adsplayer-container" width="700" height="300" controls> </div>
+        </div>
+        <div>
+            <input id="stream_toplay" type="text" size="100"> </input><br>
+            <input id="ad_toplay" type="text" size="100"> </input><br>
+            <button id="play_button" >Play</button>
+            <button id="stop_button" >Stop</button><br>
+            start/end event <input id="event_started" type="checkbox"> </input>
+            add/remove event <input id="event_added" type="checkbox"> </input>
+            play/pause event <input id="event_play" type="checkbox"> </input>
+        </div>
+
+        <script>
+
+            var mediaPlayer = null;
+            var adsPlugin = null;
+
+            document.addEventListener("DOMContentLoaded", function(event){
+
+                adsPlugin = new adsplayer.AdsPlayer(document.getElementById('adsplayer-container'));
+
+                // hide the video player and update the checkbox when an ad starts
+                adsPlugin.addEventListener('start', function(e) {
+                    document.getElementById('videoplayer-container').style.display = 'none' ;
+                    document.getElementById('event_started').checked = true;
+                });
+
+                // show the video player and update the checkbox at the end of the ad
+                adsPlugin.addEventListener('end', function(e) {
+                    document.getElementById('videoplayer-container').style.display = 'block';
+                    document.getElementById('event_started').checked = false;
+                });
+
+                adsPlugin.addEventListener('addElement', function(e) {
+                    document.getElementById('event_added').checked = true;
+                });
+
+                adsPlugin.addEventListener('removeElement', function(e) {
+                    //document.getElementById('videoplayer-container').currentTime = 0;
+                    document.getElementById('event_added').checked = false;
+                });
+
+                adsPlugin.addEventListener('play', function(e) {
+                    document.getElementById('event_play').checked = true;
+                });
+
+                adsPlugin.addEventListener('pause', function(e) {
+                    document.getElementById('event_play').checked = false;
+                });
+
+                mediaPlayer = new MediaPlayer();
+
+                mediaPlayer.init(document.getElementById('videoplayer-container'));
+
+                mediaPlayer.setDebug(false);
+
+                mediaPlayer.addPlugin(adsPlugin);
+
+            });
+
+            // play button
+            document.querySelector('#play_button').addEventListener("click",function(e) {
+                var stream = {
+                    url : document.getElementById("stream_toplay").value,
+                    protData : null,
+                    adsUrl : document.getElementById("ad_toplay").value
+                };
+
+                mediaPlayer.load(stream);
+            });
+
+            // stop button
+            document.querySelector('#stop_button').addEventListener("click",function(e) {
+                mediaPlayer.stop();
+            });
+
+
+        </script>
+
+    </body>
+
+
+</html>
