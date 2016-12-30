@@ -27,14 +27,22 @@
 * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/** Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive
+ *
+ * Reason: VAST-3.0 support for Linear Ads.
+ * Author: alain.lebreton@viaccess-orca.com
+ * Ref: CSWP-28
+ *
+ */
+
 /**
 * @class Vast
 * @ignore
 */
 class Vast {
     constructor () {
-        this.version = '';
-        this.ad = null;
+        this.version = '';                  // [Required] Current version is 3.0
+        this.ads = [];                       // [Required] Top-level element,wraps each ad in the response
     }
 }
 
@@ -45,6 +53,7 @@ class Vast {
 class Ad {
     constructor () {
         this.id = '';
+        this.sequence = '';
         this.inLine = null;
         this.wrapper = null;
     }
@@ -56,14 +65,39 @@ class Ad {
 */
 class InLine {
     constructor () {
-        this.adSystem = '';                 // [Required] Source ad server
+        this.adSystem = null;               // [Required] Source ad server
         this.adTitle = '';                  // [Required] Title
         this.description = '';              // [Optional] Description
+        this.advertiser = '';               // [Optional] Advertiser name
+        this.pricing = null;                // [Optional] Pricing
         this.survey = '';                   // [Optional] URI of request to survey vendor
         this.error = '';                    // [Optional] URI to request if ad does not play due to error
         this.impressions = [];              // [Required] URIs to track impressions.
         this.creatives = [];                // [Required] Creative elements
         this.extensions = [];               // [Optional] Any valid XML may be included in the Extensions node
+    }
+}
+
+/**
+ * @class AdSystem
+ * @ignore
+ */
+class AdSystem {
+    constructor () {
+        this.version = '';                   // [Optional] The version number of the ad system
+        this.name = '';                      // [Required] The name of the ad server
+    }
+}
+
+/**
+ * @class Pricing
+ * @ignore
+ */
+class Pricing {
+    constructor () {
+        this.model = '';                      // [Required] The pricing model
+        this.currency = '';                   // [Required] The currency symbol
+        this.price = 0;                       // [Required] The price
     }
 }
 
@@ -98,8 +132,9 @@ class Creative {
         this.id = '';                       // [Optional] Identifier
         this.adId = '';                     // [Optional] Ad-ID for the creative (formerly ISCI)
         this.sequence = 0;                  // [Optional] The preferred order in which multiple Creatives should be displayed
+        this.apiFramework = '';             // [Optional] A string that identify an API that is needed to execute the creative.
         this.linear = null;                 // [Optional] Linear ad
-        this.CompanionAds = [];             // [Optional] Companion ads
+        this.companionAds = [];             // [Optional] Companion ads
         this.nonLinearAds = [];             // [Optional] Non-linear ads
     }
 }
@@ -117,11 +152,13 @@ Creative.TYPE = {
 */
 class Linear {
     constructor () {
+        this.skipoffset = 0;                // [Required] Time value that identifies when skip controls are made available to the end user.
+        this.adParameters = null;           // [Optional] Data to be passed into the video ad
         this.duration = 0;                  // [Required] Duration in standard time format, hh:mm:ss
-        this.trackingEvents = [];           // [Optional] Tracking events elements
-        this.adParameters = '';             // [Optional] Data to be passed into the video ad
-        this.videoClicks = null;            // [Optional] Video clicks
         this.mediaFiles = [];               // [Required] Media file elements
+        this.trackingEvents = [];           // [Optional] Tracking events elements
+        this.videoClicks = null;            // [Optional] Video clicks
+        this.icons = [];                    // [Optional]
     }
 }
 
@@ -171,6 +208,45 @@ class NonLinear {
 }
 
 /**
+ * @class AdParameters
+ * @ignore
+ */
+class AdParameters {
+    constructor () {
+        this.xmlEncoded = '';               // [Optional] Identifies whether the ad parameters are xml-encoded
+        this.metadata = '';                 // [Required] Meta data for the ad.
+    }
+}
+
+/**
+ * @class MediaFile
+ * @ignore
+ */
+class MediaFile {
+    constructor () {
+        this.id = '';                       // [Optional] Identifier
+        this.delivery = '';                 // [Required] Method of delivery of ad ('streaming' or 'progressive')
+        this.type = '';                     // [Required] MIME type
+        this.bitrate = 0;                   // [Optional] For progressive load video, specify the average bitrate
+        this.minBitrate = 0;                // [Optional] Otherwise, minimum bitrate
+        this.maxBitrate = 0;                // [Optional] Otherwise, maximum bitrate
+        this.width = 0;                     // [Required] Pixel dimensions of video
+        this.height = 0;                    // [Required] Pixel dimensions of video
+        this.codec = 0;                     // [Optional] The codec according to RFC4281
+        this.scalable = true;               // [Optional] Whether it is acceptable to scale the image.
+        this.maintainAspectRatio = true;    // [Optional] Whether the ad must have its aspect ratio maintained when scaled
+        this.apiFramework = '';             // [Optional] Defines the method to use for communication if the MediaFile is interactive.
+        this.uri = '';
+    }
+}
+
+// MediaFile delivery types
+MediaFile.DELIVERY = {
+    STREAMING: 'streaming',
+    PROGRESSIVE: 'progressive '
+};
+
+/**
 * @class TrackingEvent
 * @ignore
 */
@@ -180,7 +256,6 @@ class TrackingEvent {
         this.event = '';                    // [Required] The name of the event to track for the Linear element
     }
 }
-
 
 /**
 * [TrackingEvent description]
@@ -211,36 +286,22 @@ TrackingEvent.TYPE = {
 */
 class VideoClicks {
     constructor () {
-        this.clickThrough = '';             // [Optional] URI to open as destination page when user clicks on the video
-        this.clickTracking = '';            // [Optional] URI to request for tracking purposes when user clicks on the video
-        this.customClick = '';              // [Optional] URI to request on custom events such as hotspotted video
+        this.clickThrough = null;             // [Optional] URI to open as destination page when user clicks on the video
+        this.clickTracking = null;            // [Optional] URI to request for tracking purposes when user clicks on the video
+        this.customClick = null;              // [Optional] URI to request on custom events such as hotspotted video
     }
 }
 
 /**
-* @class MediaFile
-* @ignore
-*/
-class MediaFile {
+ * @class Click
+ * @ignore
+ */
+class Click {
     constructor () {
-        this.id = '';                       // [Optional] Identifier
-        this.delivery = '';                 // [Required] Method of delivery of ad ('streaming' or 'progressive')
-        this.type = '';                     // [Required] MIME type
-        this.bitrate = 0;                   // [Optional] Bitrate of encoded video in Kbps
-        this.width = 0;                     // [Required] Pixel dimensions of video
-        this.height = 0;                    // [Required] Pixel dimensions of video
-        this.scalable = true;               // [Optional] Whether it is acceptable to scale the image.
-        this.maintainAspectRatio = true;    // [Optional] Whether the ad must have its aspect ratio maintained when scaled
-        this.apiFramework = '';             // [Optional] Defines the method to use for communication if the MediaFile is interactive.
-        this.uri = '';
+        this.id = '';                       // [Required] A unique id for the click
+        this.uri = '';                      // [Required] URI
     }
 }
-
-// MediaFile delivery types
-MediaFile.DELIVERY = {
-    STREAMING: 'streaming',
-    PROGRESSIVE: 'progressive '
-};
 
 /**
 * @class StaticResource
@@ -253,23 +314,26 @@ class StaticResource {
     }
 }
 
-
 var vast = {};
 
 vast.Vast = Vast;
 vast.Ad = Ad;
 vast.InLine = InLine;
+vast.AdSystem = AdSystem;
+vast.Pricing = Pricing;
 vast.Impression = Impression;
 vast.Extensions = Extensions;
 vast.Creative = Creative;
 vast.Linear = Linear;
 vast.Companion = Companion;
 vast.NonLinear = NonLinear;
+vast.AdParameters = AdParameters;
 vast.TrackingEvent = TrackingEvent;
 vast.VideoClicks = VideoClicks;
+vast.Click = Click;
 vast.MediaFile = MediaFile;
 vast.StaticResource = StaticResource;
 
 export default vast;
 
-export { Vast, Ad, InLine, Impression, Extensions, Creative, Linear, Companion, NonLinear, TrackingEvent, VideoClicks, MediaFile, StaticResource };
+export { Vast, Ad, InLine, AdSystem, Pricing, Impression, Extensions, Creative, Linear, Companion, NonLinear, AdParameters, TrackingEvent, VideoClicks, Click, MediaFile, StaticResource };
