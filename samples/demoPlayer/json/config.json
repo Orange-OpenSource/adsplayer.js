@@ -61,10 +61,10 @@ jsonAdsDescription = '[ { "name": "No ad insertion",                            
                           "url" : "../../samples/ads/xml/mast/preroll-vast30.xml"},                       \
                                                                                                           \
                         { "name": "Preroll VAST30 AdPods",                                                \
-                          "url" : "../../samples/ads/xml/mast/preroll-vast30AdPods.xml"},                 \
+                          "url" : "../../samples/ads/xml/mast/preroll-vast30-adPods.xml"},                \
                                                                                                           \
                         { "name": "Preroll VAST30 double trigger",                                        \
-                        "url" : "../../samples/ads/xml/mast/preroll-vast30DoubleTrigger.xml"}             \
+                        "url" : "../../samples/ads/xml/mast/preroll-vast30-doubleVastsInTrigger.xml"}     \
 ]';
 
 jsonStreamsDescription = '[{ "name" : "custom",                                                                       \
