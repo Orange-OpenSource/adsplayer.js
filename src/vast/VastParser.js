@@ -27,6 +27,14 @@
 * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
+/** Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive
+ *
+ * Reason: VAST-3.0 support for Linear Ads.
+ * Author: alain.lebreton@viaccess-orca.com
+ * Ref: CSWP-28
+ *
+ */
+
 /**
 * VAST parser. This class parses VAST file in XML format
 * and construct the corresponding VAST object according to VAST data model.
@@ -34,6 +42,7 @@
 
 import vast from './model/Vast';
 import xmldom from '../utils/xmldom';
+import Debug from '../Debug';
 
 class VastParser {
 
@@ -56,17 +65,25 @@ class VastParser {
 
         for (let i = 0; i < videoClicksNode.childNodes.length; i++) {
             nodeName = videoClicksNode.childNodes[i].nodeName;
-            nodeValue = xmldom.getNodeTextValue(videoClicksNode.childNodes[i]);
 
             switch (nodeName) {
                 case "ClickThrough":
-                    videoClicks.clickThrough = nodeValue;
+                    nodeValue = xmldom.getElement(videoClicksNode,"ClickThrough");
+                    videoClicks.clickThrough = new vast.Click();
+                    videoClicks.clickThrough.id = nodeValue.getAttribute('id');
+                    videoClicks.clickThrough.uri = xmldom.getNodeTextValue(nodeValue);
                     break;
                 case "ClickTracking":
-                    videoClicks.clickTracking = nodeValue;
+                    nodeValue = xmldom.getElement(videoClicksNode,"ClickTracking");
+                    videoClicks.clickTracking = new vast.Click();
+                    videoClicks.clickTracking.id = nodeValue.getAttribute('id');
+                    videoClicks.clickTracking.uri = xmldom.getNodeTextValue(nodeValue);
                     break;
                 case "CustomClick":
-                    videoClicks.customClick = nodeValue;
+                    nodeValue = xmldom.getElement(videoClicksNode,"CustomClick");
+                    videoClicks.customClick = new vast.Click();
+                    videoClicks.customClick.id = nodeValue.getAttribute('id');
+                    videoClicks.customClick.uri = xmldom.getNodeTextValue(nodeValue);
                     break;
             }
         }
@@ -81,6 +98,9 @@ class VastParser {
         mediaFile.delivery = mediaFileNode.getAttribute('delivery');
         mediaFile.type = mediaFileNode.getAttribute('type');
         mediaFile.bitrate = mediaFileNode.getAttribute('bitrate');
+        mediaFile.minBitrate = mediaFileNode.getAttribute('minBitrate');
+        mediaFile.maxBitrate = mediaFileNode.getAttribute('maxBitrate');
+        mediaFile.codec = mediaFileNode.getAttribute('codec');
         mediaFile.width = mediaFileNode.getAttribute('width');
         mediaFile.height = mediaFileNode.getAttribute('height');
         mediaFile.scalable = mediaFileNode.getAttribute('scalable');
@@ -91,15 +111,39 @@ class VastParser {
         return mediaFile;
     }
 
+    _getIcons (iconsNodes) {
+        if (iconsNodes) {
+            this._debug.warn("(VastParser) VAST/Ad/InLine/Creatives/Creative/Linear/Icons not supported ");
+        }
+        return null;
+    }
+
+    _getAdParameters (adParametersNode){
+        var adParameters = new vast.AdParameters();
+
+        adParameters.metadata = xmldom.getNodeTextValue(adParametersNode);
+        adParameters.xmlEncoded = adParametersNode.getAttribute('xmlEncoded');
+
+        return adParameters;
+    }
+
     _getLinear (linearNode) {
         let linear = new vast.Linear(),
             trackingNodes,
             videoClicksNode,
             mediaFileNodes,
+            adParametersNode,
+            iconsNodes,
             i;
 
+        linear.skipoffset = linearNode.getAttribute('skipoffset');
+
+        adParametersNode = xmldom.getElement(linearNode, 'AdParameters');
+        if (adParametersNode) {
+            linear.adParameters = this._getAdParameters(adParametersNode);
+        }
+
         linear.duration = xmldom.getChildNodeTextValue(linearNode, 'Duration');
-        linear.adParameters = xmldom.getChildNodeTextValue(linearNode, 'AdParameters');
 
         trackingNodes = xmldom.getSubElements(linearNode, 'TrackingEvents', 'Tracking');
         for (i = 0; i < trackingNodes.length; i++) {
@@ -116,30 +160,80 @@ class VastParser {
             linear.mediaFiles.push(this._getMediaFile(mediaFileNodes[i]));
         }
 
+        iconsNodes = xmldom.getElement(linearNode, 'Icons');
+        if (iconsNodes) {
+            linear.icons = this._getIcons(iconsNodes);
+        }
+
         return linear;
     }
 
     _getCreative (creativeNode) {
         let creative = new vast.Creative(),
-            linearNode;
+            linearNode,
+            companionNode,
+            nonLinearNode;
 
         creative.id = creativeNode.getAttribute('id');
         creative.adId = creativeNode.getAttribute('AdID');
         creative.sequence = creativeNode.getAttribute('sequence');
+        creative.apiFramework = creativeNode.getAttribute('apiFramework');
 
         linearNode = xmldom.getElement(creativeNode, 'Linear');
         if (linearNode) {
             creative.linear = this._getLinear(linearNode);
         }
 
-        // TODO: get Companion and non-Linear elements
+        companionNode = xmldom.getElement(creativeNode, 'CompanionAds');
+        if (companionNode) {
+            this._debug.warn("(VastParser) VAST/Ad/InLine/Creatives/Creative/CompanionAds not supported ");
+        }
+
+        nonLinearNode = xmldom.getElement(creativeNode, 'NonLinearAds');
+        if (nonLinearNode) {
+            this._debug.warn("(VastParser) VAST/Ad/InLine/Creatives/Creative/NonLinearAds not supported ");
+        }
 
         return creative;
+    }
+
+    _getPricing (pricingNode) {
+        var pricing = new vast.Pricing();
+
+        pricing.model = pricingNode.getAttribute('model');
+        pricing.currency = pricingNode.getAttribute('currency');
+        pricing.price = xmldom.getNodeTextValue(pricingNode);
+
+        return pricing;
+    }
+
+    _getAdSystem (adSystemNode) {
+        var adSystem = new vast.AdSystem();
+
+        adSystem.version = adSystemNode.getAttribute('version');
+        adSystem.name = xmldom.getNodeTextValue(adSystemNode);
+
+        return adSystem;
+    }
+
+    _getImpressions (impressionNodes){
+        var impressions=[];
+
+        for (var i = 0; i < impressionNodes.length; i++) {
+            var impression = new vast.Impression();
+            impression.id = impressionNodes[i].getAttribute('id');
+            impression.uri = xmldom.getNodeTextValue(impressionNodes[i]);
+            impressions.push(impression);
+        }
+
+        return impressions;
     }
 
     _getInLine (adNode) {
         let inLine = new vast.InLine(),
             inLineNode = xmldom.getElement(adNode, 'InLine'),
+            adSystemNode = null,
+            pricingNode = null,
             impressionNodes,
             creativeNodes,
             i;
@@ -148,19 +242,24 @@ class VastParser {
             return null;
         }
 
-        inLine.adSystem = xmldom.getChildNodeTextValue(inLineNode, 'AdSystem');
+        adSystemNode = xmldom.getElement(inLineNode, 'AdSystem');
+        if (adSystemNode !== null) {
+            inLine.adSystem = this._getAdSystem(adSystemNode);
+        }
         inLine.adTitle = xmldom.getChildNodeTextValue(inLineNode, 'AdTitle');
         inLine.description = xmldom.getChildNodeTextValue(inLineNode, 'Description');
+        inLine.advertiser = xmldom.getChildNodeTextValue(inLineNode, 'Advertiser');
+
+        pricingNode = xmldom.getElement(inLineNode, 'Pricing');
+        if (pricingNode !== null) {
+            inLine.pricing = this._getPricing(pricingNode);
+        }
         inLine.survey = xmldom.getChildNodeTextValue(inLineNode, 'Survey');
         inLine.error = xmldom.getChildNodeTextValue(inLineNode, 'Error');
 
         impressionNodes = xmldom.getElements(inLineNode, 'Impression');
-        for (i = 0; i < impressionNodes.length; i++) {
-            var impression = new vast.Impression();
-            impression.id = impressionNodes[i].getAttribute('id');
-            impression.uri = xmldom.getNodeTextValue(impressionNodes[i]);
-            inLine.impressions.push(impression);
-
+        if (impressionNodes !== null) {
+            inLine.impressions = this._getImpressions(impressionNodes);
         }
 
         creativeNodes = xmldom.getSubElements(inLineNode, 'Creatives', 'Creative');
@@ -171,16 +270,22 @@ class VastParser {
         return inLine;
     }
 
-    _getAd (vastNode, vast_) {
-        let adNode = xmldom.getElement(vastNode, 'Ad');
+    _getWrapper (adNode) {
+        let wrapperNode = xmldom.getElement(adNode, 'Wrapper');
 
-        if (adNode === null) {
-            return;
+        if (wrapperNode !== null) {
+            this._debug.warn("(VastParser) VAST/Ad/Wrapper not supported ");
         }
 
-        vast_.ad = new vast.Ad();
-        vast_.ad.id = adNode.getAttribute('id');
-        vast_.ad.inLine = this._getInLine(adNode);
+        return null;
+    }
+
+    _getAd (adNode, vast_, adIndex) {
+        vast_.ads[adIndex] = new vast.Ad();
+        vast_.ads[adIndex].id = adNode.getAttribute('id');
+        vast_.ads[adIndex].sequence = adNode.getAttribute('sequence');
+        vast_.ads[adIndex].inLine = this._getInLine(adNode);
+        vast_.ads[adIndex].wrapper = this._getWrapper(adNode);
     }
 
 
@@ -188,6 +293,7 @@ class VastParser {
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
     constructor() {
+        this._debug = Debug.getInstance();
     }
 
     /**
@@ -204,7 +310,15 @@ class VastParser {
 
         vast_.version = vastNode.getAttribute('version');
 
-        this._getAd(vastNode, vast_);
+        var numberOfAds = vastNode.getElementsByTagName('Ad').length;
+        var adNodes = xmldom.getElements(vastNode, 'Ad');
+
+        if (adNodes === null) {
+            return vast_;
+        }
+
+        for (var adIndex = 0; adIndex < numberOfAds; adIndex++)
+            this._getAd(adNodes[adIndex], vast_, adIndex);
 
         return vast_;
     }

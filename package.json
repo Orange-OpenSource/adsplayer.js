@@ -5,7 +5,15 @@
   "scripts": {
     "build": "gulp",
     "watch": "gulp watch",
-    "doc": "gulp doc"
+    "doc": "gulp doc",
+    "testLinuxchrome": "node node_modules/intern/runner.js config=test/functional/testsCommon.js browsers=chrome_linux selenium=local",
+    "testLinuxfirefox": "node node_modules/intern/runner.js config=test/functional/testsCommon.js browsers=firefox_linux selenium=local",
+    "testWindows7chrome": "node node_modules/intern/runner.js config=test/functional/testsCommon.js browsers=chrome_windows7 selenium=local",
+    "testWindows7firefox": "node node_modules/intern/runner.js config=test/functional/testsCommon.js browsers=firefox_windows7 selenium=local",
+    "testWindows7internetExplorer": "node node_modules/intern/runner.js config=test/functional/testsCommon.js browsers=ie11_windows7 selenium=local",
+    "testWindows10edge": "node node_modules/intern/runner.js config=test/functional/testsCommon.js browsers=edge_windows10 selenium=local",
+    "testWindows10firefox": "node node_modules/intern/runner.js config=test/functional/testsCommon.js browsers=firefox_windows10 selenium=local",
+    "testWindows10chrome": "node node_modules/intern/runner.js config=test/functional/testsCommon.js browsers=chrome_windows10 selenium=local"
   },
   "repository": {
     "type": "git",
@@ -30,6 +38,7 @@
     "gulp-sourcemaps": "^1.6.0",
     "gulp-uglify": "^1.5.3",
     "gulp-zip": "^3.2.0",
+    "intern": "^3.3.1",
     "jsdoc": "^3.4.0",
     "jshint": "^2.9.2",
     "jshint-stylish": "^2.1.0",
