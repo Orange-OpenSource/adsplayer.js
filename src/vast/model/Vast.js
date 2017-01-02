@@ -178,10 +178,8 @@ class TrackingEvent {
     constructor () {
         this.uri = '';                      // [Optional] URI to track various events during playback
         this.event = '';                    // [Required] The name of the event to track for the Linear element
-        /** Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive **/
         this.offsetInSeconds = '';  		// [Optional] Required in "Progess" event, not use with other events
         this.offsetPercent = '';  	    	// [Optional] Required in "Progess" event, not use with other events
-        /** end **/
     }
 }
 

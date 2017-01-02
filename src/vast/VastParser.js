@@ -45,7 +45,6 @@ class VastParser {
 
         trackingEvent.event = trackingNode.getAttribute('event');
         trackingEvent.uri = xmldom.getNodeTextValue(trackingNode);
-        /** Copyright (C) 2016 VIACCESS S.A and/or ORCA Interactive **/
         if (trackingEvent.event == "progress") {
             var offsetValue = trackingNode.getAttribute('offset');
             if (offsetValue.indexOf("%") == -1) {
@@ -56,7 +55,6 @@ class VastParser {
                 trackingEvent.offsetPercent = offsetValue.substring(0, offsetValue.indexOf("%")) / 100;
             }
         }
-        /** end **/
         return trackingEvent;
     }
 
