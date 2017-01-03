@@ -101,7 +101,7 @@ class TriggerManager {
             i;
 
         // Check pre-roll condition for activation
-        if (video.currentTime === 0 && condition.type === Condition.TYPE.EVENT && condition.name === Condition.NAME.ON_ITEM_START) {
+        if (video.currentTime < 0.5 && condition.type === Condition.TYPE.EVENT && condition.name === Condition.NAME.ON_ITEM_START) {
             res = true;
         }
 
