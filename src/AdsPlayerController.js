@@ -90,7 +90,7 @@ class AdsPlayerController {
                 // Push vast objects in the trigger in the original order
                 // (this = promises returned objects)
                 for (var i = 0; i < vasts.length; i++) {
-                    if (vasts[i] && vasts[i].ad) {
+                    if (vasts[i] && vasts[i].ads) {
                         trigger.vasts.push(vasts[i]);
                     }
                 }
@@ -164,6 +164,9 @@ class AdsPlayerController {
     _onTriggerEnd  () {
         this._debug.log('End playing trigger');
 
+        // Remove trigger end event listener
+        this._eventBus.removeEventListener('triggerEnd', this._onTriggerEndListener);
+
         // Delete VAST player manager
         if (this._vastPlayerManager) {
             this._vastPlayerManager.reset();
@@ -195,6 +198,9 @@ class AdsPlayerController {
 
         // Notifies the application ad(s) playback starts
         this._eventBus.dispatchEvent({type: 'start', data: null});
+
+        // Add trigger end event listener
+        this._eventBus.addEventListener('triggerEnd', this._onTriggerEndListener);
 
         // Play the trigger
         this._debug.log('Start playing trigger ' + trigger.id);
@@ -302,9 +308,6 @@ class AdsPlayerController {
         this._mainVideo.addEventListener('seeking', this._onVideoTimeupdateListener);
         this._mainVideo.addEventListener('ended', this._onVideoEndedListener);
 
-        // Add trigger end event listener
-        this._eventBus.addEventListener('triggerEnd', this._onTriggerEndListener);
-
         this._debug.setLevel(4);
     }
 
@@ -365,11 +368,9 @@ class AdsPlayerController {
         // Stop the ad player
         if (this._vastPlayerManager) {
             this._vastPlayerManager.stop();
-            this._vastPlayerManager.reset();
             this._vastPlayerManager = null;
 
-            // Notifies the application ad(s) playback has ended
-            this._eventBus.dispatchEvent({type: 'end', data: null});
+            this._onTriggerEnd();
         }
     }
 
@@ -398,8 +399,6 @@ class AdsPlayerController {
         this._mainVideo.removeEventListener('seeking', this._onVideoTimeupdateListener);
         this._mainVideo.removeEventListener('ended', this._onVideoEndedListener);
 
-        // Remove trigger end event listener
-        this._eventBus.removeEventListener('triggerEnd', this._onTriggerEndListener);
     }
 
     /**

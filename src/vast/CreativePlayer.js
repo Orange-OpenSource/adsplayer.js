@@ -124,11 +124,11 @@ class CreativePlayer {
         this._debug.log("Creative Click");
         // ClickThrough : send an event for the application to open the web page
         if (creative.videoClicks.clickThrough) {
-            this._debug.log("Ad click, uri = " + creative.videoClicks.clickThrough);
+            this._debug.log("Ad click, uri = " + creative.videoClicks.clickThrough.uri);
             this._eventBus.dispatchEvent({
                 type: 'click',
                 data: {
-                    uri: creative.videoClicks.clickThrough
+                    uri: creative.videoClicks.clickThrough.uri
                 }
             });
         }
@@ -248,6 +248,24 @@ class CreativePlayer {
         this._mediaPlayer.pause();
     }
 
+    _abort  () {
+        if (!this._mediaPlayer) {
+            return;
+        }
+        var abort_event = new Event('abort');
+        this._mediaPlayer.getElement().dispatchEvent(abort_event);
+        this._stop();
+    }
+
+    _reset () {
+        if (!this._mediaPlayer) {
+            return;
+        }
+
+        this._mainVideo.removeEventListener('volumechange', this._onMainVideoVolumeChange.bind(this));
+        this._mainVideo = null;
+    }
+
     _stop () {
 
         if (!this._mediaPlayer) {
@@ -342,9 +360,12 @@ class CreativePlayer {
         this._stop();
     }
 
+    abort() {
+        this._abort();
+    }
+
     reset () {
-        this._mainVideo.removeEventListener('volumechange', this._onMainVideoVolumeChange);
-        this._mainVideo = null;
+        this._reset();
     }
 }
 
