@@ -99,7 +99,7 @@ class VastPlayerManager {
     }
 
     _playCreative (index) {
-        var creative = this._vasts[this._vastIndex].ad.inLine.creatives[index],
+        var creative = this._vasts[this._vastIndex].ads[0].inLine.creatives[index],
             linear;
 
         this._creativeIndex = index;
@@ -121,7 +121,7 @@ class VastPlayerManager {
 
     _playVast (index) {
         var vast = this._vasts[index],
-            ad = vast.ad;
+            ad = vast.ads[0];
 
         if (ad === null) {
             // Empty VAST
@@ -154,7 +154,7 @@ class VastPlayerManager {
     }
 
     _playNextCreative () {
-        var ad = this._vasts[this._vastIndex].ad;
+        var ad = this._vasts[this._vastIndex].ads[0];
 
         this._creativeIndex++;
 
