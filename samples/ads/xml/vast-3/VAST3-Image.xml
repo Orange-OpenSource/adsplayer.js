@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<VAST version="3.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="vast3_draft.xsd">
+    <Ad id="vast30-image">
+        <InLine>
+            <AdSystem version="3.0">Viaccess-Orca ad VAST 3.0</AdSystem>
+            <AdTitle><![CDATA[VAST 3.0 image]]></AdTitle>
+            <Description><![CDATA[VAST 3.0 image]]></Description>
+            <Survey></Survey>
+            <Error/>
+            <Impression id="DART"><![CDATA[http://localhost/log?impression]]></Impression>
+            <Creatives>
+                 <Creative sequence="1" AdID="">
+                    <Linear>
+                        <Duration>00:00:05</Duration>
+                        <MediaFiles>
+                            <MediaFile type="image/jpeg" delivery="progressive">
+                                <![CDATA[../../media/vo_logo.png]]>
+                            </MediaFile>
+                        </MediaFiles>
+                    </Linear>
+                </Creative>
+            </Creatives>
+        </InLine>
+    </Ad>
+</VAST>

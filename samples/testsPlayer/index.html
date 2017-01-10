@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <!-- sources under test-->
+        <script src="../../dist/adsplayer.js"></script>
+        <!-- uses cswebplayer-->
+        <script src="../hasplayer.min.js"></script>
+    </head>
+
+    <body>
+        <div id="container" style="min-height: 300px">
+            <video id="videoplayer-container" width="700" height="300" controls>  </video>
+            <div id="adsplayer-container" width="700" height="300" controls> </div>
+        </div>
+        <div>
+            <br>
+            <input id="stream_toplay" type="text" size="100"> </input><br>
+            <input id="ad_toplay" type="text" size="100"> </input><br>
+            <br>
+            <button id="play_button" >Play</button>
+            <button id="stop_button" >Stop</button><br>
+            <h4>CSAdsPlugin Events</h4>
+            <table>
+                <tr>
+                    <td>start  </td>
+                    <td><input id="event_start" type="number" value="0" style="width:30px" disabled> </input></td>
+                    <td>stop  </td>
+                    <td><input id="event_end" type="number" value="0" style="width:30px" disabled> </input></td>
+                </tr>
+                <tr>
+                    <td>add  </td>
+                    <td><input id="event_add" type="number" value="0" style="width:30px" disabled> </input></td>
+                    <td>remove  </td>
+                    <td><input id="event_remove" type="number" value="0" style="width:30px" disabled> </input></td>
+                </tr>
+                <tr>
+                    <td>play  </td>
+                    <td><input id="event_play" type="number" value="0" style="width:30px" disabled> </input></td>
+                    <td>pause  </td>
+                    <td><input id="event_pause" type="number" value="0" style="width:30px" disabled> </input></td>
+                </tr>
+            </table>
+        </div>
+
+        <script>
+
+            var mediaPlayer = null;
+            var adsPlugin = null;
+
+            document.addEventListener("DOMContentLoaded", function(event){
+
+                adsPlugin = new adsplayer.AdsPlayer(document.getElementById('adsplayer-container'));
+
+                // hide the video player and update the number of start event
+                adsPlugin.addEventListener('start', function(e) {
+                    document.getElementById('videoplayer-container').style.display = 'none' ;
+                    document.getElementById('event_start').value++;
+                });
+
+                // show the video player and update the number of end event
+                // reset the add/remove, play/pause events
+                adsPlugin.addEventListener('end', function(e) {
+                    document.getElementById('videoplayer-container').style.display = 'block';
+                    document.getElementById('event_end').value++;
+                    document.getElementById('event_add').value = "0";
+                    document.getElementById('event_remove').value = "0";
+                    document.getElementById('event_play').value = "0";
+                    document.getElementById('event_pause').value = "0";
+                });
+
+                adsPlugin.addEventListener('addElement', function(e) {
+                    document.getElementById('event_add').value++;
+                });
+
+                adsPlugin.addEventListener('removeElement', function(e) {
+                    document.getElementById('event_remove').value++;
+                });
+
+                adsPlugin.addEventListener('play', function(e) {
+                    document.getElementById('event_play').value++;
+                });
+
+                adsPlugin.addEventListener('pause', function(e) {
+                    document.getElementById('event_pause').value++;
+                });
+
+                mediaPlayer = new MediaPlayer();
+
+                mediaPlayer.init(document.getElementById('videoplayer-container'));
+
+                mediaPlayer.setDebug(false);
+
+                mediaPlayer.addPlugin(adsPlugin);
+
+            });
+
+            // play button
+            document.querySelector('#play_button').addEventListener("click",function(e) {
+                var stream = {
+                    url : document.getElementById("stream_toplay").value,
+                    protData : null,
+                    adsUrl : document.getElementById("ad_toplay").value
+                };
+
+                mediaPlayer.load(stream);
+            });
+
+            // stop button
+            document.querySelector('#stop_button').addEventListener("click",function(e) {
+                mediaPlayer.stop();
+                document.getElementById('event_start').value = "0";
+                document.getElementById('event_end').value = "0";
+            });
+
+
+        </script>
+
+    </body>
+
+
+</html>
