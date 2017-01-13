@@ -159,28 +159,17 @@ class TrackingEventsManager {
                         this._addEventListener(this._adMediaPlayer, 'volumechange', trackingEvent);
                         break;
                     case 'fullscreen':
-                        trackingEvent.oneShot = false;
-                        trackingEvent.condition = () => {
-                            return (document.fullScreen===true || document.mozFullScreen===true || document.webkitIsFullScreen===true);
-                        };
-                        this._addEventListener(document, 'webkitfullscreenchange', trackingEvent);
-                        this._addEventListener(document, 'mozfullscreenchange', trackingEvent);
-                        this._addEventListener(document, 'MSFullscreenChange', trackingEvent);
-                        this._addEventListener(document, 'fullscreenChange', trackingEvent);
-                        break;
-
-                    // from VAST-3.0 tracking events
                     case 'exitFullscreen':
                         trackingEvent.oneShot = false;
-                        trackingEvent.condition = () => {
-                            return (document.fullScreen===false || document.mozFullScreen===false || document.webkitIsFullScreen===false);
+                        trackingEvent.condition = (event = trackingEvent.event) => {
+                            let state = (event === 'fullscreen');
+                            return (document.fullScreen === state || document.mozFullScreen === state || document.webkitIsFullScreen === state);
                         };
                         this._addEventListener(document, 'webkitfullscreenchange', trackingEvent);
                         this._addEventListener(document, 'mozfullscreenchange', trackingEvent);
                         this._addEventListener(document, 'MSFullscreenChange', trackingEvent);
                         this._addEventListener(document, 'fullscreenChange', trackingEvent);
                         break;
-
                     case 'progress':
                         trackingEvent.oneShot = true;
                         trackingEvent.condition = () => {
@@ -194,17 +183,14 @@ class TrackingEventsManager {
                         };
                         this._addEventListener(this._adMediaPlayer, 'timeupdate', trackingEvent);
                         break;
-
                     case 'acceptInvitationLinear':
                         trackingEvent.oneShot = false;
                         this._addEventListener(this._adMediaPlayer, 'click', trackingEvent);
                         break;
-
                     case 'closeLinear':
                         trackingEvent.oneShot = false;
                         this._addEventListener(window, 'beforeunload', trackingEvent);
                         break;
-
                     default:
                         break;
                 }
