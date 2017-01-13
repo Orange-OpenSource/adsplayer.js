@@ -78,6 +78,7 @@ class ImagePlayer {
 
         if (this._currentTime >= this._duration) {
             this._stopTimer();
+            this._ended = true;
             this._notifyEvent('ended');
         }
 
@@ -111,6 +112,7 @@ class ImagePlayer {
         this._image = null;
         this._duration = 0;
         this._currentTime = 0;
+        this._ended = false;
         this._listeners = {};
         this._timerInterval = null;
         this._timerTime = -1;
@@ -157,6 +159,7 @@ class ImagePlayer {
 
         // Reset current time
         this._currentTime = 0;
+        this._ended = false;
 
         return true;
     }
@@ -238,6 +241,10 @@ class ImagePlayer {
         }
         this._image = null;
         this._listeners = {};
+    }
+
+    isEnded () {
+        return this._ended;
     }
 }
 
