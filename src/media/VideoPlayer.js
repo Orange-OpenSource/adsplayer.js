@@ -182,6 +182,10 @@ class VideoPlayer {
         }
         this._video = null;
     }
+
+    isEnded () {
+        return this._video.ended;
+    }
 }
 
 export default VideoPlayer;
