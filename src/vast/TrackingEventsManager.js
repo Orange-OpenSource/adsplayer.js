@@ -92,8 +92,8 @@ class TrackingEventsManager {
                     case 'pause':
                         trackingEvent.oneShot = false;
                         trackingEvent.condition = () => {
-                            // to avoid pause event at the end of stream
-                            return (this._adMediaPlayer.getElement().ended === false );
+                            // To ignore pause event that may be raised at end of stream
+                            return (this._adMediaPlayer.isEnded() === false );
                         };
                         this._addEventListener(this._adMediaPlayer, 'pause', trackingEvent);
                         break;
