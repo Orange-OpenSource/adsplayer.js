@@ -91,7 +91,11 @@ class TrackingEventsManager {
                         break;
                     case 'pause':
                         trackingEvent.oneShot = false;
-                        this._addEventListener(this._adMediaPlayer, 'paused', trackingEvent);
+                        trackingEvent.condition = () => {
+                            // To ignore pause event that may be raised at end of stream
+                            return (this._adMediaPlayer.isEnded() === false );
+                        };
+                        this._addEventListener(this._adMediaPlayer, 'pause', trackingEvent);
                         break;
                     case 'resume':
                         trackingEvent.oneShot = false;
@@ -127,7 +131,7 @@ class TrackingEventsManager {
                     case 'rewind':
                         trackingEvent.oneShot = false;
                         trackingEvent.condition = () => {
-                            let res = (this._adMediaPlayer.getCurrentTime() < this._currentTime);
+                            let res = ((this._adMediaPlayer.getCurrentTime() < this._currentTime) && (this._adMediaPlayer.isEnded() === false));
                             this._currentTime = this._adMediaPlayer.getCurrentTime();
                             return res;
                         };
@@ -155,14 +159,37 @@ class TrackingEventsManager {
                         this._addEventListener(this._adMediaPlayer, 'volumechange', trackingEvent);
                         break;
                     case 'fullscreen':
+                    case 'exitFullscreen':
                         trackingEvent.oneShot = false;
-                        trackingEvent.condition = () => {
-                            return (document.fullScreen || document.mozFullScreen || document.webkitIsFullScreen);
+                        trackingEvent.condition = (event = trackingEvent.event) => {
+                            let state = (event === 'fullscreen');
+                            return (document.fullScreen === state || document.mozFullScreen === state || document.webkitIsFullScreen === state);
                         };
                         this._addEventListener(document, 'webkitfullscreenchange', trackingEvent);
                         this._addEventListener(document, 'mozfullscreenchange', trackingEvent);
                         this._addEventListener(document, 'MSFullscreenChange', trackingEvent);
                         this._addEventListener(document, 'fullscreenChange', trackingEvent);
+                        break;
+                    case 'progress':
+                        trackingEvent.oneShot = true;
+                        trackingEvent.condition = () => {
+                            if (trackingEvent.offsetPercent) {
+                                //this._debug.log("progress:" + this._adMediaPlayer.getCurrentTime()+" vs offsetPercent = " + trackingEvent.offsetPercent * this._adMediaPlayer.getDuration());
+                                return (this._adMediaPlayer.getCurrentTime() >= trackingEvent.offsetPercent * this._adMediaPlayer.getDuration());
+                            } else {
+                                //this._debug.log("progress:" + this._adMediaPlayer.getCurrentTime()+" vs offsetInSeconds " + trackingEvent.offsetInSeconds);
+                                return (this._adMediaPlayer.getCurrentTime() >= trackingEvent.offsetInSeconds);
+                            }
+                        };
+                        this._addEventListener(this._adMediaPlayer, 'timeupdate', trackingEvent);
+                        break;
+                    case 'acceptInvitationLinear':
+                        trackingEvent.oneShot = false;
+                        this._addEventListener(this._adMediaPlayer, 'click', trackingEvent);
+                        break;
+                    case 'closeLinear':
+                        trackingEvent.oneShot = false;
+                        this._addEventListener(window, 'beforeunload', trackingEvent);
                         break;
                     default:
                         break;
