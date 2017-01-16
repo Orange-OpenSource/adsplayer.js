@@ -131,7 +131,7 @@ class TrackingEventsManager {
                     case 'rewind':
                         trackingEvent.oneShot = false;
                         trackingEvent.condition = () => {
-                            let res = ((this._adMediaPlayer.getCurrentTime() < this._currentTime) && (this._adMediaPlayer.getElement()!==null));
+                            let res = ((this._adMediaPlayer.getCurrentTime() < this._currentTime) && (this._adMediaPlayer.isEnded() === false));
                             this._currentTime = this._adMediaPlayer.getCurrentTime();
                             return res;
                         };
