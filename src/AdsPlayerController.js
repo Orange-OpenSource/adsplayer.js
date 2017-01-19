@@ -193,9 +193,6 @@ class AdsPlayerController {
         // Pause the main video element
         this._pauseVideo();
 
-        // Notifies the application ad(s) playback starts
-        this._eventBus.dispatchEvent({type: 'start', data: null});
-
         // Play the trigger
         this._debug.log('Start playing trigger ' + trigger.id);
         this._vastPlayerManager = new VastPlayerManager();
@@ -256,6 +253,11 @@ class AdsPlayerController {
         var trigger = this._checkTriggersStart();
         if (trigger !== null) {
             this._activateTrigger(trigger);
+
+            if (trigger.activated === true) {
+                // Notifies the application ad(s) playback starts
+                this._eventBus.dispatchEvent({type: 'start', data: null});
+            }
         }
     }
 
