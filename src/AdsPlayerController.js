@@ -177,6 +177,7 @@ class AdsPlayerController {
         } else {
             // Notifies the application ad(s) playback has ended
             this._eventBus.dispatchEvent({type: 'end', data: null});
+            this._startEventAlreadySent = false;
 
             if (!this._mainVideo.ended) {
                 // Resume the main video element
@@ -205,6 +206,12 @@ class AdsPlayerController {
         // Check if a trigger is not already activated
         if (this._vastPlayerManager) {
             return;
+        }
+
+        if (this._startEventAlreadySent === false){
+            // Notifies the application ad(s) playback starts
+            this._eventBus.dispatchEvent({type: 'start', data: null});
+            this._startEventAlreadySent = true;
         }
 
         this._debug.log('Activate trigger ' + trigger.id);
@@ -253,12 +260,8 @@ class AdsPlayerController {
         var trigger = this._checkTriggersStart();
         if (trigger !== null) {
             this._activateTrigger(trigger);
-
-            if (trigger.activated === true) {
-                // Notifies the application ad(s) playback starts
-                this._eventBus.dispatchEvent({type: 'start', data: null});
-            }
         }
+
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -278,6 +281,7 @@ class AdsPlayerController {
         this._errorHandler = ErrorHandler.getInstance();
         this._debug = Debug.getInstance();
         this._eventBus = EventBus.getInstance();
+        this._startEventAlreadySent = false;
 
         this._onVideoPlayingListener = this._onVideoPlaying.bind(this);
         this._onVideoTimeupdateListener = this._onVideoTimeupdate.bind(this);
