@@ -131,9 +131,10 @@ class AdsPlayerController {
     }
 
     _onVideoTimeupdate () {
+        // Check for mid-roll triggers
         var trigger = this._checkTriggersStart();
         if (trigger !== null) {
-            this._activateTrigger(trigger);
+            this._activateTrigger(trigger, true);
         }
     }
 
@@ -141,27 +142,27 @@ class AdsPlayerController {
         // Check for end-roll triggers
         var trigger = this._checkTriggersStart();
         if (trigger !== null) {
-            this._activateTrigger(trigger);
+            this._activateTrigger(trigger, true);
         }
 
         this._checkTriggersEnd();
     }
 
-    _pauseVideo  () {
+    _pauseVideo () {
         if (!this._mainVideo.paused) {
             this._debug.log("Pause main video");
             this._mainVideo.pause();
         }
     }
 
-    _resumeVideo  () {
+    _resumeVideo () {
         if (this._mainVideo.paused) {
             this._debug.log("Resume main video");
             this._mainVideo.play();
         }
     }
 
-    _onTriggerEnd  () {
+    _onTriggerEnd () {
         this._debug.log('End playing trigger');
 
         // Delete VAST player manager
@@ -173,11 +174,10 @@ class AdsPlayerController {
         // Check if another trigger has to be activated
         var trigger = this._checkTriggersStart();
         if (trigger !== null) {
-            this._activateTrigger(trigger);
+            this._activateTrigger(trigger, false);
         } else {
             // Notifies the application ad(s) playback has ended
             this._eventBus.dispatchEvent({type: 'end', data: null});
-            this._startEventAlreadySent = false;
 
             if (!this._mainVideo.ended) {
                 // Resume the main video element
@@ -186,7 +186,7 @@ class AdsPlayerController {
         }
     }
 
-    _playTrigger  (trigger) {
+    _playTrigger (trigger) {
         if (trigger.vasts.length === 0) {
             return;
         }
@@ -201,17 +201,16 @@ class AdsPlayerController {
         this._vastPlayerManager.start();
     }
 
-    _activateTrigger  (trigger) {
+    _activateTrigger (trigger, firstTrigger) {
 
         // Check if a trigger is not already activated
         if (this._vastPlayerManager) {
             return;
         }
 
-        if (this._startEventAlreadySent === false){
+        if (firstTrigger) {
             // Notifies the application ad(s) playback starts
             this._eventBus.dispatchEvent({type: 'start', data: null});
-            this._startEventAlreadySent = true;
         }
 
         this._debug.log('Activate trigger ' + trigger.id);
@@ -259,7 +258,7 @@ class AdsPlayerController {
         // Check for pre-roll trigger
         var trigger = this._checkTriggersStart();
         if (trigger !== null) {
-            this._activateTrigger(trigger);
+            this._activateTrigger(trigger, true);
         }
 
     }
@@ -281,7 +280,6 @@ class AdsPlayerController {
         this._errorHandler = ErrorHandler.getInstance();
         this._debug = Debug.getInstance();
         this._eventBus = EventBus.getInstance();
-        this._startEventAlreadySent = false;
 
         this._onVideoPlayingListener = this._onVideoPlaying.bind(this);
         this._onVideoTimeupdateListener = this._onVideoTimeupdate.bind(this);
