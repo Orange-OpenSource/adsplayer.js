@@ -180,16 +180,11 @@ class VastParser {
         return inLine;
     }
 
-    _getAd (vastNode, vast_) {
-        let adNode = xmldom.getElement(vastNode, 'Ad');
-
-        if (adNode === null) {
-            return;
-        }
-
-        vast_.ad = new vast.Ad();
-        vast_.ad.id = adNode.getAttribute('id');
-        vast_.ad.inLine = this._getInLine(adNode);
+    _getAd (adNode, vast_, adIndex) {
+        vast_.ads[adIndex] = new vast.Ad();
+        vast_.ads[adIndex].id = adNode.getAttribute('id');
+        vast_.ads[adIndex].sequence = adNode.getAttribute('sequence');
+        vast_.ads[adIndex].inLine = this._getInLine(adNode);
     }
 
 
@@ -213,7 +208,15 @@ class VastParser {
 
         vast_.version = vastNode.getAttribute('version');
 
-        this._getAd(vastNode, vast_);
+        var numberOfAds = vastNode.getElementsByTagName('Ad').length;
+        var adNodes = xmldom.getElements(vastNode, 'Ad');
+
+        if (adNodes === null) {
+            return vast_;
+        }
+
+        for (var adIndex = 0; adIndex < numberOfAds; adIndex++)
+            this._getAd(adNodes[adIndex], vast_, adIndex);
 
         return vast_;
     }
