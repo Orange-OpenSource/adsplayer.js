@@ -16,7 +16,7 @@ import EventBus from '../EventBus';
 
 class AdPlayer {
 
-    _sendImpressions (impressions){
+    _sendImpressions (impressions) {
         let impression;
 
         if (impressions.length === 0) {
@@ -26,8 +26,8 @@ class AdPlayer {
         for (let i = 0; i < impressions.length; i++) {
             impression = impressions[i];
             if (impression.uri && impression.uri.length > 0) {
-                var http = new XMLHttpRequest();
                 this._debug.log("Send Impression, uri = " + impression.uri);
+                let http = new XMLHttpRequest();
                 http.open("GET", impression.uri, true);
                 http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
                 http.send();
@@ -35,7 +35,7 @@ class AdPlayer {
         }
     }
 
-    _onCreativeEnd (){
+    _onCreativeEnd () {
 
         this._debug.log("Creative ended");
 
@@ -46,14 +46,14 @@ class AdPlayer {
         this._playNextCreative();
     }
 
-    _pauseCreative (){
+    _pauseCreative () {
         if (!this._creativePlayer) {
             return;
         }
         this._creativePlayer.pause();
     }
 
-    _resumeCreative (){
+    _resumeCreative () {
         if (!this._creativePlayer) {
             return;
         }
@@ -69,8 +69,8 @@ class AdPlayer {
         this._creativePlayer = null;
     }
 
-    _playCreative(index){
-        let creative = this._ad.inLine.creatives[index],
+    _playCreative (index) {
+        var creative = this._ad.inLine.creatives[index],
             linear;
 
         this._creativeIndex = index;
@@ -100,14 +100,14 @@ class AdPlayer {
         this._playCreative(0);
     }
 
-    _playNextCreative(){
+    _playNextCreative () {
 
         this._creativeIndex++;
 
         if (this._creativeIndex < this._ad.inLine.creatives.length) {
             this._playCreative(this._creativeIndex);
         } else {
-            // Notify end of trigger
+            // Notify end of Ad
             this._eventBus.dispatchEvent({
                 type: "adEnd",
                 data: {}
