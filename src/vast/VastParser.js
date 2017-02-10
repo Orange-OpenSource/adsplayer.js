@@ -180,13 +180,20 @@ class VastParser {
         return inLine;
     }
 
-    _getAd (adNode, vast_, adIndex) {
-        vast_.ads[adIndex] = new vast.Ad();
-        vast_.ads[adIndex].id = adNode.getAttribute('id');
-        vast_.ads[adIndex].sequence = adNode.getAttribute('sequence');
-        vast_.ads[adIndex].inLine = this._getInLine(adNode);
+    _getAd (adNode) {
+        let ad = new vast.Ad();
+        ad.id = adNode.getAttribute('id');
+        ad.sequence = adNode.getAttribute('sequence');
+        ad.inLine = this._getInLine(adNode);
+        return ad;
     }
 
+    _getAds (vastNode, vast_) {
+        let adNodes = xmldom.getElements(vastNode, 'Ad');
+        for (let i = 0; i < adNodes.length; i++) {
+            vast_.ads.push(this._getAd(adNodes[i]));
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
@@ -208,15 +215,7 @@ class VastParser {
 
         vast_.version = vastNode.getAttribute('version');
 
-        var numberOfAds = vastNode.getElementsByTagName('Ad').length;
-        var adNodes = xmldom.getElements(vastNode, 'Ad');
-
-        if (adNodes === null) {
-            return vast_;
-        }
-
-        for (var adIndex = 0; adIndex < numberOfAds; adIndex++)
-            this._getAd(adNodes[adIndex], vast_, adIndex);
+        this._getAds(vastNode, vast_);
 
         return vast_;
     }
