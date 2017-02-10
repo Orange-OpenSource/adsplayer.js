@@ -91,15 +91,6 @@ class AdPlayer {
         }
     }
 
-    _playAd(){
-
-        // Send Impressions tracking
-        this._sendImpressions(this._ad.inLine.impressions);
-
-        // Play first Creative
-        this._playCreative(0);
-    }
-
     _playNextCreative () {
 
         this._creativeIndex++;
@@ -161,6 +152,9 @@ class AdPlayer {
             type: 'adStart',
             data: {}
         });
+
+        // Send Impressions tracking
+        this._sendImpressions(this._ad.inLine.impressions);
 
         // Play first Creative
         this._playCreative(0);
