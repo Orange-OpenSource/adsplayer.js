@@ -144,7 +144,6 @@ class VastPlayerManager {
         this._vasts = [];
         this._adPlayerContainer = null;
         this._adIndex = 0;
-        this._isAdPods = false;
         this._adPlayer = null;
         this._debug = Debug.getInstance();
         this._eventBus = EventBus.getInstance();
