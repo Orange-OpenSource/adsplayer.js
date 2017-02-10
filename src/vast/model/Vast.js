@@ -44,7 +44,8 @@ class Vast {
 */
 class Ad {
     constructor () {
-        this.id = '';
+        this.id = '';                       // [Optional] an ad server-defined string for the ad
+        this.sequence = 0;                  // [Optional] the sequence in which an ad should play
         this.inLine = null;
         this.wrapper = null;
     }
