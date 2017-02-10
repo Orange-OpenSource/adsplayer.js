@@ -40,9 +40,7 @@ class AdPlayer {
         this._debug.log("Creative ended");
 
         // Stop the current creative media
-        this. _stopCreative();
-
-        this._resetCreative();
+        this._stopCreative();
 
         // Play next creative
         this._playNextCreative();
@@ -62,19 +60,11 @@ class AdPlayer {
         this._creativePlayer.play();
     }
 
-    _resetCreative(){
+    _stopCreative () {
         if (!this._creativePlayer) {
             return;
         }
-        this._creativePlayer.reset();
-    }
-
-    _stopCreative(){
         this._eventBus.removeEventListener('creativeEnd', this._onCreativeEndListener);
-
-        if (!this._creativePlayer) {
-            return;
-        }
         this._creativePlayer.stop();
         this._creativePlayer = null;
     }
@@ -93,8 +83,7 @@ class AdPlayer {
             this._debug.log("Play Linear Ad, duration = " + linear.duration);
             this._eventBus.addEventListener('creativeEnd', this._onCreativeEndListener);
             this._creativePlayer = new CreativePlayer();
-            this._creativePlayer.init(this._adPlayerContainer, this._mainVideo);
-            if (!this._creativePlayer.load(creative.linear, this._baseUrl)) {
+            if (!this._creativePlayer.init(creative.linear, this._adPlayerContainer, this._mainVideo, this._baseUrl)) {
                 this._playNextCreative();
             }
         } else {
@@ -129,65 +118,64 @@ class AdPlayer {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
-
     /**
      * Initializes the AdPlayer
      * @method constructor
      * @access public
      * @memberof AdPlayer#
-     * @param {Object} ad - the Ad to play
-     * @param {Array} adPlayerContainer - the HTML DOM container for ads player components
-     * @param {Object} mainVideo - the HTML5 video element used by the main media player
-     * @param {string} baseUrl - TODO
      */
 
-    constructor(ad, adPlayerContainer, mainVideo, baseUrl) {
-        this._ad = ad;
-        this._adPlayerContainer = adPlayerContainer;
-        this._mainVideo = mainVideo;
-        this._baseUrl = baseUrl;
+    constructor () {
+        this._ad = null;
+        this._adPlayerContainer = null;
+        this._mainVideo = null;
+        this._baseUrl = '';
         this._creativeIndex = -1;
+        this._creativePlayer = null;
         this._debug = Debug.getInstance();
         this._eventBus = EventBus.getInstance();
-        this._creativePlayer = null;
 
         this._onCreativeEndListener = this._onCreativeEnd.bind(this);
     }
 
-    start(){
+    /**
+     * Initializes the AdManager.
+     * @method init
+     * @access public
+     * @memberof VastPlayerManager#
+     * @param {Object} ad - the Ad to play
+     * @param {Array} adPlayerContainer - the HTML DOM container for ads player components
+     * @param {Object} mainVideo - the HTML5 video element used by the main media player
+     * @param {string} baseUrl - the base URL for media files
+     */
+    init (ad, adPlayerContainer, mainVideo, baseUrl) {
+        this._ad = ad;
+        this._adPlayerContainer = adPlayerContainer;
+        this._mainVideo = mainVideo;
+        this._baseUrl = baseUrl;
+    }
 
-        // Notify an ad is starting to play
+    start () {
+        // Notify an Ad is starting to play
         this._eventBus.dispatchEvent({
             type: 'adStart',
             data: {}
         });
 
-        this._playAd();
+        // Play first Creative
+        this._playCreative(0);
     }
 
-    play() {
+    play () {
         this._resumeCreative();
     }
 
-    pause() {
+    pause () {
         this._pauseCreative();
     }
 
-    stop() {
-        if (!this._creativePlayer) {
-            return;
-        }
-
-        this._creativePlayer.abort();
+    stop () {
         this._stopCreative();
-    }
-
-    reset() {
-        if (!this._creativePlayer) {
-            return;
-        }
-
-        this._creativePlayer.reset();
     }
 }
 
