@@ -114,7 +114,7 @@ class Debug {
         let message = "",
             logTime = null;
 
-        if (this.showTimestamp) {
+        if (this._showTimestamp) {
             logTime = new Date();
             message += "[" + logTime.HHMMSSmmm() + "]";
         }
@@ -123,7 +123,7 @@ class Debug {
             message += "[" + this._getStringLevel(logLevel) + "]";
         }
 
-        if (this.showElapsedTime) {
+        if (this._showElapsedTime) {
             message += "[" + new Date(logTime - this._startTime).MMSSmmm() + "]";
         }
 
