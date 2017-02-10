@@ -92,9 +92,9 @@ class VideoPlayer {
 
         this._debug.log("Load video media, uri = " + this._uri);
 
-        this._video.addEventListener('error', function(e) {
-            console.log(e);
-        });
+        // this._video.addEventListener('error', function(e) {
+        //     console.log(e);
+        // });
 
         this._video.src = this._uri;
 
