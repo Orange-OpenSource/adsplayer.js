@@ -54,7 +54,7 @@ class AdPlayer {
         for (let i = 0; i < impressions.length; i++) {
             impression = impressions[i];
             if (impression.uri && impression.uri.length > 0) {
-                this._debug.log("Send Impression, uri = " + impression.uri);
+                this._debug.info("Send Impression, uri = " + impression.uri);
                 let http = new XMLHttpRequest();
                 http.open("GET", impression.uri, true);
                 http.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
@@ -64,8 +64,7 @@ class AdPlayer {
     }
 
     _onCreativeEnd () {
-
-        this._debug.log("Creative ended");
+        this._debug.info("Creative ended");
 
         // Stop the current creative media
         this._stopCreative();
@@ -75,6 +74,8 @@ class AdPlayer {
     }
 
     _pauseCreative () {
+        this._debug.info("Creative paused");
+
         if (!this._creativePlayer) {
             return;
         }
@@ -82,6 +83,8 @@ class AdPlayer {
     }
 
     _resumeCreative () {
+        this._debug.info("Creative resumed");
+
         if (!this._creativePlayer) {
             return;
         }
@@ -89,6 +92,8 @@ class AdPlayer {
     }
 
     _stopCreative () {
+        this._debug.info("Creative stopped");
+
         if (!this._creativePlayer) {
             return;
         }
@@ -98,17 +103,18 @@ class AdPlayer {
     }
 
     _playCreative (index) {
+        this._debug.info("Play Creative - index = " + this._creativeIndex);
+
         var creative = this._ad.inLine.creatives[index],
             linear;
 
         this._creativeIndex = index;
-        this._debug.log("Play Creative - index = " + this._creativeIndex);
 
         // Play Linear element
         linear = creative.linear;
 
         if (linear) {
-            this._debug.log("Play Linear Ad, duration = " + linear.duration);
+            this._debug.info("Play Linear Ad, duration = " + linear.duration);
             this._eventBus.addEventListener('creativeEnd', this._onCreativeEndListener);
             this._creativePlayer = new CreativePlayer();
             if (!this._creativePlayer.init(creative.linear, this._adPlayerContainer, this._mainVideo, this._baseUrl)) {
@@ -120,6 +126,7 @@ class AdPlayer {
     }
 
     _playNextCreative () {
+        this._debug.info("Play next Creative");
 
         this._creativeIndex++;
 
