@@ -144,7 +144,7 @@ class AdPlayer {
         this._playCreative(0);
     }
 
-    _playNextCreative(){
+    _playNextCreative () {
 
         this._creativeIndex++;
 
