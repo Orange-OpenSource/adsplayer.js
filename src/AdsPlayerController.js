@@ -167,6 +167,7 @@ class AdsPlayerController {
 
         // Delete VAST player manager
         if (this._vastPlayerManager) {
+            this._vastPlayerManager.reset();
             this._vastPlayerManager = null;
         }
 
@@ -365,9 +366,10 @@ class AdsPlayerController {
         }
         this._fileLoaders = [];
 
-        // Stop the VAST player manager
+        // Stop the ad player
         if (this._vastPlayerManager) {
             this._vastPlayerManager.stop();
+            this._vastPlayerManager.reset();
             this._vastPlayerManager = null;
 
             // Notifies the application ad(s) playback has ended
@@ -413,7 +415,7 @@ class AdsPlayerController {
     play () {
 
         this._debug.log("Play");
-        // Start the VAST player manager
+        // Play the ad player
         if (this._vastPlayerManager) {
             this._vastPlayerManager.play();
         }
@@ -428,7 +430,7 @@ class AdsPlayerController {
     pause () {
 
         this._debug.log("Pause");
-        // Pause the VAST player manager
+        // Stop the ad player
         if (this._vastPlayerManager) {
             this._vastPlayerManager.pause();
         }

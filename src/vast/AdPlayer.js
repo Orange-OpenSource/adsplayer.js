@@ -67,7 +67,9 @@ class AdPlayer {
         this._debug.info("Creative ended");
 
         // Stop the current creative media
-        this._stopCreative();
+        this. _stopCreative();
+
+        this._resetCreative();
 
         // Play next creative
         this._playNextCreative();
@@ -91,13 +93,20 @@ class AdPlayer {
         this._creativePlayer.play();
     }
 
-    _stopCreative () {
-        this._debug.info("Creative stopped");
+    _resetCreative () {
+    	this._debug.info("Creative resetted");
+        if (!this._creativePlayer) {
+            return;
+        }
+        this._creativePlayer.reset();
+    }
+
+    _stopCreative(){
+        this._eventBus.removeEventListener('creativeEnd', this._onCreativeEndListener);
 
         if (!this._creativePlayer) {
             return;
         }
-        this._eventBus.removeEventListener('creativeEnd', this._onCreativeEndListener);
         this._creativePlayer.stop();
         this._creativePlayer = null;
     }
@@ -105,7 +114,7 @@ class AdPlayer {
     _playCreative (index) {
         this._debug.info("Play Creative - index = " + this._creativeIndex);
 
-        var creative = this._ad.inLine.creatives[index],
+        let creative = this._ad.inLine.creatives[index],
             linear;
 
         this._creativeIndex = index;
@@ -117,7 +126,8 @@ class AdPlayer {
             this._debug.info("Play Linear Ad, duration = " + linear.duration);
             this._eventBus.addEventListener('creativeEnd', this._onCreativeEndListener);
             this._creativePlayer = new CreativePlayer();
-            if (!this._creativePlayer.init(creative.linear, this._adPlayerContainer, this._mainVideo, this._baseUrl)) {
+            this._creativePlayer.init(this._adPlayerContainer, this._mainVideo);
+            if (!this._creativePlayer.load(creative.linear, this._baseUrl)) {
                 this._playNextCreative();
             }
         } else {
@@ -125,8 +135,16 @@ class AdPlayer {
         }
     }
 
-    _playNextCreative () {
-        this._debug.info("Play next Creative");
+    _playAd () {
+
+        // Send Impressions tracking
+        this._sendImpressions(this._ad.inLine.impressions);
+
+        // Play first Creative
+        this._playCreative(0);
+    }
+
+    _playNextCreative(){
 
         this._creativeIndex++;
 
@@ -144,67 +162,65 @@ class AdPlayer {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
 
+
     /**
      * Initializes the AdPlayer
      * @method constructor
      * @access public
      * @memberof AdPlayer#
-     */
-
-    constructor () {
-        this._ad = null;
-        this._adPlayerContainer = null;
-        this._mainVideo = null;
-        this._baseUrl = '';
-        this._creativeIndex = -1;
-        this._creativePlayer = null;
-        this._debug = Debug.getInstance();
-        this._eventBus = EventBus.getInstance();
-
-        this._onCreativeEndListener = this._onCreativeEnd.bind(this);
-    }
-
-    /**
-     * Initializes the AdManager.
-     * @method init
-     * @access public
-     * @memberof VastPlayerManager#
      * @param {Object} ad - the Ad to play
      * @param {Array} adPlayerContainer - the HTML DOM container for ads player components
      * @param {Object} mainVideo - the HTML5 video element used by the main media player
-     * @param {string} baseUrl - the base URL for media files
+     * @param {string} baseUrl - TODO
      */
-    init (ad, adPlayerContainer, mainVideo, baseUrl) {
+
+    constructor(ad, adPlayerContainer, mainVideo, baseUrl) {
         this._ad = ad;
         this._adPlayerContainer = adPlayerContainer;
         this._mainVideo = mainVideo;
         this._baseUrl = baseUrl;
+        this._creativeIndex = -1;
+        this._debug = Debug.getInstance();
+        this._eventBus = EventBus.getInstance();
+        this._creativePlayer = null;
+
+        this._onCreativeEndListener = this._onCreativeEnd.bind(this);
     }
 
-    start () {
-        // Notify an Ad is starting to play
+    start(){
+
+        // Notify an ad is starting to play
         this._eventBus.dispatchEvent({
             type: 'adStart',
             data: {}
         });
 
-        // Send Impressions tracking
-        this._sendImpressions(this._ad.inLine.impressions);
-
-        // Play first Creative
-        this._playCreative(0);
+        this._playAd();
     }
 
-    play () {
+    play() {
         this._resumeCreative();
     }
 
-    pause () {
+    pause() {
         this._pauseCreative();
     }
 
-    stop () {
+    stop() {
+        if (!this._creativePlayer) {
+            return;
+        }
+
+        this._creativePlayer.abort();
         this._stopCreative();
+    }
+
+    reset() {
+        if (!this._creativePlayer) {
+            return;
+        }
+
+        this._creativePlayer.reset();
     }
 }
 
