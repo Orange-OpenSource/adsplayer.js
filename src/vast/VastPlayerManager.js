@@ -46,7 +46,7 @@ class VastPlayerManager {
 
     _onAdEnd () {
 
-        this._debug.info("Ad ended");
+        this._debug.log("Ad ended");
 
         this._eventBus.removeEventListener('adEnd', this._onAdEndListener);
 
@@ -58,7 +58,7 @@ class VastPlayerManager {
     }
 
     _pauseAd () {
-        this._debug.info("Ad paused");
+        this._debug.log("Ad paused");
 
         if (!this._adPlayer) {
             return;
@@ -67,7 +67,7 @@ class VastPlayerManager {
     }
 
     _resumeAd () {
-        this._debug.info("Ad resumed");
+        this._debug.log("Ad resumed");
 
         if (!this._adPlayer) {
             return;
@@ -77,7 +77,7 @@ class VastPlayerManager {
     }
 
     _resetAd () {
-        this._debug.info("Ad resetted");
+        this._debug.log("Ad resetted");
 
         if (!this._adPlayer) {
             return;
@@ -86,7 +86,7 @@ class VastPlayerManager {
     }
 
     _stopAd () {
-        this._debug.info("Ad stopped");
+        this._debug.log("Ad stopped");
 
          if (!this._adPlayer) {
             return;
@@ -96,7 +96,7 @@ class VastPlayerManager {
 
     _playAd (vastIndex,adIndex) {
 
-        this._debug.info("Ad played - vastIndex = " + vastIndex + ", adIndex = " + adIndex);
+        this._debug.log("Ad played - vastIndex = " + vastIndex + ", adIndex = " + adIndex);
 
         this._adPlayer = new AdPlayer();
         this._adPlayer.init(this._vasts[vastIndex].ads[adIndex], this._adPlayerContainer, this._mainVideo, this._vasts[vastIndex].baseUrl);
@@ -134,7 +134,7 @@ class VastPlayerManager {
 
         this._adIndex++;
 
-        this._debug.info("Next ad index: "+this._adIndex);
+        this._debug.log("Next ad index: "+this._adIndex);
 
         return this._adIndex;
     }
@@ -143,7 +143,7 @@ class VastPlayerManager {
 
         this._adIndex=0;
 
-        this._debug.info("First ad index: " + this._adIndex);
+        this._debug.log("First ad index: " + this._adIndex);
 
         return this._adIndex;
     }

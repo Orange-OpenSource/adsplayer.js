@@ -224,7 +224,6 @@ class Debug {
         this._log(INFO, arguments);
     }
 
-    // Keep this function for compatibility
     log () {
         this._log(DEBUG, arguments);
     }
