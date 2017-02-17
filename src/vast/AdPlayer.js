@@ -168,23 +168,36 @@ class AdPlayer {
      * @method constructor
      * @access public
      * @memberof AdPlayer#
+     */
+
+    constructor () {
+        this._ad = null;
+        this._adPlayerContainer = null;
+        this._mainVideo = null;
+        this._baseUrl = '';
+        this._creativeIndex = -1;
+        this._creativePlayer = null;
+        this._debug = Debug.getInstance();
+        this._eventBus = EventBus.getInstance();
+
+        this._onCreativeEndListener = this._onCreativeEnd.bind(this);
+    }
+
+    /**
+     * Initializes the AdManager.
+     * @method init
+     * @access public
+     * @memberof VastPlayerManager#
      * @param {Object} ad - the Ad to play
      * @param {Array} adPlayerContainer - the HTML DOM container for ads player components
      * @param {Object} mainVideo - the HTML5 video element used by the main media player
-     * @param {string} baseUrl - TODO
+     * @param {string} baseUrl - the base URL for media files
      */
-
-    constructor(ad, adPlayerContainer, mainVideo, baseUrl) {
+    init (ad, adPlayerContainer, mainVideo, baseUrl) {
         this._ad = ad;
         this._adPlayerContainer = adPlayerContainer;
         this._mainVideo = mainVideo;
         this._baseUrl = baseUrl;
-        this._creativeIndex = -1;
-        this._debug = Debug.getInstance();
-        this._eventBus = EventBus.getInstance();
-        this._creativePlayer = null;
-
-        this._onCreativeEndListener = this._onCreativeEnd.bind(this);
     }
 
     start(){

@@ -98,7 +98,8 @@ class VastPlayerManager {
 
         this._debug.info("Ad played - vastIndex = " + vastIndex + ", adIndex = " + adIndex);
 
-        this._adPlayer = new AdPlayer(this._vasts[vastIndex].ads[adIndex], this._adPlayerContainer,this._mainVideo,this._vasts[vastIndex].baseUrl);
+        this._adPlayer = new AdPlayer();
+        this._adPlayer.init(this._vasts[vastIndex].ads[adIndex], this._adPlayerContainer, this._mainVideo, this._vasts[vastIndex].baseUrl);
 
         this._eventBus.addEventListener('adEnd', this._onAdEndListener);
         this._adPlayer.start();
