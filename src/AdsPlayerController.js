@@ -41,10 +41,10 @@ import MastParser from './mast/MastParser';
 import TriggerManager from './mast/TriggerManager';
 import VastParser from './vast/VastParser';
 import VastPlayerManager from './vast/VastPlayerManager';
+import utils from './utils/utils';
 
 
 class AdsPlayerController {
-
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
@@ -78,10 +78,8 @@ class AdsPlayerController {
 
         for (i = 0; i < trigger.sources.length; i++) {
             uri = trigger.sources[i].uri;
-            // Check for relative uri path
-            if (uri.indexOf('http://') === -1) {
-                uri = this._mast.baseUrl + uri;
-            }
+            // Check for relative uri path and add base url if needed
+            uri = utils.isAbsoluteURI(uri) ? uri : (this._mast.baseUrl + uri);
             loadVastPromises.push(this._loadVast(uri));
         }
 

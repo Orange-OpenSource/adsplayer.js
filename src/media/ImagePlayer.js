@@ -32,6 +32,8 @@
 */
 
 import Debug from '../Debug';
+import utils from '../utils/utils';
+
 
 class ImagePlayer {
 
@@ -152,7 +154,7 @@ class ImagePlayer {
 
         // Add base URL
         this._uri = mediaFile.uri;
-        this._uri = (this._uri.indexOf('http://') === -1) ? (baseUrl + this._uri) : this._uri;
+        this._uri = utils.isAbsoluteURI(this._uri) ? this._uri : (baseUrl + this._uri);
 
         this._debug.log("Load image media, uri = " + this._uri);
         this._image.src = this._uri;
