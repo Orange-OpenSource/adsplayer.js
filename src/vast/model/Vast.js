@@ -34,7 +34,7 @@
 class Vast {
     constructor () {
         this.version = '';
-        this.ad = null;
+        this.ads = [];
     }
 }
 
