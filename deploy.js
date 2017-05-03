@@ -1,7 +1,7 @@
 var exec = require('child_process').exec,
     fs = require('fs'),
     del = require('del'),
-    pkg = require('package.json');
+    pkg = require('./package.json');
 
 
 // Shell gitCommands
