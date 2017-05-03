@@ -1,3 +1,14 @@
+### Release Notes v1.1.0 (2017/05/03)
+* Add support for 'acceptInvitationLinear', 'fullscreen', exitFullscreen', and 'progress' tracking events
+* Add support for multiple Ads in a single VAST
+* Add sample demonstration web application
+* Bugs fixing:
+* - Correct HTTPS aboslute urls management
+* - Fix ad's media 'ended' event handler
+* - Raise 'start' event only once if multiple consecutive triggers
+* - Raise 'start' event for mid-roll and end-roll triggers
+* - Do no send 'pause' tracking event for <video>'s 'pause' event raised at end of stream
+
 ### Release Notes v1.0.0 (2016/11/28)
 * Source code migration to ES6
 * Add 'rewind' tracking event handler
