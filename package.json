@@ -9,7 +9,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://www.forge.orange-labs.fr/plugins/git/dash-js/adsplayer.js.git"
+    "url": "github.com:Orange-OpenSource/adsplayer.js.git"
   },
   "author": "Orange",
   "license": "BSD-3-Clause-Clear",
