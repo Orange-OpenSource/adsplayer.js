@@ -1,19 +1,19 @@
 var exec = require('child_process').exec,
     fs = require('fs'),
     del = require('del'),
-    pkg = require('../package.json');
+    pkg = require('package.json');
 
 
 // Shell gitCommands
 var gitCommands = {
     currentBranch:  "git branch | grep \\* | cut -d ' ' -f2",
     commitDate:     "git log -1 --format=%cD",
-    clone:          "git clone -b gh-pages https://github.com/Orange-OpenSource/hasplayer.js.git gh-pages",
+    clone:          "git clone -b gh-pages https://github.com/Orange-OpenSource/adsplayer.js.git gh-pages",
     configUser:     "git config user.name \"Travis-CI\"",
     configEmail:    "git config user.email \"bertrand.berthelot@orange.com\"",
     add:            "git add --all",
     commit:         "git commit -am \"Automatic build from Travis-CI\"",
-    push:           "git push \"git@github.com:Orange-OpenSource/hasplayer.js.git\" gh-pages:gh-pages"
+    push:           "git push \"git@github.com:Orange-OpenSource/adsplayer.js.git\" gh-pages:gh-pages"
 };
 
 /**
