@@ -1,6 +1,6 @@
 # adsplayer.js [![Build Status](https://travis-ci.org/Orange-OpenSource/adsplayer.js.svg?branch=development&style=flat-square)](https://travis-ci.org/Orange-OpenSource/adsplayer.js)
 
-adsplayer.js is a plugin/module for hasplayer.js [https://github.com/Orange-OpenSource/hasplayer.js] that handles ad-insertion when playing streams with hasplayer.js MSE/EME client.
+adsplayer.js is a plugin/module for [hasplayer.js](https://github.com/Orange-OpenSource/hasplayer.js) that handles ad-insertion when playing streams with hasplayer.js MSE/EME client.
 
 adsplayer.js is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
 When opening a new stream with hasplayer.js, the adsplayer.js plugin handles ad-insertion in the case a MAST file URL is provided.
@@ -28,7 +28,7 @@ The resulting built file adsplayer.js has to be included along with hasplayer.js
 
 The project releases are available at this address:
 
-http://orange-opensource.github.io/adsplayer.js
+[http://orange-opensource.github.io/adsplayer.js](http://orange-opensource.github.io/adsplayer.js)
 
 ## Getting Started
 
