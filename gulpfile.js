@@ -166,8 +166,9 @@ gulp.task('releases-notes', function() {
 });
 
 gulp.task('zip', function() {
+    var filename = pkg.name + '-v' + pkg.version + '.zip';
     return gulp.src(outDir + '/**/*')
-        .pipe(zip(pkg.name + '.zip'))
+        .pipe(zip(filename))
         .pipe(gulp.dest(outDir));
 });
 
