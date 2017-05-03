@@ -180,10 +180,18 @@ gulp.task('version', function() {
     fs.writeFileSync(outDir + '/version.properties', 'VERSION=' + pkg.version);
 });
 
+gulp.task('copy-index', function() {
+    return gulp.src('index.html')
+        .pipe(replace(/@@VERSION/g, pkg.version))
+        .pipe(replace(/@@DATE/, pkg.gitDate))
+        .pipe(gulp.dest(outDir));
+});
+
 gulp.task('default', function(cb) {
     runSequence('build', ['doc'],
         'releases-notes',
         'zip',
         'version',
+        'copy-index',
         cb);
 });
