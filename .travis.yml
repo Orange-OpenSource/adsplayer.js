@@ -11,5 +11,4 @@ install:
     - npm install
 script:
     - npm run build
-    - npm run deploy
-    - if [["$TRAVIS_BRANCH" = "master" || "$TRAVIS_BRANCH" = "development"]]; then npm run deploy ; fi
+    - if [[ "$TRAVIS_BRANCH" = "master" || "$TRAVIS_BRANCH" = "development" ]]; then npm run deploy ; fi
