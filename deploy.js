@@ -21,6 +21,7 @@ var gitCommands = {
  * @return {Promise} the promise that will be resolved when command is executed
  */
 var execCommand = function(cmd) {
+    console.log('Exec command: ' + cmd);
     var p = new Promise(function(resolve, reject) {
         exec(cmd, function(err, stdout, stderr) {
             if (!err) {
@@ -38,6 +39,7 @@ var execCommand = function(cmd) {
  * @return {String} the current branch name
  */
 var getBranchName = function() {
+    console.log('Get branch name');
     if (process.env.TRAVIS_BRANCH) {
         return Promise.resolve(process.env.TRAVIS_BRANCH);
     } else {
