@@ -93,14 +93,14 @@
 
 
     <section class="readme-section">
-        <article><h1>adsplayer.js <a href="https://travis-ci.org/Orange-OpenSource/adsplayer.js"><img src="https://travis-ci.org/Orange-OpenSource/adsplayer.js.svg?branch=development&amp;style=flat-square" alt="Build Status"></a></h1><p>adsplayer.js is a plugin/module for hasplayer.js [https://github.com/Orange-OpenSource/hasplayer.js] that handles ad-insertion when playing streams with hasplayer.js player.
-adsplayer.js v1.0.0 is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
-When opening a new stream with hasplayer.js, the adsplayer.js plugin handles ad-insertion in the cast a MAST description is provided.</p>
+        <article><h1>adsplayer.js <a href="https://travis-ci.org/Orange-OpenSource/adsplayer.js"><img src="https://travis-ci.org/Orange-OpenSource/adsplayer.js.svg?branch=development&amp;style=flat-square" alt="Build Status"></a></h1><p>adsplayer.js is a plugin/module for hasplayer.js [https://github.com/Orange-OpenSource/hasplayer.js] that handles ad-insertion when playing streams with hasplayer.js MSE/EME client.</p>
+<p>adsplayer.js is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
+When opening a new stream with hasplayer.js, the adsplayer.js plugin handles ad-insertion in the case a MAST file URL is provided.</p>
 <p>The adsplayer.js plugin takes charge of:</p>
 <ul>
 <li>MAST and VAST files downloading</li>
 <li>detecting ad-insertion triggers</li>
-<li>pausing and then resuming the MediaPlayer video when playing ad(s)</li>
+<li>pausing and then resuming the main player video when playing ad(s)</li>
 <li>opening and playing ad media files, by the help of &lt;video&gt; and &lt;img&gt; HTML components, created by the plugin and appended in the DOM container provided to the plugin</li>
 </ul>
 <p>The application that uses hasplayer.js in conjunction with adsplayer.js has to take charge of:</p>
@@ -109,38 +109,39 @@ When opening a new stream with hasplayer.js, the adsplayer.js plugin handles ad-
 <li>opening the web page when a click on the playing ad has been detected by the plugin</li>
 <li>pausing/resuming the plugin (for example when application visibility changes)</li>
 </ul>
-<h2>Build / Run</h2><pre class="prettyprint source lang-bash"><code># npm run build</code></pre><p>The resulting built file adsplayer(.min).js has to be included along with hasplayer.js.</p>
+<h2>Build / Run</h2><pre class="prettyprint source lang-bash"><code># npm run build</code></pre><p>The resulting built file adsplayer.js has to be included along with hasplayer.js.</p>
+<h2>Releases</h2><p>The project releases are available at this address:</p>
+<p>http://orange-opensource.github.io/adsplayer.js</p>
 <h2>Getting Started</h2><p>When creating the hasplayer.js's MediaPlayer instance, create an AdsPlayer instance and add it to the MediaPlayer.
-The DOM element in which &lt;video&gt; and &lt;img&gt; HTML components for playing ad(s) will be appended has to be provided in the constuctor.</p>
+The DOM element in which &lt;video&gt; and &lt;img&gt; HTML components will be appended for playing ad(s) has to be provided in the constuctor.</p>
 <pre class="prettyprint source lang-js"><code>var mediaPlayer = new MediaPlayer();
 var adsPlayer = new adsplayer.AdsPlayer(document.getElementById('adsplayer-container'));
-mediaPlayer.addPlugin(adsPlayer);</code></pre><p>When opening a stream with the MediaPlayer, the URL for MAST file has to be provided in the 'adsUrl' stream parameter.</p>
+mediaPlayer.addPlugin(adsPlayer);</code></pre><p>When opening a stream with the MediaPlayer, the MAST file URL has to be provided in the 'adsUrl' stream parameter.</p>
 <pre class="prettyprint source lang-js"><code>var stream = {
     url: &quot;http://playready.directtaps.net/smoothstreaming/SSWSS720H264/SuperSpeedway_720.ism/Manifest&quot;,
     adsUrl: &quot;&lt;mast-file-url>&quot;
 };
 mediaPlayer.load(stream);</code></pre><p>In order to interact with AdsPlayer, the application has to register to some events raised by the AdsPlayer:</p>
 <pre class="prettyprint source lang-js"><code>adsPlayer.addEventListener(&quot;start&quot;, function (e) {
-    // Ad(s) playback is starting => show ad(s) player container and hide main video
+    // Ad(s) playback is starting => the application shall show ad(s) player container and hide main video
 });
 adsPlayer.addEventListener(&quot;end&quot;, function (e) {
-    // Ad(s) playback has ended => hide ad(s) player container and show main video
+    // Ad(s) playback has ended => the application shall hide ad(s) player container and show main video
 });
 adsPlayer.addEventListener(&quot;addElement&quot;, function (e) {
-    // a DOM element for playing an ad has been created and will be appended in the ads player container. The element can be either a &lt;video&gt; or an &lt;img&gt; element
+    // A DOM element for playing an ad has been created and will be appended in the ads player container. The element can be either a &lt;video&gt; or an &lt;img&gt; element
 });
 adsPlayer.addEventListener(&quot;removeElement&quot;, function (e) {
     // the DOM element for playing an ad is being removed from the ads player container and deleted
 });
 adsPlayer.addEventListener(&quot;play&quot;, function (e) {
-    // An ad's media playback is starting => update play/pause button
+    // An ad's media playback is starting => the application should update play/pause button
 });
 adsPlayer.addEventListener(&quot;pause&quot;, function (e) {
-    // An ad's media playback is paused => update play/pause button
+    // An ad's media playback is paused => the application should update play/pause button
 });
 adsPlayer.addEventListener(&quot;click&quot;, function (e) {
-    // A click has beed detected on the media component
-    // e.data.uri contains the URI of the webpage to open
+    // A click has beed detected on the media component => the application shall open the corresponding web page, which URL is contained in parameter e.data.uri
 });</code></pre><p>AdsPlayer propose some more specific API methods in order to interact with the ad(s) playing:</p>
 <pre class="prettyprint source lang-js"><code>adsPlayer.pause(); // Pause the playback of the current ad media
 adsPlayer.play();  // Play/resume the playback of the current ad media</code></pre><h2>License</h2><p>All code in this repository is covered by the <a href="http://opensource.org/licenses/BSD-3-Clause">BSD-3 license</a>.
@@ -192,7 +193,7 @@ See LICENSE file for copyright details.</p>
 <span class="jsdoc-message">
 	Documentation generated by <a href="https://github.com/jsdoc3/jsdoc">JSDoc 3.4.3</a>
 	
-		on May 3rd 2017, 1:32:34 pm
+		on May 3rd 2017, 1:43:42 pm
 	
 	using the <a href="https://github.com/docstrap/docstrap">DocStrap template</a>.
 </span>
