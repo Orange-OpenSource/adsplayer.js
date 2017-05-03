@@ -5,7 +5,8 @@
   "scripts": {
     "build": "gulp",
     "watch": "gulp watch",
-    "doc": "gulp doc"
+    "doc": "gulp doc",
+    "deploy": "node deploy.js"
   },
   "repository": {
     "type": "git",
