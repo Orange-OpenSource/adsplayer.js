@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<VAST version="2.0">
+	<Ad id="BC0_Position1">
+		<InLine>
+			<AdSystem>OAS</AdSystem>
+			<AdTitle>BC0</AdTitle>
+			<Description>ad Description</Description>
+		<Impression>http://tv-has.orange-labs.fr/adserver/tracking/impression</Impression>       
+			<Creatives>
+					<Creative>
+						<Linear>
+							<Duration>00:00:05</Duration>
+							<VideoClicks>
+								 <ClickThrough>
+									<![CDATA[http://www.orange.fr]]>
+								</ClickThrough> 
+							</VideoClicks>
+							<MediaFiles>
+								<MediaFile delivery="progressive" bitrate="273" width="320" height="240" type="video/mp4">
+									<![CDATA[../../media/vo_ad_2.mp4]]>
+								</MediaFile>
+							</MediaFiles>
+						</Linear>
+	        </Creative>
+			</Creatives>
+		</InLine>
+	</Ad>
+</VAST>

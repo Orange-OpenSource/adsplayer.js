@@ -45,7 +45,16 @@ class VastParser {
 
         trackingEvent.event = trackingNode.getAttribute('event');
         trackingEvent.uri = xmldom.getNodeTextValue(trackingNode);
-
+        if (trackingEvent.event == "progress") {
+            var offsetValue = trackingNode.getAttribute('offset');
+            if (offsetValue.indexOf("%") == -1) {
+                /* convert HH:MM:SS ( or HH:MM:SS.mmm) in seconds */
+                trackingEvent.offsetInSeconds = new Date('1970-01-01T' + offsetValue + 'Z').getTime() / 1000;
+            }
+            else {
+                trackingEvent.offsetPercent = offsetValue.substring(0, offsetValue.indexOf("%")) / 100;
+            }
+        }
         return trackingEvent;
     }
 
@@ -171,18 +180,20 @@ class VastParser {
         return inLine;
     }
 
-    _getAd (vastNode, vast_) {
-        let adNode = xmldom.getElement(vastNode, 'Ad');
-
-        if (adNode === null) {
-            return;
-        }
-
-        vast_.ad = new vast.Ad();
-        vast_.ad.id = adNode.getAttribute('id');
-        vast_.ad.inLine = this._getInLine(adNode);
+    _getAd (adNode) {
+        let ad = new vast.Ad();
+        ad.id = adNode.getAttribute('id');
+        ad.sequence = adNode.getAttribute('sequence');
+        ad.inLine = this._getInLine(adNode);
+        return ad;
     }
 
+    _getAds (vastNode, vast_) {
+        let adNodes = xmldom.getElements(vastNode, 'Ad');
+        for (let i = 0; i < adNodes.length; i++) {
+            vast_.ads.push(this._getAd(adNodes[i]));
+        }
+    }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
     ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
@@ -204,7 +215,7 @@ class VastParser {
 
         vast_.version = vastNode.getAttribute('version');
 
-        this._getAd(vastNode, vast_);
+        this._getAds(vastNode, vast_);
 
         return vast_;
     }

@@ -32,6 +32,8 @@
 */
 
 import Debug from '../Debug';
+import utils from '../utils/utils';
+
 
 class VideoPlayer {
 
@@ -88,7 +90,7 @@ class VideoPlayer {
         this._uri = mediaFiles[0].uri;
 
         // Add base URL
-        this._uri = (this._uri.indexOf('http://') === -1) ? (baseUrl + this._uri) : this._uri;
+        this._uri = utils.isAbsoluteURI(this._uri) ? this._uri : (baseUrl + this._uri);
 
         this._debug.log("Load video media, uri = " + this._uri);
 
@@ -181,6 +183,10 @@ class VideoPlayer {
             return;
         }
         this._video = null;
+    }
+
+    isEnded () {
+        return this._video.ended;
     }
 }
 

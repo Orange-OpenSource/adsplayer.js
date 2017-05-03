@@ -166,8 +166,9 @@ gulp.task('releases-notes', function() {
 });
 
 gulp.task('zip', function() {
+    var filename = pkg.name + '-v' + pkg.version + '.zip';
     return gulp.src(outDir + '/**/*')
-        .pipe(zip(pkg.name + '.zip'))
+        .pipe(zip(filename))
         .pipe(gulp.dest(outDir));
 });
 
@@ -180,10 +181,18 @@ gulp.task('version', function() {
     fs.writeFileSync(outDir + '/version.properties', 'VERSION=' + pkg.version);
 });
 
+gulp.task('copy-index', function() {
+    return gulp.src('index.html')
+        .pipe(replace(/@@VERSION/g, pkg.version))
+        .pipe(replace(/@@DATE/, pkg.gitDate))
+        .pipe(gulp.dest(outDir));
+});
+
 gulp.task('default', function(cb) {
     runSequence('build', ['doc'],
         'releases-notes',
         'zip',
         'version',
+        'copy-index',
         cb);
 });

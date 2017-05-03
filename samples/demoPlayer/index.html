@@ -1,0 +1,297 @@
+<!doctype html>
+<html>
+<head>
+<title>CSWebPlayer</title>
+<link
+    href="http://www.viaccess-orca.com/templates/ja_onepage/favicon.ico"
+    rel="shortcut icon" type="image/vnd.microsoft.icon">
+<link rel="stylesheet" type="text/css" href="css/style.css" />
+<link rel="stylesheet" type="text/css" href="css/tables.css" />
+<!-- inject:js -->
+<!-- endinject -->
+<script type="text/javascript" src="../hasplayer.min.js"></script>
+<script type="text/javascript" src="../../dist/adsplayer.js"></script>
+
+<script type="text/javascript" src="json/config.json"></script>
+<script type="text/javascript" src="js/streamSelector.js"></script>
+<script type="text/javascript" src="js/drmSelector.js"></script>
+<script type="text/javascript" src="js/stream.js"></script>
+<script type="text/javascript" src="js/adSelector.js"></script>
+<script type="text/javascript" src="js/ad.js"></script>
+<script type="text/javascript" src="js/adsPlugin.js"></script>
+<script type="text/javascript" src="js/webPlayer.js"></script>
+
+</head>
+<body>
+<div class="clsHeader">
+        <div id="banner" style="width: 100%;margin-left: 15%;background-color:#f34f4f; text-align: center;z-index: 100;position: fixed;"></div>
+        <!-- <div id="app-title">version</div> -->
+        <div class="clsPageAlign">
+            <h1 class="clsLogo" onclick="fScrollTo('top')"><img src="images/logo_vo.png" alt="Viaccess.Orca" width="123px" height="67px"/></h1>
+            <div class="clsMenu">
+                <ul>
+                    <li id="cswebplayer_version" class="active">hasPlayer</li>
+                </ul>
+                <ul>
+                    <li id="adsplayer_version" class="active">adsPlayer</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+<div id="container">
+    <video id="videoplayer-container" width="854" height="480" controls>  </video>
+    <div id="subtitle-container"> </div>
+    <div id="adsplayer-container" width="700" height="300" controls> </div>
+    <table>
+        <tr>
+            <td><label>Stream choice</label></td>
+                <td>
+                    <select id="stream_type" >
+                    </select>
+                </td>
+        </tr>
+		
+		<tr id="licencer">
+            <td><label>Licencer</label></td>
+			<td>
+				<div><label>Url</label><input type="text" id="licencerUrl" name="licencerUrl"></div>
+				<div>
+					<label>Drm</label>
+					<select id="licencerDrm" name="licencerDrm">
+						<option value="com.microsoft.playready">com.microsoft.playready</option>
+						<option value="com.widevine.alpha">com.widevine.alpha</option>
+					</select>
+				</div>
+				<div id="customData">
+					<label>Custom Data</label><input type="text" id="licencerCustomData" name="licencerCustomData">
+				</div>
+			</td>
+        </tr>
+		
+        <tr>
+            <td><label>Stream url</label></td>
+            <td><input type="text" id="stream" name="stream" size="100" value=""></input>
+            </td>
+        </tr>
+        <tr>
+            <td><label>Ad choice</label></td>
+            <td><select id="ad_type">
+            </td>
+        </tr>
+        <tr>
+            <td><label>Ad url</label></td>
+            <td><input type="text" id="ad_url" name="ad_url" size="100" value="" disabled="disabled"></input>
+            </td>
+        </tr>
+        <tr>
+            <td><label>Audio tracks</label></td>
+            <td><select id="audio-tracks" style="display:none"></select></td>
+        </tr>
+        <tr>
+            <td><label>Subtitles</label></td>
+            <td><select id="sub-tracks" style="display:none"></select></td>
+        </tr>
+        <tr>
+            <td><label>Video bitrate</label></td>
+            <td><select id="video-bitrate" style="display:none"></select></td>
+        </tr>
+    </table>
+    <button id="play_button" >Play</button>
+    <button id="stop_button" >Stop</button>
+
+    <div id="terminal-id-container" style="position:absolute;right:10px;bottom:0;">
+        <p style="align:center;font-size:small" id="terminal-id"></p>
+    </div>
+    </div>
+</div>
+<script>
+
+	var webplayer;
+
+    document.addEventListener("DOMContentLoaded", function(event) {
+
+        var streamSelector  = new StreamSelector(jsonStreamsDescription);
+        var adSelector      = new AdSelector(jsonAdsDescription);
+		var drmSelector     = new DrmSelector();
+        var adsPlugin       = new AdsPlugin();
+        webplayer       	= new WebPlayer(adsPlugin.getPlugin());
+
+        function updateList(){
+            updateAudioTracksList();
+            updateSubtitleTracksList();
+            updateVideoBitratesList();
+        }
+
+        // update audio tracks list
+        function updateAudioTracksList(){
+            var at = document.getElementById("audio-tracks");
+            
+            // remove all audio tracks if any
+            while (at.firstChild) { 
+                at.removeChild(at.firstChild);
+            }
+            
+            // get the current audio
+            var audio = webplayer.getAudio();
+            
+            // add audio tracks
+            var audioTracks = webplayer.getAudios();
+            if (audioTracks && audioTracks.length >= 1) {
+                for (var i = 0; i < audioTracks.length; i++) {
+                    var option = document.createElement("option");
+                    option.text = audioTracks[i].lang;
+                    option.value = audioTracks[i].id;
+                    // select the current
+                    if (audio.id === audioTracks[i].id) {
+                        option.selected = true;
+                    }
+                    at.add(option);
+                }
+                at.style.display = "block";
+            } else{
+                at.style.display = "none";
+            }
+            
+        }
+        
+        // update subtitle tracks list
+        function updateSubtitleTracksList () {
+            var st = document.getElementById("sub-tracks");
+            
+            // remove all subtitle tracks if any
+            while (st.firstChild) { 
+                st.removeChild(st.firstChild);
+            }
+            
+            // get the current audio
+            var subtitle = webplayer.getSubtitle();
+            
+            // add subtitle tracks
+            var subtitleTracks = webplayer.getSubtitles();
+            if (subtitleTracks && subtitleTracks.length >= 1) {
+                for (var i = 0; i < subtitleTracks.length; i++) {
+                        var option = document.createElement("option");
+                        option.text = subtitleTracks[i].lang;
+                        option.value = subtitleTracks[i].id;
+                        // select the current
+                        if (subtitle.id === subtitleTracks[i].id) {
+                            option.selected = true;
+                        }
+                        st.add(option);
+                }
+                st.style.display = "block";
+            } else {
+                st.style.display = "none";
+            }
+        }
+        
+        // update video bitrates list
+        function updateVideoBitratesList() {
+            var vbr = document.getElementById("video-bitrate");
+            
+             // remove all bitrates if any
+            while (vbr.firstChild) { 
+                vbr.removeChild(vbr.firstChild);
+            }
+            
+            // get the current bitrate
+            var bitrate = webplayer.getVideoBitrate();
+            
+            // add video bitrates
+            var bitrates = webplayer.getVideoBitrates();
+            
+            if (!bitrates || bitrates.length == 0) {
+                vbr.style.display = "none";
+            } else {
+                bitrates.forEach(function(element,index,array){
+                    var option = document.createElement("option");
+                    option.text = element;
+                    // select the current
+                    if (bitrate === index) {
+                        option.selected = true;
+                    }
+                    vbr.add(option);
+                });
+                
+                vbr.style.display = "block";
+            }
+        }
+
+        // update audio, subtitle and bandwidth list
+        document.getElementById('videoplayer-container').removeEventListener("loadeddata", updateList);
+        document.getElementById('videoplayer-container').addEventListener("loadeddata", updateList);
+
+        // select a stream
+        document.querySelector('#stream_type').addEventListener("change",function(e) {
+            streamSelector.onSelect(this);
+        });
+
+        // select an ad
+        document.querySelector('#ad_type').addEventListener("change",function(e) {
+            adSelector.onSelect(this);
+        });
+
+        // select an audio
+        document.getElementById("audio-tracks").addEventListener("change",function(e) {
+            var id = this.options[this.selectedIndex].value;
+            webplayer.selectAudio(id);
+        });
+        
+        // select a subtitle
+        document.getElementById("sub-tracks").addEventListener("change",function(e) {
+            var id = this.options[this.selectedIndex].value;
+            webplayer.selectSubtitle(id);
+        });
+        
+        // select a bitrates
+        document.getElementById("video-bitrate").addEventListener("change",function(e) {
+            webplayer.setVideoBitrate(this.selectedIndex);
+        });
+
+        // play button
+        document.querySelector('#play_button').addEventListener("click",function(e) {
+            var selectedStream = streamSelector.getSelected();
+            var selectedAd  = adSelector.getSelected();
+
+            webplayer.play(selectedStream, selectedAd);
+        });
+
+        // stop button
+        document.querySelector('#stop_button').addEventListener("click",function(e) {
+            console.log("adsplayer - stop ");
+            //webplayer.stop();
+            adsPlugin.getPlugin().stop();
+        });
+
+        // Set the name of the hidden property and the change event for visibility
+        // manage pause of ads when hidden
+        var hidden, visibilityChange;
+        if (typeof document.hidden !== "undefined") { // Opera 12.10 and Firefox 18 and later support
+            hidden = "hidden";
+            visibilityChange = "visibilitychange";
+        } else if (typeof document.mozHidden !== "undefined") {
+            hidden = "mozHidden";
+            visibilityChange = "mozvisibilitychange";
+        } else if (typeof document.msHidden !== "undefined") {
+            hidden = "msHidden";
+            visibilityChange = "msvisibilitychange";
+        } else if (typeof document.webkitHidden !== "undefined") {
+            hidden = "webkitHidden";
+            visibilityChange = "webkitvisibilitychange";
+        }
+
+        document.addEventListener(visibilityChange, function(e){
+            if (adsPlugin.getAdsMode()) {
+                console.log("adsplayer - visibility change: " + document.hidden);
+                if (document.hidden) {
+                    adsPlugin.getPlugin().pause();
+                } else {
+                    adsPlugin.getPlugin().play();
+                }
+            }
+        }, false);
+    });
+</script>
+
+</body>
+</html>

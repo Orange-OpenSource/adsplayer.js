@@ -32,6 +32,8 @@
 */
 
 import Debug from '../Debug';
+import utils from '../utils/utils';
+
 
 class ImagePlayer {
 
@@ -78,6 +80,7 @@ class ImagePlayer {
 
         if (this._currentTime >= this._duration) {
             this._stopTimer();
+            this._ended = true;
             this._notifyEvent('ended');
         }
 
@@ -111,6 +114,7 @@ class ImagePlayer {
         this._image = null;
         this._duration = 0;
         this._currentTime = 0;
+        this._ended = false;
         this._listeners = {};
         this._timerInterval = null;
         this._timerTime = -1;
@@ -150,13 +154,14 @@ class ImagePlayer {
 
         // Add base URL
         this._uri = mediaFile.uri;
-        this._uri = (this._uri.indexOf('http://') === -1) ? (baseUrl + this._uri) : this._uri;
+        this._uri = utils.isAbsoluteURI(this._uri) ? this._uri : (baseUrl + this._uri);
 
         this._debug.log("Load image media, uri = " + this._uri);
         this._image.src = this._uri;
 
         // Reset current time
         this._currentTime = 0;
+        this._ended = false;
 
         return true;
     }
@@ -238,6 +243,10 @@ class ImagePlayer {
         }
         this._image = null;
         this._listeners = {};
+    }
+
+    isEnded () {
+        return this._ended;
     }
 }
 

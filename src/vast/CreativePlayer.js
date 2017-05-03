@@ -116,21 +116,26 @@ class CreativePlayer {
         //this._debug.log("Media timeupdate: " + this._mediaPlayer.getCurrentTime());
     }
 
-    _onAdClick () {
-        // this = creative
-        if (!this.videoClicks) {
+    _onMainVideoVolumeChange () {
+        if (!this._mediaPlayer) {
             return;
         }
+        this._mediaPlayer.setVolume(this._mainVideo.muted ? 0 : this._mainVideo.volume);
+    }
 
+    _onAdClick (creative) {
+        // this = creative player
+        if (!creative.videoClicks) {
+            return;
+        }
         this._debug.log("Creative Click");
-
         // ClickThrough : send an event for the application to open the web page
-        if (this.videoClicks.clickThrough) {
-            this._debug.log("Ad click, uri = " + this.videoClicks.clickThrough);
+        if (creative.videoClicks.clickThrough) {
+            this._debug.log("Ad click, uri = " + creative.videoClicks.clickThrough);
             this._eventBus.dispatchEvent({
                 type: 'click',
                 data: {
-                    uri: this.videoClicks.clickThrough
+                    uri: creative.videoClicks.clickThrough
                 }
             });
         }
@@ -182,7 +187,7 @@ class CreativePlayer {
         this._mediaPlayer.addEventListener('pause', this._onMediaPauseListener);
         this._mediaPlayer.addEventListener('error', this._onMediaErrorListener);
         this._mediaPlayer.addEventListener('timeupdate', this._onMediaTimeupdateListener);
-        this._mediaPlayer.addEventListener('ended', this. _onMediaEndedListener);
+        this._mediaPlayer.addEventListener('ended', this._onMediaEndedListener);
 
         // Add tracking events
         if (creative.trackingEvents) {
@@ -214,11 +219,12 @@ class CreativePlayer {
             if (creative.videoClicks.clickThrough) {
                 this._mediaPlayer.getElement().style.cursor = 'pointer';
             }
-            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(creative).bind(this));
+            this._mediaPlayer.getElement().addEventListener('click', this._onAdClick.bind(this, creative));
         }
 
-        // Align media volume to main video volume
+        // Align media volume to main video volume, add 'volumechange' listener
         this._onMainVideoVolumeChange();
+        this._mainVideo.addEventListener('volumechange', this._onMainVideoVolumeChange.bind(this));
 
         // Start playing the media
         this._play();
@@ -258,6 +264,10 @@ class CreativePlayer {
 
         this._debug.log("Creative stop");
 
+        // Stop listening for 'volumechange' event
+        this._mainVideo.removeEventListener('volumechange', this._onMainVideoVolumeChange);
+        this._mainVideo = null;
+
         // Stop the media player
         this._mediaPlayer.removeEventListener('play', this._onMediaPlayListener);
         this._mediaPlayer.removeEventListener('pause', this._onMediaPauseListener);
@@ -266,7 +276,7 @@ class CreativePlayer {
         this._mediaPlayer.removeEventListener('ended', this._onMediaEndedListener);
         this._mediaPlayer.stop();
 
-        // Notify a media element has been created and appended into document
+        // Notify a media element has been removed from DOM
         this._eventBus.dispatchEvent({
             type: 'removeElement',
             data: {
@@ -287,13 +297,6 @@ class CreativePlayer {
             this._trackingEventsManager.stop();
             this._trackingEventsManager = null;
         }
-    }
-
-    _onMainVideoVolumeChange () {
-        if (!this._mediaPlayer) {
-            return;
-        }
-        this._mediaPlayer.setVolume(this._mainVideo.muted ? 0 : this._mainVideo.volume);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -320,15 +323,13 @@ class CreativePlayer {
      * @access public
      * @memberof CreativePlayer#
      * @param {Object} creative - the creative element to play
-     * @param {String} baseUrl - the base URL for media files
+     * @param {Object} adPlayerContainer - the HTML DOM container for ads player components
+     * @param {Object} mainVideo - the HTML5 video element used by the main media player
+     * @param {string} baseUrl - the base URL for media files
      */
-    init (adPlayerContainer, mainVideo) {
+    init (creative, adPlayerContainer, mainVideo, baseUrl) {
         this._adPlayerContainer = adPlayerContainer;
         this._mainVideo = mainVideo;
-        this._mainVideo.addEventListener('volumechange', this._onMainVideoVolumeChange.bind(this));
-    }
-
-    load (creative, baseUrl) {
         return this._load(creative, baseUrl);
     }
 
@@ -342,11 +343,6 @@ class CreativePlayer {
 
     stop () {
         this._stop();
-    }
-
-    reset () {
-        this._mainVideo.removeEventListener('volumechange', this._onMainVideoVolumeChange);
-        this._mainVideo = null;
     }
 }
 

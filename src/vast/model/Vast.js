@@ -34,7 +34,7 @@
 class Vast {
     constructor () {
         this.version = '';
-        this.ad = null;
+        this.ads = [];
     }
 }
 
@@ -44,7 +44,8 @@ class Vast {
 */
 class Ad {
     constructor () {
-        this.id = '';
+        this.id = '';                       // [Optional] an ad server-defined string for the ad
+        this.sequence = 0;                  // [Optional] the sequence in which an ad should play
         this.inLine = null;
         this.wrapper = null;
     }
@@ -178,6 +179,8 @@ class TrackingEvent {
     constructor () {
         this.uri = '';                      // [Optional] URI to track various events during playback
         this.event = '';                    // [Required] The name of the event to track for the Linear element
+        this.offsetInSeconds = '';          // [Optional] Required in "Progess" event, not use with other events
+        this.offsetPercent = '';            // [Optional] Required in "Progess" event, not use with other events
     }
 }
 

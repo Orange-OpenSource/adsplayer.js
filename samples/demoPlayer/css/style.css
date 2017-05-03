@@ -1,0 +1,361 @@
+*
+{
+	margin: 0px;
+}
+
+body
+{
+	font-family: verdana, helvetica, sans-serif;
+	font-size: 13px;
+	padding: 0px;
+	background-color: #ffffff;
+	color: #222222;
+}
+
+a
+{
+	background-color: inherit;
+	color: #E13026;
+}
+
+a:hover
+{
+	text-decoration: none;
+}
+
+a.disabled {
+	text-decoration: none;
+	color:grey;
+}
+
+p
+{
+	text-align: justify;
+	margin-bottom: 15px;
+	line-height: 22px;
+}
+
+ul
+{
+	list-style: disc;
+	padding-left: 15px;
+	margin-bottom: 15px;
+}
+
+h3
+{
+	font-size: 20px;
+	margin-bottom: 30px;
+}
+
+h4
+{
+	font-size: 20px;
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+h5
+{
+	font-size: 17px;
+	margin-top: 10px;
+	margin-bottom: 5px;
+}
+
+.clsHeader{
+	/*position:fixed;*/
+	top:0;
+	left:0;
+	z-index:10;
+	width:100%;
+	height:100px;
+	background:url(../images/header_bg.png) bottom;
+}
+
+.clsFooter{
+	color:#787878;
+	text-align: center;
+	position:fixed;
+	background:url(../images/footer_bg.png);
+	z-indeX: 5;
+	margin-top:10px;
+	bottom:0;
+	width:100%;
+	height:57px;
+}
+
+.clsHeader .clsLogo{
+	float:left;
+	padding:0;
+	margin:8px 0 0 30px;
+}
+
+.clsHeader .clsMenu{
+	float:left;
+	margin:0 0 0 0;
+}
+
+.clsHeader .clsLogin{
+    position:absolute;
+	bottom:20px;
+	right:20px;
+	padding-right:20px;
+}
+
+.clsHeader .clsMenu ul{
+	padding:0;
+	margin:0;
+}
+
+.clsHeader .clsMenu ul li{
+	float:left;
+	font-size:16px;
+	font-family:'Univers LT W01 65 Bold', Helvetica, Arial;
+	list-style:none;
+	cursor:pointer;
+	padding:10px 40px 10px 40px;
+	margin:0;
+	border-left:2px solid #dcdcdf;
+	font-weight:bold;
+}
+
+.clsHeader .clsMenu ul li:first-child{
+	border-left:0 none;
+	margin:0;
+}
+
+.clsHeader .clsMenu ul li a:hover{text-decoration:underline;}
+.clsHeader .clsMenu ul li.active a{color:#e81f38; text-decoration:none;}
+.clsHeader .clsMenu ul li a{color:black; text-decoration:none;}
+
+
+.overlay {
+    background-attachment: scroll;
+    background-clip: border-box;
+    background-color: #FAFAFA;
+    background-image: none;
+    background-origin: padding-box;
+    left: -20px;
+    opacity: 1;
+    position: absolute;
+    top: 20px;
+    width: 0;
+    z-index: 10;
+    padding: 15px;
+    border: 2px;
+    border-color: darkred;
+    border-style: solid;
+    min-width: 110px;
+}
+
+.hidden {
+	visibility: hidden;
+}
+
+.menu {
+	position: fixed;
+	right: 30px;
+	overflow: auto;
+	height: 70%;
+	width: 200px;
+}
+
+#linkChain ul li
+{
+	display: inline;
+}
+
+#equipmentMenu
+{
+	font-weight:normal;
+}
+
+#container
+{
+	position: relative;
+	position:none\9;
+	margin: 0px 40px 0px 40px;
+}
+
+#primarycontainer
+{
+	float: left;
+	margin-right: -200px;
+	margin-top: 120px;
+	margin-bottom:0px;
+	width: 100%;
+}
+
+#secondarycontainer
+{
+    float: left;
+    margin-right: -200px;
+    margin-top: 20px;
+    margin-bottom:0px;
+    width: 100%;
+}
+
+#primarycontent
+{
+	margin-right: 240px;
+}
+
+#primarycontent p
+{
+	margin-bottom: 20px;
+}
+
+#secondarycontent
+{
+	float: right;
+	width: 200px;
+	margin-top: 150px;
+	margin-bottom:60px;
+}
+
+li.active, a.active
+{
+	font-weight:bold;
+}
+
+.clearit
+{
+	clear: both;
+	height: 1px;
+}
+
+.help 
+{
+    background-color: #F0F0F0;
+    border: 1px solid #BBBBBB;
+    margin-bottom: 1em;
+    padding: 1em;
+}
+
+.helpIcon
+{
+	width:20px;
+	height:20px;
+	float:right;
+	clear:none;
+	cursor:help;
+}
+
+.pdfIcon
+{
+	width:20px;
+	height:20px;
+	float:right;
+	clear:none;
+}
+
+.error
+{
+	color:#8B0000;
+}
+
+.blacklist
+{
+	background-color:#EEEEEE;
+}
+
+.chainPackage {
+    font-size: larger;
+}
+
+
+
+/******************************
+ * Player container
+ ******************************/
+
+#player-container:-webkit-full-screen {
+    position:absolute;
+    left:0;
+    top:0;
+    width:100%;
+    height:100%;
+}
+
+.demo-player {
+    width: 65%;
+    position: relative;
+    margin: auto;
+    overflow: hidden;
+    height: 500px;
+}
+
+.demo-player-fullscreen {
+    width: 100%;
+    height: 100%;
+    position: relative;
+}
+
+.op-seek-bar .bar-container .bar-seek-zoom {
+    position: relative;
+    top: -2px;
+    height: 8px !important;
+}
+
+/******************************
+ * Ads Player container
+ ******************************/
+.ads-video
+{
+    position : absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    zIndex: "1";
+}
+
+.ads-image {
+    position : absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height = '100%';
+    zIndex: "2";
+}
+
+.adskip-button {
+    background-color: gray;
+    opacity:0.4;
+    color: white;
+    text-align: center;
+    position : absolute;
+    top: 25px;
+    right: 20px;
+    height: 45px;
+    width: 110px;
+    border: solid white 2px;
+}
+
+.adskip-button1 {
+    cursor: pointer;
+    zIndex: "4";
+}
+
+/**/
+
+#licencer > td > div > label{
+	display: inline-block;
+	width: 15%;
+}
+
+#licencer > td > div > input{
+	width: 84%;
+	margin: 0;
+	margin-left:3px;
+	padding: 0;
+}
+
+#licencer :first-child input{
+	margin-bottom: 5px;
+}
+
+#customData{
+	margin-top: 5px;
+}
+
+
