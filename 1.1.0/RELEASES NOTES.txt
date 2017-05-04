@@ -1,3 +1,6 @@
+### Release Notes v1.1.1 (2017/05/04)
+* Correct npm package publishing
+
 ### Release Notes v1.1.0 (2017/05/03)
 * Add support for 'acceptInvitationLinear', 'fullscreen', exitFullscreen', and 'progress' tracking events
 * Add support for multiple Ads in a single VAST
