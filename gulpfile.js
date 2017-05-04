@@ -15,7 +15,7 @@ var gulp = require('gulp'),
     gulpif = require('gulp-if'),
     jsdoc = require('gulp-jsdoc3'),
     jshint = require('gulp-jshint'),
-    //rename = require('gulp-rename'),
+    rename = require('gulp-rename'),
     replace = require('gulp-replace'),
     sourcemaps = require('gulp-sourcemaps'),
     uglify = require('gulp-uglify'),
@@ -161,7 +161,8 @@ gulp.task('build', ['clean', 'package-info', 'lint'], function() {
 });
 
 gulp.task('releases-notes', function() {
-    return gulp.src('./RELEASES NOTES.txt')
+    return gulp.src('./CHANGELOG.md')
+        .pipe(rename('RELEASES NOTES.txt'))
         .pipe(gulp.dest(outDir));
 });
 
