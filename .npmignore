@@ -1,9 +1,0 @@
-doc
-samples
-src
-.travis.yml
-deploy.js
-gulpfile.js
-index.html
-release.js
-travis_deploy.enc

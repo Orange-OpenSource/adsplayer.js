@@ -15,7 +15,7 @@ var gulp = require('gulp'),
     gulpif = require('gulp-if'),
     jsdoc = require('gulp-jsdoc3'),
     jshint = require('gulp-jshint'),
-    //rename = require('gulp-rename'),
+    rename = require('gulp-rename'),
     replace = require('gulp-replace'),
     sourcemaps = require('gulp-sourcemaps'),
     uglify = require('gulp-uglify'),
@@ -161,7 +161,8 @@ gulp.task('build', ['clean', 'package-info', 'lint'], function() {
 });
 
 gulp.task('releases-notes', function() {
-    return gulp.src('./RELEASES NOTES.txt')
+    return gulp.src('./CHANGELOG.md')
+        .pipe(rename('RELEASES NOTES.txt'))
         .pipe(gulp.dest(outDir));
 });
 
@@ -177,10 +178,6 @@ gulp.task('doc', function () {
         .pipe(jsdoc(jsdocConfig));
 });
 
-gulp.task('version', function() {
-    fs.writeFileSync(outDir + '/version.properties', 'VERSION=' + pkg.version);
-});
-
 gulp.task('copy-index', function() {
     return gulp.src('index.html')
         .pipe(replace(/@@VERSION/g, pkg.version))
@@ -192,7 +189,6 @@ gulp.task('default', function(cb) {
     runSequence('build', ['doc'],
         'releases-notes',
         'zip',
-        'version',
         'copy-index',
         cb);
 });

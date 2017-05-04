@@ -1,5 +1,5 @@
 var PACKAGE_JSON_FILE = './package.json',
-    RELEASES_NOTES_FILE = './RELEASES NOTES.txt';
+    RELEASES_NOTES_FILE = './CHANGELOG.md';
 
 var child = require('child_process'),
     fs = require('fs'),
@@ -106,7 +106,7 @@ function generateReleaseNotes(version) {
         MM = m[1] ? m : "0" + m[0],
         DD = d[1] ? d : "0" + d[0];
 
-    notes = '### Release Notes v' + version + ' (' + y + '/' + MM + '/' + DD + ')\n';
+    notes = '### v' + version + ' (' + y + '/' + MM + '/' + DD + ')\n';
 
     // Get last/previous tag
     var lastTag = gitGetLastTag();
