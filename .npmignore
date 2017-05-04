@@ -1,6 +1,8 @@
 doc
 samples
 src
+.jshintrc
+.npmignore
 .travis.yml
 deploy.js
 gulpfile.js
