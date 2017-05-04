@@ -178,10 +178,6 @@ gulp.task('doc', function () {
         .pipe(jsdoc(jsdocConfig));
 });
 
-gulp.task('version', function() {
-    fs.writeFileSync(outDir + '/version.properties', 'VERSION=' + pkg.version);
-});
-
 gulp.task('copy-index', function() {
     return gulp.src('index.html')
         .pipe(replace(/@@VERSION/g, pkg.version))
@@ -193,7 +189,6 @@ gulp.task('default', function(cb) {
     runSequence('build', ['doc'],
         'releases-notes',
         'zip',
-        'version',
         'copy-index',
         cb);
 });
