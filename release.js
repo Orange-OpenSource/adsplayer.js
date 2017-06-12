@@ -6,7 +6,7 @@ var child = require('child_process'),
     semver = require('semver'),
     yargs = require('yargs'),
     argv = yargs
-        .usage("$0 --start [--type major|minor] [--version <version>] \n$0 --finish")
+        .usage("$0 --start [--type major|minor|patch] [--version <version>] \n$0 --finish")
         .default('type', 'minor')
         .argv;
 
@@ -135,8 +135,8 @@ function startRelease() {
         // Checkout master branch
         gitCheckout('master');
     } else {
-    // Checkout development branch
-    gitCheckout('development');
+        // Checkout development branch
+        gitCheckout('development');
     }
 
     // Read package.json file
@@ -147,7 +147,7 @@ function startRelease() {
     // - else version number is incremented
     console.info("Current version: " + pkg.version);
     console.info("Release type: " + argv.type);
-    var version = semver.inc(pkg.version, argv.type);
+    var version = argv.version ? argv.version : semver.inc(pkg.version, argv.type);
     pkg.version = version;
     console.info("=> Release version: " + pkg.version);
 
@@ -186,14 +186,14 @@ function finishRelease() {
     gitFlowFinish(releaseType, pkg.version);
 
     if (releaseType === 'release') {
-    // Increment version number for next release version in development
-    gitCheckout('development');
-    var version = semver.inc(pkg.version, 'minor');
-    version += '-dev';
-    pkg.version = version;
-    console.info("Next release version in development: " + pkg.version);
-    fs.writeFileSync(PACKAGE_JSON_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
-    gitCommit('v' + pkg.version);
+        // Increment version number for next release version in development
+        gitCheckout('development');
+        var version = semver.inc(pkg.version, 'minor');
+        version += '-dev';
+        pkg.version = version;
+        console.info("Next release version in development: " + pkg.version);
+        fs.writeFileSync(PACKAGE_JSON_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
+        gitCommit('v' + pkg.version);
     }
 
     // Push all branches and tags to remote
