@@ -37,6 +37,7 @@ var outDir = './dist';
 var browserifyArgs = {
     entries: './index.js',
     transform: [['babelify', { 'presets': ['es2015'] }]],
+    standalone: 'adsplayer',
     debug: true
 };
 
