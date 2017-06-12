@@ -1,3 +1,6 @@
+### v1.1.2 (2017/06/12)
+* Correct gulp building to enable module integration using node.js (require)
+
 ### v1.1.1 (2017/05/04)
 * Correct npm package publishing
 
