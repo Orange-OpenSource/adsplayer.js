@@ -1,3 +1,7 @@
+### v1.1.3 (2017/06/13)
+* Bugs fixing:
+  - Fix 'end' event not raised in case of VAST file(s) download failure
+
 ### v1.1.2 (2017/06/12)
 * Correct gulp building to enable module integration using node.js (require)
 
