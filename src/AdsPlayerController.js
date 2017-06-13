@@ -185,6 +185,7 @@ class AdsPlayerController {
 
     _playTrigger (trigger) {
         if (trigger.vasts.length === 0) {
+            this._onTriggerEnd();
             return;
         }
 

@@ -118,6 +118,7 @@ class EventBus {
         var listeners = this._getListeners(evt.type, false).slice(),
             i = 0;
 
+        this._debug.log("# Event: " + evt.type);
         for (i = 0; i < listeners.length; i += 1) {
             listeners[i].call(this, evt);
         }
