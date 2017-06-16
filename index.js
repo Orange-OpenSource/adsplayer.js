@@ -1,4 +1,5 @@
 
+import "babel-polyfill";
 import AdsPlayer from './src/AdsPlayer';
 
 // Shove both of these into the global scope
