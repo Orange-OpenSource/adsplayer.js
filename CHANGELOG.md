@@ -1,5 +1,5 @@
 ### v1.1.4 (2017/06/16)
-* v1.1.4
+* Use Babel polyfill for old browsers support
 
 ### v1.1.3 (2017/06/13)
 * Bugs fixing:
