@@ -266,7 +266,6 @@ class AdsPlayerController {
 
     constructor () {
 
-        this._mainPlayer = null;
         this._mainVideo = null;
         this._adsPlayerContainer = null;
         this._mast = null;
@@ -290,12 +289,11 @@ class AdsPlayerController {
      * @method init
      * @access public
      * @memberof AdsPlayerController#
-     * @param {Object} mainVideo - the HTML5 video element used by the main media player
+     * @param {Object} video - the HTML5 video element used by the main media player
      * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
      */
-    init (player, adsPlayerContainer) {
-        this._mainPlayer = player;
-        this._mainVideo = player.getVideoModel().getElement();
+    init (video, adsPlayerContainer) {
+        this._mainVideo = video;
         this._adsPlayerContainer = adsPlayerContainer;
 
         // Add <video> event listener
