@@ -288,15 +288,15 @@ class CreativePlayer {
         // Remove the element from the DOM
         this._adPlayerContainer.removeChild(this._mediaPlayer.getElement());
 
-        // Reset the media player
-        this._mediaPlayer.reset();
-        this._mediaPlayer = null;
-
         // Stop the TrackingEvents manager
         if (this._trackingEventsManager) {
             this._trackingEventsManager.stop();
             this._trackingEventsManager = null;
         }
+
+        // Reset the media player
+        this._mediaPlayer.reset();
+        this._mediaPlayer = null;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
