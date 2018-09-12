@@ -1,3 +1,7 @@
+### v1.2.0 (2018/09/12)
+* Modify AdsPlayer API for init() and load() functions
+* Correct package entry point declaration 
+
 ### v1.1.4 (2017/06/16)
 * Use Babel polyfill for old browsers support
 
