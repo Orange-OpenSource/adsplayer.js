@@ -106,16 +106,18 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @param {object} stream - the stream contaning all stream informations (url, protData, adsUrl)
     */
-    load (stream, callback) {
-        if (stream.adsUrl) {
-            this._adsPlayerController.load(stream.adsUrl).then(function () {
-                callback();
-            }).catch(function () {
-                callback();
-            });
-        } else {
-            callback();
-        }
+    load (stream) {
+        return new Promise((resolve, reject) => {
+            if (stream.adsUrl) {
+                this._adsPlayerController.load(stream.adsUrl).then(function () {
+                    resolve();
+                }).catch(function (e) {
+                    reject(e);
+                });
+            } else {
+                resolve();
+            }
+        });
     }
 
     /**
