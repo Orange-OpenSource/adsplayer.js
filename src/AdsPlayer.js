@@ -90,15 +90,12 @@ class AdsPlayer {
     * @access public
     * @memberof AdsPlayer#
     * @param {Object} video - the main video player
-    * @param {function} callback - the callback function to invoke when initialization is done
     */
-    init (video, callback) {
+    init (video) {
         this._adsPlayerController = new AdsPlayerController();
         this._adsPlayerController.init(video, this._adsPlayerContainer);
         this._eventBus.addEventListener('error', this.onErrorListener);
         this._eventBus.addEventListener('warning', this.onWarningListener);
-
-        callback();
     }
 
     /**
