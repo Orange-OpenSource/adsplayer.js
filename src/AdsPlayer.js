@@ -89,16 +89,13 @@ class AdsPlayer {
     * @method init
     * @access public
     * @memberof AdsPlayer#
-    * @param {Object} player - the MediaPlayer
-    * @param {function} callback - the callback function to invoke when initialization is done
+    * @param {Object} video - the main video player
     */
-    init (player, callback) {
+    init (video) {
         this._adsPlayerController = new AdsPlayerController();
-        this._adsPlayerController.init(player, this._adsPlayerContainer);
+        this._adsPlayerController.init(video, this._adsPlayerContainer);
         this._eventBus.addEventListener('error', this.onErrorListener);
         this._eventBus.addEventListener('warning', this.onWarningListener);
-
-        callback();
     }
 
     /**
@@ -109,16 +106,18 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @param {object} stream - the stream contaning all stream informations (url, protData, adsUrl)
     */
-    load (stream, callback) {
-        if (stream.adsUrl) {
-            this._adsPlayerController.load(stream.adsUrl).then(function () {
-                callback();
-            }).catch(function () {
-                callback();
-            });
-        } else {
-            callback();
-        }
+    load (stream) {
+        return new Promise((resolve, reject) => {
+            if (stream.adsUrl) {
+                this._adsPlayerController.load(stream.adsUrl).then(function () {
+                    resolve();
+                }).catch(function (e) {
+                    reject(e);
+                });
+            } else {
+                resolve();
+            }
+        });
     }
 
     /**
