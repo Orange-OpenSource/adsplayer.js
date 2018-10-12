@@ -109,13 +109,13 @@ class AdsPlayer {
     load (stream) {
         return new Promise((resolve, reject) => {
             if (stream.adsUrl) {
-                this._adsPlayerController.load(stream.adsUrl).then(function () {
-                    resolve();
+                this._adsPlayerController.load(stream.adsUrl).then(function (res) {
+                    resolve(res);
                 }).catch(function (e) {
                     reject(e);
                 });
             } else {
-                resolve();
+                resolve(false);
             }
         });
     }

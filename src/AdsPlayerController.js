@@ -251,6 +251,8 @@ class AdsPlayerController {
             return;
         }
 
+        this._debug.log("Start");
+
         if (this._mast.triggers.length === 0) {
             this._debug.warn('No trigger in MAST');
         }
@@ -259,7 +261,10 @@ class AdsPlayerController {
         var trigger = this._checkTriggersStart();
         if (trigger !== null) {
             this._activateTrigger(trigger, true);
+            return true;
         }
+
+        return false;
 
     }
 
@@ -338,15 +343,13 @@ class AdsPlayerController {
                 this._debug.log("Parse MAST file");
                 this._parseMastFile(result.response, result.baseUrl);
                 // Start managing triggers and ads playing
-                this._debug.log("Start");
-                this._start();
-                resolve();
+                resolve(this._start());
             }).catch(error => {
                 if (error) {
                     this._errorHandler.sendError(error.name, error.message, error.data);
                     reject(error);
                 } else {
-                    resolve();
+                    resolve(false);
                 }
             });
             this._fileLoaders.push(fileLoader);
