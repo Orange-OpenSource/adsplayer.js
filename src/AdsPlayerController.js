@@ -122,7 +122,7 @@ class AdsPlayerController {
     }
 
     _onVideoPlaying () {
-        if (this._vastPlayerManager) {
+        if (this._handleMainPlayerPlayback && this._vastPlayerManager) {
             this._debug.log("Pause main video");
             this._mainVideo.pause();
         }
@@ -147,14 +147,14 @@ class AdsPlayerController {
     }
 
     _pauseVideo () {
-        if (!this._mainVideo.paused) {
+        if (this._handleMainPlayerPlayback && this._mainVideo && !this._mainVideo.paused) {
             this._debug.log("Pause main video");
             this._mainVideo.pause();
         }
     }
 
     _resumeVideo () {
-        if (this._mainVideo.paused) {
+        if (this._handleMainPlayerPlayback && this._mainVideo && this._mainVideo.paused) {
             this._debug.log("Resume main video");
             this._mainVideo.play();
         }

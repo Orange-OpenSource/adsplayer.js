@@ -91,9 +91,9 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @param {Object} video - the main video player
     */
-    init (video) {
+    init (video, handleMainPlayerPlayback) {
         this._adsPlayerController = new AdsPlayerController();
-        this._adsPlayerController.init(video, this._adsPlayerContainer);
+        this._adsPlayerController.init(video, this._adsPlayerContainer, handleMainPlayerPlayback);
         this._eventBus.addEventListener('error', this.onErrorListener);
         this._eventBus.addEventListener('warning', this.onWarningListener);
     }
