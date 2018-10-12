@@ -279,6 +279,7 @@ class AdsPlayerController {
         this._errorHandler = ErrorHandler.getInstance();
         this._debug = Debug.getInstance();
         this._eventBus = EventBus.getInstance();
+        this._handleMainPlayerPlayback = true;
 
         this._onVideoPlayingListener = this._onVideoPlaying.bind(this);
         this._onVideoTimeupdateListener = this._onVideoTimeupdate.bind(this);
@@ -294,9 +295,13 @@ class AdsPlayerController {
      * @param {Object} video - the HTML5 video element used by the main media player
      * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
      */
-    init (video, adsPlayerContainer) {
+    init (video, adsPlayerContainer, handleMainPlayerPlayback) {
         this._mainVideo = video;
         this._adsPlayerContainer = adsPlayerContainer;
+
+        if (handleMainPlayerPlayback === false) {
+            this._handleMainPlayerPlayback = false;
+        }
 
         // Add <video> event listener
         this._mainVideo.addEventListener('playing', this._onVideoPlayingListener);
