@@ -174,7 +174,9 @@ class AdsPlayerController {
             this._activateTrigger(trigger, false);
         } else {
             // Notifies the application ad(s) playback has ended
-            this._eventBus.dispatchEvent({type: 'end', data: null});
+            this._eventBus.dispatchEvent({type: 'end', data: {
+                ended: true
+            }});
 
             if (!this._mainVideo.ended) {
                 // Resume the main video element
