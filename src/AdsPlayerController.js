@@ -316,8 +316,6 @@ class AdsPlayerController {
 
         // Add trigger end event listener
         this._eventBus.addEventListener('triggerEnd', this._onTriggerEndListener);
-
-        this._debug.setLevel(4);
     }
 
 

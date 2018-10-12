@@ -35,6 +35,7 @@
 
 import AdsPlayerController from './AdsPlayerController';
 import EventBus from './EventBus';
+import Debug from './Debug';
 
 const NAME = 'AdsPlayer';
 const VERSION = '';
@@ -63,6 +64,7 @@ class AdsPlayer {
         this._error = null;
         this._warning = null;
         this._eventBus = EventBus.getInstance();
+        this._debug = Debug.getInstance();
         this._adsPlayerController = null;
 
         this.onErrorListener = _onError.bind(this);
@@ -267,6 +269,10 @@ class AdsPlayer {
     */
     getWarning () {
         return this._warning;
+    }
+
+    enableLogs (enable) {
+        this._debug.setLevel(enable? 4 : 0);
     }
 }
 
