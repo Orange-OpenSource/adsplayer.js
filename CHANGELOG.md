@@ -1,3 +1,8 @@
+### v1.3.0 (2018/10/15)
+* Add option to disable main video playback management (pause, resume)
+* AdsPlayer.load() method resolve true if pre-roll trigger
+* Add API method AdsPlayer.enableLogs() 
+
 ### v1.2.0 (2018/09/12)
 * Modify AdsPlayer API for init() and load() functions
 * Correct package entry point declaration 
