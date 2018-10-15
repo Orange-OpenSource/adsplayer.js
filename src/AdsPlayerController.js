@@ -174,9 +174,7 @@ class AdsPlayerController {
             this._activateTrigger(trigger, false);
         } else {
             // Notifies the application ad(s) playback has ended
-            this._eventBus.dispatchEvent({type: 'end', data: {
-                ended: true
-            }});
+            this._eventBus.dispatchEvent({type: 'end', data: null});
 
             if (!this._mainVideo.ended) {
                 // Resume the main video element
@@ -210,7 +208,10 @@ class AdsPlayerController {
 
         if (firstTrigger) {
             // Notifies the application ad(s) playback starts
-            this._eventBus.dispatchEvent({type: 'start', data: null});
+            this._eventBus.dispatchEvent({type: 'start', data: {
+                currentTime: this._mainVideo.currentTime,
+                ended: this._mainVideo.ended
+            }});
         }
 
         this._debug.log('Activate trigger ' + trigger.id);
@@ -376,7 +377,7 @@ class AdsPlayerController {
             this._vastPlayerManager = null;
 
             // Notifies the application ad(s) playback has ended
-            this._eventBus.dispatchEvent({type: 'end', data: null});
+            // this._eventBus.dispatchEvent({type: 'end', data: null});
         }
     }
 
