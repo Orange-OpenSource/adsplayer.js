@@ -122,7 +122,7 @@ class AdsPlayerController {
     }
 
     _onVideoPlaying () {
-        if (this._vastPlayerManager) {
+        if (this._handleMainPlayerPlayback && this._vastPlayerManager) {
             this._debug.log("Pause main video");
             this._mainVideo.pause();
         }
@@ -147,14 +147,14 @@ class AdsPlayerController {
     }
 
     _pauseVideo () {
-        if (!this._mainVideo.paused) {
+        if (this._handleMainPlayerPlayback && this._mainVideo && !this._mainVideo.paused) {
             this._debug.log("Pause main video");
             this._mainVideo.pause();
         }
     }
 
     _resumeVideo () {
-        if (this._mainVideo.paused) {
+        if (this._handleMainPlayerPlayback && this._mainVideo && this._mainVideo.paused) {
             this._debug.log("Resume main video");
             this._mainVideo.play();
         }
@@ -208,7 +208,10 @@ class AdsPlayerController {
 
         if (firstTrigger) {
             // Notifies the application ad(s) playback starts
-            this._eventBus.dispatchEvent({type: 'start', data: null});
+            this._eventBus.dispatchEvent({type: 'start', data: {
+                currentTime: this._mainVideo.currentTime,
+                ended: this._mainVideo.ended
+            }});
         }
 
         this._debug.log('Activate trigger ' + trigger.id);
@@ -249,6 +252,8 @@ class AdsPlayerController {
             return;
         }
 
+        this._debug.log("Start");
+
         if (this._mast.triggers.length === 0) {
             this._debug.warn('No trigger in MAST');
         }
@@ -257,7 +262,10 @@ class AdsPlayerController {
         var trigger = this._checkTriggersStart();
         if (trigger !== null) {
             this._activateTrigger(trigger, true);
+            return true;
         }
+
+        return false;
 
     }
 
@@ -277,6 +285,7 @@ class AdsPlayerController {
         this._errorHandler = ErrorHandler.getInstance();
         this._debug = Debug.getInstance();
         this._eventBus = EventBus.getInstance();
+        this._handleMainPlayerPlayback = true;
 
         this._onVideoPlayingListener = this._onVideoPlaying.bind(this);
         this._onVideoTimeupdateListener = this._onVideoTimeupdate.bind(this);
@@ -292,9 +301,13 @@ class AdsPlayerController {
      * @param {Object} video - the HTML5 video element used by the main media player
      * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
      */
-    init (video, adsPlayerContainer) {
+    init (video, adsPlayerContainer, handleMainPlayerPlayback) {
         this._mainVideo = video;
         this._adsPlayerContainer = adsPlayerContainer;
+
+        if (handleMainPlayerPlayback === false) {
+            this._handleMainPlayerPlayback = false;
+        }
 
         // Add <video> event listener
         this._mainVideo.addEventListener('playing', this._onVideoPlayingListener);
@@ -304,8 +317,6 @@ class AdsPlayerController {
 
         // Add trigger end event listener
         this._eventBus.addEventListener('triggerEnd', this._onTriggerEndListener);
-
-        this._debug.setLevel(4);
     }
 
 
@@ -331,15 +342,13 @@ class AdsPlayerController {
                 this._debug.log("Parse MAST file");
                 this._parseMastFile(result.response, result.baseUrl);
                 // Start managing triggers and ads playing
-                this._debug.log("Start");
-                this._start();
-                resolve();
+                resolve(this._start());
             }).catch(error => {
                 if (error) {
                     this._errorHandler.sendError(error.name, error.message, error.data);
                     reject(error);
                 } else {
-                    resolve();
+                    resolve(false);
                 }
             });
             this._fileLoaders.push(fileLoader);
@@ -368,7 +377,7 @@ class AdsPlayerController {
             this._vastPlayerManager = null;
 
             // Notifies the application ad(s) playback has ended
-            this._eventBus.dispatchEvent({type: 'end', data: null});
+            // this._eventBus.dispatchEvent({type: 'end', data: null});
         }
     }
 

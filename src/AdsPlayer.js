@@ -35,6 +35,7 @@
 
 import AdsPlayerController from './AdsPlayerController';
 import EventBus from './EventBus';
+import Debug from './Debug';
 
 const NAME = 'AdsPlayer';
 const VERSION = '';
@@ -63,6 +64,7 @@ class AdsPlayer {
         this._error = null;
         this._warning = null;
         this._eventBus = EventBus.getInstance();
+        this._debug = Debug.getInstance();
         this._adsPlayerController = null;
 
         this.onErrorListener = _onError.bind(this);
@@ -91,9 +93,9 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @param {Object} video - the main video player
     */
-    init (video) {
+    init (video, handleMainPlayerPlayback) {
         this._adsPlayerController = new AdsPlayerController();
-        this._adsPlayerController.init(video, this._adsPlayerContainer);
+        this._adsPlayerController.init(video, this._adsPlayerContainer, handleMainPlayerPlayback);
         this._eventBus.addEventListener('error', this.onErrorListener);
         this._eventBus.addEventListener('warning', this.onWarningListener);
     }
@@ -109,13 +111,13 @@ class AdsPlayer {
     load (stream) {
         return new Promise((resolve, reject) => {
             if (stream.adsUrl) {
-                this._adsPlayerController.load(stream.adsUrl).then(function () {
-                    resolve();
+                this._adsPlayerController.load(stream.adsUrl).then(function (res) {
+                    resolve(res);
                 }).catch(function (e) {
                     reject(e);
                 });
             } else {
-                resolve();
+                resolve(false);
             }
         });
     }
@@ -267,6 +269,10 @@ class AdsPlayer {
     */
     getWarning () {
         return this._warning;
+    }
+
+    enableLogs (enable) {
+        this._debug.setLevel(enable? 4 : 0);
     }
 }
 

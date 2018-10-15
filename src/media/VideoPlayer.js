@@ -169,6 +169,8 @@ class VideoPlayer {
             return;
         }
         this._video.pause();
+        this._video.removeAttribute('src');
+        this._video.load();
     }
 
     pause () {
