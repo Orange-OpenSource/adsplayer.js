@@ -30,14 +30,14 @@
 export class XmlDom {
     static getElementsByTagName = function(node: XMLDocument, name) {
         let elements = node.getElementsByTagName(name);
-        if (elements.length < 1) {
-            let child = node.firstElementChild || node.firstChild;
-            if (child) {
-                let namespaceURI = child.namespaceURI;
-                elements = node.getElementsByTagNameNS(namespaceURI, name);
-            }
+        if (elements.length > 0) {
+            return elements;
         }
-        return elements;
+        let child = node.firstElementChild || node.firstChild;
+        if (child) {
+            let namespaceURI = child.namespaceURI;
+            return node.getElementsByTagNameNS(namespaceURI, name);
+        }
     }
 
     static getElement = function(node, name) {
