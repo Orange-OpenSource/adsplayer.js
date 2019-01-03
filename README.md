@@ -1,9 +1,11 @@
 # adsplayer.js [![Build Status](https://travis-ci.org/Orange-OpenSource/adsplayer.js.svg?branch=develop&style=flat-square)](https://travis-ci.org/Orange-OpenSource/adsplayer.js)
 
-adsplayer.js is a plugin/module for [hasplayer.js](https://github.com/Orange-OpenSource/hasplayer.js) that handles ad-insertion when playing streams with hasplayer.js MSE/EME client.
+adsplayer.js is a javascript client/module that handles ad-insertion when playing streams with HTML5 based players, such as players using MSE/EME extensions.
 
 adsplayer.js is compatible with MAST file format for describing the list of ad-insertion triggers, and with VAST format for ads playing description.
 When opening a new stream with hasplayer.js, the adsplayer.js plugin handles ad-insertion in the case a MAST file URL is provided.
+
+adsplayer.js API enables using this module as a plugin/module for hasplayer.js.
 
 The adsplayer.js plugin takes charge of:
 * MAST and VAST files downloading
@@ -11,7 +13,7 @@ The adsplayer.js plugin takes charge of:
 * pausing and then resuming the main player video when playing ad(s)
 * opening and playing ad media files, by the help of &lt;video&gt; and &lt;img&gt; HTML components, created by the plugin and appended in the DOM container provided to the plugin
 
-The application that uses hasplayer.js in conjunction with adsplayer.js has to take charge of:
+The web application that uses adsplayer.js in cunjunction with a HTML5 player has to take charge of:
 * hiding/showing adsplayer.js components according to the events raised by the plugin
 * opening the web page when a click on the playing ad has been detected by the plugin
 * pausing/resuming the plugin (for example when application visibility changes)
@@ -30,7 +32,7 @@ The project releases are available at this address:
 
 [http://orange-opensource.github.io/adsplayer.js](http://orange-opensource.github.io/adsplayer.js)
 
-## Getting Started
+## Getting Started (when using with hasplayer.js)
 
 When creating the hasplayer.js's MediaPlayer instance, create an AdsPlayer instance and add it to the MediaPlayer.
 The DOM element in which &lt;video&gt; and &lt;img&gt; HTML components will be appended for playing ad(s) has to be provided in the constuctor.
