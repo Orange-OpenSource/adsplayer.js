@@ -60,11 +60,11 @@ function gitFlowFinish(type, version) {
     try {
         execSync('git flow ' + type + ' finish -F ' + version + ' -m \"' + type + ' v' + version + '\"');
     } catch (err) {
-        // In case of hotfix, there will be a conflict when merging hotfix branch into development with package.json file (version value)
+        // In case of hotfix, there will be a conflict when merging hotfix branch into develop with package.json file (version value)
         // Then resolve the merge and finish again the hotfix
         if (type === 'hotfix') {
             execSync('git checkout --ours package.json');
-            execSync('git commit -am \"Merge tag v' + version + ' into development\"');
+            execSync('git commit -am \"Merge tag v' + version + ' into develop\"');
             execSync('git flow ' + type + ' finish -F ' + version + ' -m \"' + type + ' v' + version + '\"');
         }
     }
@@ -135,8 +135,8 @@ function startRelease() {
         // Checkout master branch
         gitCheckout('master');
     } else {
-        // Checkout development branch
-        gitCheckout('development');
+        // Checkout develop branch
+        gitCheckout('develop');
     }
 
     // Read package.json file
@@ -186,12 +186,12 @@ function finishRelease() {
     gitFlowFinish(releaseType, pkg.version);
 
     if (releaseType === 'release') {
-        // Increment version number for next release version in development
-        gitCheckout('development');
+        // Increment version number for next release version in develop
+        gitCheckout('develop');
         var version = semver.inc(pkg.version, 'minor');
         version += '-dev';
         pkg.version = version;
-        console.info("Next release version in development: " + pkg.version);
+        console.info("Next release version in develop: " + pkg.version);
         fs.writeFileSync(PACKAGE_JSON_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
         gitCommit('v' + pkg.version);
     }
