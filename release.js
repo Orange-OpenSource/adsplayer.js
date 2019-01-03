@@ -1,4 +1,5 @@
-var PACKAGE_JSON_FILE = './package.json',
+var PACKAGE_FILE = './package.json',
+    PACKAGE_LOCK_FILE = './package-lock.json',
     RELEASES_NOTES_FILE = './CHANGELOG.md';
 
 var child = require('child_process'),
@@ -6,7 +7,7 @@ var child = require('child_process'),
     semver = require('semver'),
     yargs = require('yargs'),
     argv = yargs
-        .usage("$0 --start [--type major|minor|patch] [--version <version>] \n$0 --finish")
+        .usage("$0 --start [--type major|minor|patch] [--ver <version>] \n$0 --finish")
         .default('type', 'minor')
         .argv;
 
@@ -106,7 +107,7 @@ function generateReleaseNotes(version) {
         MM = m[1] ? m : "0" + m[0],
         DD = d[1] ? d : "0" + d[0];
 
-    notes = '### v' + version + ' (' + y + '/' + MM + '/' + DD + ')\n';
+    notes = '### Release Notes v' + version + ' (' + y + '/' + MM + '/' + DD + ')\n';
 
     // Get last/previous tag
     var lastTag = gitGetLastTag();
@@ -140,15 +141,17 @@ function startRelease() {
     }
 
     // Read package.json file
-    var pkg = require(PACKAGE_JSON_FILE);
+    var pkg = require(PACKAGE_FILE);
+    var pkglock = require(PACKAGE_LOCK_FILE);
 
     // Get current version from package.json and increment it:
     // - if version ends with '-dev' suffix, then suffix is removed
     // - else version number is incremented
     console.info("Current version: " + pkg.version);
     console.info("Release type: " + argv.type);
-    var version = argv.version ? argv.version : semver.inc(pkg.version, argv.type);
+    var version = argv.ver ? argv.ver : semver.inc(pkg.version, argv.type);
     pkg.version = version;
+    pkglock.version = version;
     console.info("=> Release version: " + pkg.version);
 
     // Start git flow release
@@ -156,7 +159,8 @@ function startRelease() {
     gitFlowStart(releaseType, pkg.version);
 
     // Write/update and commit package.jon file with the new version number
-    fs.writeFileSync(PACKAGE_JSON_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
+    fs.writeFileSync(PACKAGE_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
+    fs.writeFileSync(PACKAGE_LOCK_FILE, JSON.stringify(pkglock, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
     gitCommit('v' + pkg.version);
 
     // Generate release notes, write/update and commit 'RELEASE NOTES.txt' file
@@ -178,8 +182,12 @@ function finishRelease() {
         return;
     }
 
+    // Update local branches
+    // gitPull();
+
     // Read package.json file
-    var pkg = require(PACKAGE_JSON_FILE);
+    var pkg = require(PACKAGE_FILE);
+    var pkglock = require(PACKAGE_LOCK_FILE);
 
     // Finish git flow
     console.info('Finish git ' + releaseType + ' v' + pkg.version);
@@ -192,7 +200,8 @@ function finishRelease() {
         version += '-dev';
         pkg.version = version;
         console.info("Next release version in develop: " + pkg.version);
-        fs.writeFileSync(PACKAGE_JSON_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
+        fs.writeFileSync(PACKAGE_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
+        fs.writeFileSync(PACKAGE_LOCK_FILE, JSON.stringify(pkglock, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
         gitCommit('v' + pkg.version);
     }
 
