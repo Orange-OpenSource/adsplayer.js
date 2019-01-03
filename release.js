@@ -199,6 +199,7 @@ function finishRelease() {
         var version = semver.inc(pkg.version, 'minor');
         version += '-dev';
         pkg.version = version;
+        pkglock.version = version;
         console.info("Next release version in develop: " + pkg.version);
         fs.writeFileSync(PACKAGE_FILE, JSON.stringify(pkg, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
         fs.writeFileSync(PACKAGE_LOCK_FILE, JSON.stringify(pkglock, null, '  '), {encoding: 'utf8',mode: 438 /*=0666*/});
