@@ -33,10 +33,10 @@ import { Logger } from './lib/Logger';
 import { EventTypes } from './Events';
 
 const NAME = 'AdsPlayer';
-const VERSION = '';
-const GIT_TAG = '@@REVISION';
-const BUILD_DATE = '@@TIMESTAMP';
-
+declare const __VERSION__: string;
+const VERSION = __VERSION__;
+declare const __BUILDDATE__: string;
+const BUILDDATE = __BUILDDATE__;
 
 export class AdsPlayer {
 
@@ -139,11 +139,7 @@ export class AdsPlayer {
     * @return {string} the full plugin version, including git revision
     */
     getVersionFull (): string {
-        if (GIT_TAG.indexOf("@@") === -1) {
-            return VERSION + '_' + GIT_TAG;
-        } else {
-            return VERSION;
-        }
+        return VERSION;
     }
 
     /**
@@ -151,11 +147,7 @@ export class AdsPlayer {
     * @return {string} the build date
     */
     getBuildDate (): string {
-        if (BUILD_DATE.indexOf("@@") === -1) {
-            return BUILD_DATE;
-        } else {
-            return 'Not a builded version';
-        }
+        return BUILDDATE;
     }
 
     /**

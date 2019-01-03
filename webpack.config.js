@@ -3,10 +3,21 @@
 var webpack = require('webpack');
 var path = require('path');
 var argv = require('yargs').argv;
+var pkg = require("./package.json");
 
 var TypedocWebpackPlugin = require('typedoc-webpack-plugin');
+var CopyWebpackPlugin = require('copy-webpack-plugin');
 
 var ouptutname = 'adsplayer';
+
+var commitDate = require('child_process')
+  .execSync('git log -1 --format=%cD')
+  .toString();
+
+console.log(commitDate);
+var date = new Date(commitDate);
+var gitDate = (date.getFullYear()) + '-' + (date.getMonth() + 1) + '-' + (date.getDate());
+console.log(gitDate);
 
 module.exports = {
   entry: __dirname + '/index.ts',
@@ -44,8 +55,25 @@ module.exports = {
   },
   plugins: [
     new webpack.DefinePlugin({
-      __VERSION__: JSON.stringify(require("./package.json").version)
+      __VERSION__: JSON.stringify(pkg.version),
+      __BUILDDATE__: JSON.stringify(gitDate)
     }),
+    new CopyWebpackPlugin([{
+      from: './index.html',
+      transform: function (content, toto) {
+        content = content.toString()
+          .replace(new RegExp('@@VERSION', 'g'), pkg.version)
+          .replace('@@DATE', gitDate);
+
+        return content;
+      }
+    }]),
+    new CopyWebpackPlugin([
+      './package.json',
+      './README.md',
+      './CHANGELOG.md',
+      './COPYRIGHT'
+    ]),
     new TypedocWebpackPlugin({
       name: 'adsplayer.js',
       out: './doc',
