@@ -37,7 +37,7 @@
 import * as vast from './model/Vast';
 import { AdPlayer } from './AdPlayer';
 import { Logger } from '../Logger';
-import { EventBus } from '../EventBus';
+import { EventBus, AdEvents } from '../EventBus';
 
 export class VastPlayerManager {
 
@@ -94,10 +94,7 @@ export class VastPlayerManager {
         }
 
         // Notify a trigger is starting to play
-        this.eventBus.dispatchEvent({
-            type: 'triggerStart',
-            data: {}
-        });
+        this.eventBus.dispatchEvent(AdEvents.TRIGGER_START);
 
         this.playVast(0);
     }
@@ -161,7 +158,7 @@ export class VastPlayerManager {
         this.adIndex = index;
         this.logger.debug('Play Ad - index = ' + this.adIndex);
 
-        this.eventBus.addEventListener('adEnd', this.onAdEndListener);
+        this.eventBus.addEventListener(AdEvents.AD_END, this.onAdEndListener);
         this.adPlayer = new AdPlayer();
         this.adPlayer.init(ad, this.adPlayerContainer, this.mainVideo, vast.baseUrl);
         this.adPlayer.start();
@@ -202,10 +199,7 @@ export class VastPlayerManager {
             this.playVast(this.vastIndex);
         } else {
             // Notify end of trigger
-            this.eventBus.dispatchEvent({
-                type: 'triggerEnd',
-                data: {}
-            });
+            this.eventBus.dispatchEvent(AdEvents.TRIGGER_END);
         }
     }
 

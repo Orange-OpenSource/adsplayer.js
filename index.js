@@ -1,2 +1,3 @@
 export { AdsPlayer } from './src/AdsPlayer';
-export { ERROR } from './src/ErrorHandler';
+export { Event, EventTypes } from './src/Events';
+export { ErrorCodes } from './src/Errors';

@@ -53,7 +53,8 @@ module.exports = {
       target: 'es6',
       mode: 'module',
       exclude: [
-        '**/node_modules/**/*.*'
+        '**/node_modules/**/*.*',
+        '**/src/lib/**/*.*'
       ],
       experimentalDecorators: true,
       includeDeclarations: false,

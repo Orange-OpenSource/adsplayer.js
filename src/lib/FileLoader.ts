@@ -31,7 +31,7 @@
 * File downloader utility class.
 */
 
-import { ERROR } from './ErrorHandler';
+import { ErrorCodes } from '../Errors';
 
 export class FileLoader {
 
@@ -173,8 +173,7 @@ export class FileLoader {
         } else if (this.request.status < 200 || this.request.status > 299) {
             // Request has failed => reject with error
             reject({
-                name: ERROR.DOWNLOAD_ERR_FILES,
-                message: 'Failed to download file',
+                name: ErrorCodes.DOWNLOAD_ERR_FILE,
                 data: {
                     url: this.url,
                     status: this.request.status
@@ -183,8 +182,7 @@ export class FileLoader {
         } else if (this.request.responseXML === null) {
             // Response was not in XML format => reject with error
             reject({
-                name: ERROR.DOWNLOAD_ERR_NOT_XML,
-                message: 'The downloaded file format is not in xml format',
+                name: ErrorCodes.DOWNLOAD_ERR_NOT_XML,
                 data: {
                     url: this.url
                 }

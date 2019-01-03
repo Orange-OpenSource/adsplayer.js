@@ -36,13 +36,14 @@
 import { Mast, Trigger } from './mast/model/Mast'
 import { Logger } from './Logger';
 import { FileLoader } from './FileLoader';
-import { ErrorHandler, ERROR } from './ErrorHandler';
-import { EventBus } from './EventBus';
+import { ErrorHandler } from './ErrorHandler';
+import { EventBus, AdEvents } from './EventBus';
 import { MastParser } from './mast/MastParser';
 import { TriggerManager } from './mast/TriggerManager';
 import { VastParser } from './vast/VastParser';
 import { VastPlayerManager } from './vast/VastPlayerManager';
 import { Utils } from './utils/utils';
+import { EventTypes } from '../Events';
 
 
 export class AdsPlayerController {
@@ -118,7 +119,7 @@ export class AdsPlayerController {
         this.mainVideo.addEventListener('ended', this.onVideoEndedListener);
 
         // Add trigger end event listener
-        this.eventBus.addEventListener('triggerEnd', this.onTriggerEndListener);
+        this.eventBus.addEventListener(AdEvents.TRIGGER_END, this.onTriggerEndListener);
     }
 
 
@@ -147,7 +148,7 @@ export class AdsPlayerController {
                 resolve(this.start());
             }).catch(error => {
                 if (error) {
-                    this.errorHandler.sendError(error.name, error.message, error.data);
+                    this.errorHandler.sendError(error.name, error.data);
                     reject(error);
                 } else {
                     resolve(false);
@@ -178,7 +179,7 @@ export class AdsPlayerController {
             this.vastPlayerManager = null;
 
             // Notifies the application ad(s) playback has ended
-            // this.eventBus.dispatchEvent({type: 'end', data: null});
+            // this.eventBus.dispatchEvent(EventTypes.END);
         }
     }
 
@@ -255,7 +256,7 @@ export class AdsPlayerController {
                     resolve(vast);
                 }).catch(error => {
                     if (error) {
-                        this.errorHandler.sendWarning(ERROR.LOAD_VAST_FAILED, 'Failed to load VAST file', error);
+                        this.errorHandler.sendError(error.name, error.data);
                     }
                     resolve(null);
                 }
@@ -364,7 +365,7 @@ export class AdsPlayerController {
             this.activateTrigger(trigger, false);
         } else {
             // Notifies the application ad(s) playback has ended
-            this.eventBus.dispatchEvent({type: 'end', data: null});
+            this.eventBus.dispatchEvent(EventTypes.END);
 
             if (!this.mainVideo.ended) {
                 // Resume the main video element
@@ -398,10 +399,10 @@ export class AdsPlayerController {
 
         if (firstTrigger) {
             // Notifies the application ad(s) playback starts
-            this.eventBus.dispatchEvent({type: 'start', data: {
+            this.eventBus.dispatchEvent(EventTypes.START, {
                 currentTime: this.mainVideo.currentTime,
                 ended: this.mainVideo.ended
-            }});
+            });
         }
 
         this.logger.debug('Activate trigger ' + trigger.id);

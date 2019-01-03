@@ -41,8 +41,7 @@
 import * as vast from './model/Vast';
 import { CreativePlayer } from './CreativePlayer';
 import { Logger } from '../Logger';
-import { EventBus } from '../EventBus';
-import { Vast } from './model/Vast';
+import { EventBus, AdEvents } from '../EventBus';
 
 export class AdPlayer {
 
@@ -106,10 +105,7 @@ export class AdPlayer {
 
     start () {
         // Notify an Ad is starting to play
-        this.eventBus.dispatchEvent({
-            type: 'adStart',
-            data: {}
-        });
+        this.eventBus.dispatchEvent(AdEvents.AD_START);
 
         // Send Impressions tracking
         this.sendImpressions(this.ad.inLine.impressions);
@@ -201,7 +197,7 @@ export class AdPlayer {
 
         if (linear) {
             this.logger.debug('Play Linear Ad, duration = ' + linear.duration);
-            this.eventBus.addEventListener('creativeEnd', this.onCreativeEndListener);
+            this.eventBus.addEventListener(AdEvents.CREATIVE_END, this.onCreativeEndListener);
             this.creativePlayer = new CreativePlayer();
             if (!this.creativePlayer.init(creative.linear, this.adPlayerContainer, this.mainVideo, this.baseUrl)) {
                 this.playNextCreative();
@@ -219,10 +215,7 @@ export class AdPlayer {
             this.playCreative(this.creativeIndex);
         } else {
             // Notify end of Ad
-            this.eventBus.dispatchEvent({
-                type: 'adEnd',
-                data: {}
-            });
+            this.eventBus.dispatchEvent(AdEvents.AD_END);
         }
     }
 

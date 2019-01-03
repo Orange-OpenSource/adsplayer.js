@@ -41,7 +41,8 @@ import { MediaPlayer } from '../media/MediaPlayer';
 import { VideoPlayer } from '../media/VideoPlayer';
 import { ImagePlayer } from '../media/ImagePlayer';
 import { Logger } from '../Logger';
-import { EventBus } from '../EventBus';
+import { EventBus, AdEvents } from '../EventBus';
+import { EventTypes } from '../../Events';
 
 export class CreativePlayer {
 
@@ -141,37 +142,25 @@ export class CreativePlayer {
     private onMediaPlay () {
         this.logger.debug('Creative media play');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent({
-            type: 'play',
-            data: {}
-        });
+        this.eventBus.dispatchEvent(AdEvents.PLAY);
     }
 
     private onMediaPause () {
         this.logger.debug('Creative media pause');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent({
-            type: 'pause',
-            data: {}
-        });
+        this.eventBus.dispatchEvent(AdEvents.PAUSE);
     }
 
     private onMediaError () {
         this.logger.debug('Creative media error');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent({
-            type: 'creativeEnd',
-            data: {}
-        });
+        this.eventBus.dispatchEvent(AdEvents.CREATIVE_END);
     }
 
     private onMediaEnded () {
         this.logger.debug('creative media ended');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent({
-            type: 'creativeEnd',
-            data: {}
-        });
+        this.eventBus.dispatchEvent(AdEvents.CREATIVE_END);
     }
 
     private onMediaTimeupdate () {
@@ -194,11 +183,8 @@ export class CreativePlayer {
         // ClickThrough : send an event for the application to open the web page
         if (creative.videoClicks.clickThrough) {
             this.logger.debug('Ad click, uri = ' + creative.videoClicks.clickThrough);
-            this.eventBus.dispatchEvent({
-                type: 'click',
-                data: {
-                    uri: creative.videoClicks.clickThrough
-                }
+            this.eventBus.dispatchEvent(AdEvents.CLICK, {
+                uri: creative.videoClicks.clickThrough
             });
         }
 
@@ -259,18 +245,12 @@ export class CreativePlayer {
         }
 
         // Notify a creative is starting to play
-        this.eventBus.dispatchEvent({
-            type: 'creativeStart',
-            data: {}
-        });
+        this.eventBus.dispatchEvent(AdEvents.CREATIVE_START);
 
         // Notify a media element has been created and appended into document
-        this.eventBus.dispatchEvent({
-            type: 'addElement',
-            data: {
-                element: this.mediaPlayer.getElement(),
-                type: this.mediaPlayer.getType()
-            }
+        this.eventBus.dispatchEvent(EventTypes.ADD_ELEMENT, {
+            element: this.mediaPlayer.getElement(),
+            type: this.mediaPlayer.getType()
         });
 
         // Add the media player DOM element
@@ -339,12 +319,9 @@ export class CreativePlayer {
         this.mediaPlayer.stop();
 
         // Notify a media element has been removed from DOM
-        this.eventBus.dispatchEvent({
-            type: 'removeElement',
-            data: {
-                element: this.mediaPlayer.getElement(),
-                type: this.mediaPlayer.getType()
-            }
+        this.eventBus.dispatchEvent(EventTypes.REMOVE_ELEMENT, {
+            element: this.mediaPlayer.getElement(),
+            type: this.mediaPlayer.getType()
         });
 
         // Remove the element from the DOM

@@ -28,22 +28,23 @@
 */
 
 /**
-* Event bus utility class for events listening and notifying.
+* Errors and warning notifications handler.
 */
 
 import { Logger } from './Logger';
+import { EventBus } from './EventBus';
+import { ErrorCodes, ErrorMessages } from '../Errors';
+import { EventTypes } from '../Events';
 
-let _instance = null;
-
-export class EventBus {
+export class ErrorHandler {
 
     // #region MEMBERS
     // --------------------------------------------------
 
-    private static instance: EventBus = null;
+    private static instance: ErrorHandler = null;
 
-    private registrations: object;
     private logger: Logger;
+    private eventBus: EventBus;
 
     // #endregion MEMBERS
     // --------------------------------------------------
@@ -53,86 +54,26 @@ export class EventBus {
 
     static getInstance() {
         if (this.instance === null) {
-            this.instance = new EventBus();
+            this.instance = new ErrorHandler();
         }
         return this.instance;
     }
 
-    constructor() {
-        this.registrations = {};
+    constructor () {
         this.logger = Logger.getInstance();
+        this.eventBus = EventBus.getInstance();
     }
 
-
-    // #endregion PUBLIC FUNCTIONS
-    // --------------------------------------------------
-
-    /**
-     * [addEventListener description]
-     * @param {[type]} type       [description]
-     * @param {[type]} listener   [description]
-     * @param {[type]} useCapture [description]
-     */
-    public addEventListener (type: string, listener: any, useCapture?: boolean) {
-        var listeners = this.getListeners(type, useCapture),
-            idx = listeners.indexOf(listener);
-
-        if (idx === -1) {
-            listeners.push(listener);
-        }
-    }
-
-    /**
-     * [removeEventListener description]
-     * @param  {[type]} type       [description]
-     * @param  {[type]} listener   [description]
-     * @param  {[type]} useCapture [description]
-     * @return {[type]}            [description]
-     */
-    public removeEventListener (type: string, listener: any, useCapture?: boolean) {
-        var listeners = this.getListeners(type, useCapture),
-            idx = listeners.indexOf(listener);
-
-        if (idx !== -1) {
-            listeners.splice(idx, 1);
-        }
-    }
-
-    /**
-     * [dispatchEvent description]
-     * @param  {[type]} evt [description]
-     * @return {[type]}     [description]
-     */
-    public dispatchEvent (evt: any) {
-        var listeners = this.getListeners(evt.type, false).slice(),
-            i = 0;
-
-        this.logger.debug('# Event: ' + evt.type);
-        for (i = 0; i < listeners.length; i += 1) {
-            listeners[i].call(this, evt);
-        }
-        return !evt.defaultPrevented;
-    }
-
-    // #region PRIVATE FUNCTIONS
-    // --------------------------------------------------
-
-    private getListeners (type: string, useCapture?: boolean) {
-        if (useCapture === undefined) { // to provide a default parameter that works !!
-            useCapture = false;
-        }
-        var captype = (useCapture ? '1' : '0') + type;
-
-        if (!(captype in this.registrations)) {
-            this.registrations[captype] = [];
-        }
-
-        return this.registrations[captype];
+    sendError (code: ErrorCodes, data: object) {
+        let message = ErrorMessages[code];
+        this.logger.error('[Error] Code: ' + code + ', Message: ' + message + ', Data: ' + JSON.stringify(data, null, '\t'));
+        this.eventBus.dispatchEvent(EventTypes.ERROR, {
+            code: code,
+            message: message,
+            data: data
+        });
     }
 
     // #endregion PUBLIC FUNCTIONS
     // --------------------------------------------------
-
 }
-
-// export default EventBus;

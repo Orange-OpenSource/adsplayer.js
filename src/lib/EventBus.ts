@@ -28,32 +28,34 @@
 */
 
 /**
-* Errors and warning notifications handler.
+* Event bus utility class for events listening and notifying.
 */
 
 import { Logger } from './Logger';
-import { EventBus } from './EventBus';
+import { EventTypes } from '../Events';
 
 
-export enum ERROR {
-    DOWNLOAD_ERR_FILES = 'DOWNLOAD_ERR_FILES',
-    DOWNLOAD_ERR_NOT_XML = 'DOWNLOAD_ERR_NOT_XML',
-    LOAD_VAST_FAILED = 'LOAD_VAST_FAILED',
-    NO_VALID_MEDIA_FOUND = 'NO_VALID_MEDIA_FOUND',
-    LOAD_MEDIA_FAILED = 'LOAD_MEDIA_FAILED',
-    UNSUPPORTED_MEDIA_FILE = 'UNSUPPORTED_MEDIA_FILE',
-    UNAVAILABLE_LINK = 'UNAVAILABLE_LINK'
-}  
+export enum AdEvents {
+    TRIGGER_START = 'triggerStart',
+    TRIGGER_END = 'triggerEnd',
+    AD_START = 'adStart',
+    AD_END = 'adEnd',
+    CREATIVE_START = 'creativeStart',
+    CREATIVE_END = 'creativeEnd',
+    PLAY = 'play',
+    PAUSE = 'pause',
+    CLICK = 'click'
+}
 
-export class ErrorHandler {
+export class EventBus {
 
     // #region MEMBERS
     // --------------------------------------------------
 
-    private static instance: ErrorHandler = null;
+    private static instance: EventBus = null;
 
+    private registrations: object;
     private logger: Logger;
-    private eventBus: EventBus;
 
     // #endregion MEMBERS
     // --------------------------------------------------
@@ -63,54 +65,64 @@ export class ErrorHandler {
 
     static getInstance() {
         if (this.instance === null) {
-            this.instance = new ErrorHandler();
+            this.instance = new EventBus();
         }
         return this.instance;
     }
 
     constructor() {
+        this.registrations = {};
         this.logger = Logger.getInstance();
-        this.eventBus = EventBus.getInstance();
     }
 
-    /**
-     * [sendWarning description]
-     * @param  {[type]} code    [description]
-     * @param  {[type]} message [description]
-     * @param  {[type]} data    [description]
-     * @return {[type]}         [description]
-     */
-    sendWarning (code, message, data) {
-        this.eventBus.dispatchEvent({
-            type: 'warning',
-            data: {
-                code: code,
-                message: message,
-                data: data
-            }
-        });
-        this.logger.warn('[Warn] Code: ' + code + ', Message: ' + message + ', Data: ' + JSON.stringify(data, null, '\t'));
+
+    // #endregion PUBLIC FUNCTIONS
+    // --------------------------------------------------
+
+    public addEventListener (type: string, listener: any) {
+        let listeners = this.getListeners(type),
+            idx = listeners.indexOf(listener);
+
+        if (idx === -1) {
+            listeners.push(listener);
+        }
     }
 
-    /**
-     * [sendError description]
-     * @param  {[type]} code    [description]
-     * @param  {[type]} message [description]
-     * @param  {[type]} data    [description]
-     * @return {[type]}         [description]
-     */
-    sendError (code, message, data) {
-        this.eventBus.dispatchEvent({
-            type: 'error',
-            data: {
-                code: code,
-                message: message,
-                data: data
+    public removeEventListener (type: string, listener: any) {
+        let listeners = this.getListeners(type),
+            idx = listeners.indexOf(listener);
+
+        if (idx !== -1) {
+            listeners.splice(idx, 1);
+        }
+    }
+
+    public dispatchEvent (type: string, data?: object) {
+        let listeners = this.getListeners(type).slice(),
+            event = {
+                type: type,
+                data: data ? data : {}
             }
-        });
-        this.logger.error('[Error] Code: ' + code + ', Message: ' + message + ', Data: ' + JSON.stringify(data, null, '\t'));
+
+        this.logger.debug('# Event: ' + type);
+        for (let i = 0; i < listeners.length; i += 1) {
+            listeners[i].call(this, event);
+        }
+    }
+
+    // #region PRIVATE FUNCTIONS
+    // --------------------------------------------------
+
+    private getListeners (type: string) {
+        if (!(type in this.registrations)) {
+            this.registrations[type] = [];
+        }
+        return this.registrations[type];
     }
 
     // #endregion PUBLIC FUNCTIONS
     // --------------------------------------------------
+
 }
+
+// export default EventBus;
