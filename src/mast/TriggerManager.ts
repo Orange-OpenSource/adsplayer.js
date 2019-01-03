@@ -33,15 +33,77 @@
 * to detect the activation and revocation of a trigger.
 */
 
-import { Condition } from './model/Mast';
+import * as mast from './model/Mast';
 
-class TriggerManager {
+export class TriggerManager {
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
+    // #region MEMBERS
+    // --------------------------------------------------
 
-    _parseTime (str) {
-        var timeParts,
+    trigger: mast.Trigger;
+
+    // #region PUBLIC FUNCTIONS
+    // --------------------------------------------------
+
+    constructor() {
+        this.trigger = null;
+    }
+
+    /**
+     * Initializes the TriggerManager.
+     * @method init
+     * @access public
+     * @memberof TriggerManager#
+     * @param {Trigger} trigger - the trigger to handle by this manager
+     */
+    init (trigger: mast.Trigger) {
+        this.trigger = trigger;
+    }
+
+    /**
+     * Returns the trigger object managed by this TriggerManager.
+     * @method init
+     * @access public
+     * @memberof TriggerManager#
+     * @return {Object} the managed trigger object
+     */
+    getTrigger (): mast.Trigger {
+        return this.trigger;
+    }
+
+    /**
+     * Evaluates the trigger start conditions.
+     * @method checkStartConditions
+     * @access public
+     * @memberof TriggerManager#
+     * @param {Number} video - the main video element
+     */
+    checkStartConditions (video: HTMLMediaElement) {
+        if (this.trigger.activated) {
+            return false;
+        }
+        return this.evaluateConditions(this.trigger.startConditions, video);
+    }
+
+    /**
+     * Evaluates the trigger end conditions.
+     * @method checkEndConditions
+     * @access public
+     * @memberof TriggerManager#
+     * @param {Number} video - the main video element
+     */
+    checkEndConditions (video: HTMLMediaElement) {
+        return this.evaluateConditions(this.trigger.endConditions, video);
+    }
+
+    // #endregion PUBLIC FUNCTIONS
+    // --------------------------------------------------
+
+    // #region PRIVATE FUNCTIONS
+    // --------------------------------------------------
+
+    private parseTime (str: string): number {
+        let timeParts,
             SECONDS_IN_HOUR = 60 * 60,
             SECONDS_IN_MIN = 60;
 
@@ -61,33 +123,33 @@ class TriggerManager {
                 (parseFloat(timeParts[2]));
     }
 
-    _compareValues (value1, value2, operator) {
-        var res = false;
+    private compareValues (value1: number, value2: number, operator: string): boolean {
 
         if (value1 < 0 || value2 < 0) {
             return false;
         }
 
+        let res: boolean = false;
         switch (operator) {
-            case Condition.OPERATOR.EQ:
+            case mast.CONDITION_OPERATOR.EQ:
                 res = (value1 === value2);
                 break;
-            case Condition.OPERATOR.NEQ:
+            case mast.CONDITION_OPERATOR.NEQ:
                 res = (value1 !== value2);
                 break;
-            case Condition.OPERATOR.GTR:
+            case mast.CONDITION_OPERATOR.GTR:
                 res = (value1 > value2);
                 break;
-            case Condition.OPERATOR.GEQ:
+            case mast.CONDITION_OPERATOR.GEQ:
                 res = (value1 >= value2);
                 break;
-            case Condition.OPERATOR.LT:
+            case mast.CONDITION_OPERATOR.LT:
                 res = (value1 < value2);
                 break;
-            case Condition.OPERATOR.LEQ:
+            case mast.CONDITION_OPERATOR.LEQ:
                 res = (value1 <= value2);
                 break;
-            case Condition.OPERATOR.MOD:
+            case mast.CONDITION_OPERATOR.MOD:
                 res = ((value1 % value2) === 0);
                 break;
             default:
@@ -96,23 +158,22 @@ class TriggerManager {
         return res;
     }
 
-    _evaluateCondition (condition, video) {
-        var res = false,
-            i;
+    private evaluateCondition (condition: mast.Condition, video: HTMLMediaElement): boolean {
+        let res: boolean = false;
 
         // Check pre-roll condition for activation
-        if (video.currentTime === 0 && condition.type === Condition.TYPE.EVENT && condition.name === Condition.NAME.ON_ITEM_START) {
+        if (video.currentTime === 0 && condition.type === mast.CONDITION_TYPE.EVENT && condition.name === mast.CONDITION_NAME.ON_ITEM_START) {
             res = true;
         }
 
         // Check mid-roll condition for activation
-        if (condition.type === Condition.TYPE.PROPERTY) {
+        if (condition.type === mast.CONDITION_TYPE.PROPERTY) {
             switch (condition.name) {
-                case Condition.NAME.POSITION:
-                    res = this._compareValues(video.currentTime, this._parseTime(condition.value), condition.operator);
+                case mast.CONDITION_NAME.POSITION:
+                    res = this.compareValues(video.currentTime, this.parseTime(condition.value), condition.operator);
                     break;
-                case Condition.NAME.DURATION:
-                    res = this._compareValues(video.duration, this._parseTime(condition.value), condition.operator);
+                case mast.CONDITION_NAME.DURATION:
+                    res = this.compareValues(video.duration, this.parseTime(condition.value), condition.operator);
                     break;
                 default:
                     break;
@@ -120,85 +181,34 @@ class TriggerManager {
         }
 
         // Check condition for revocation
-        if (video.ended && condition.type === Condition.TYPE.EVENT && condition.name === Condition.NAME.ON_ITEM_END) {
+        if (video.ended && condition.type === mast.CONDITION_TYPE.EVENT && condition.name === mast.CONDITION_NAME.ON_ITEM_END) {
             res = true;
         }
 
         // AND with sub-conditions
         // MAST spec. : "Child conditions are treated as an implicit AND, all children of a condition must evaluate true before a trigger will fire (or be revoked) from that condition."
-        for (i = 0; i < condition.conditions.length; i++) {
-            res &= this._evaluateCondition(condition.conditions[i], video);
+        for (let i = 0; i < condition.conditions.length; i++) {
+            res = res && this.evaluateCondition(condition.conditions[i], video);
         }
 
         return res;
     }
 
-    _evaluateConditions (conditions, video) {
-        var res = false,
-            i;
+    private evaluateConditions (conditions, video: HTMLMediaElement): boolean {
+        let res: boolean = false;
 
         // Evaluate each condition
         // MAST spec. : "Multiple condition elements are treated as an implicit OR, any one of them evaluating true will fire the trigger."
-        for (i = 0; i < conditions.length; i++) {
-            res |=  this._evaluateCondition(conditions[i], video);
+        for (let i = 0; i < conditions.length; i++) {
+            res = res || this.evaluateCondition(conditions[i], video);
         }
 
         return res;
     }
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+    // #region PRIVATE FUNCTIONS
+    // --------------------------------------------------
 
-    constructor() {
-        this._trigger = null;
-    }
-
-    /**
-     * Initializes the TriggerManager.
-     * @method init
-     * @access public
-     * @memberof TriggerManager#
-     * @param {Object} trigger - the trigger to handle by this manager
-     */
-    init (trigger) {
-        this._trigger = trigger;
-    }
-
-    /**
-     * Returns the trigger object managed by this TriggerManager.
-     * @method init
-     * @access public
-     * @memberof TriggerManager#
-     * @return {Object} the managed trigger object
-     */
-    getTrigger () {
-        return this._trigger;
-    }
-
-    /**
-     * Evaluates the trigger start conditions.
-     * @method checkStartConditions
-     * @access public
-     * @memberof TriggerManager#
-     * @param {Number} video - the main video element
-     */
-    checkStartConditions (video) {
-        if (this._trigger.activated) {
-            return false;
-        }
-        return this._evaluateConditions(this._trigger.startConditions, video);
-    }
-
-    /**
-     * Evaluates the trigger end conditions.
-     * @method checkEndConditions
-     * @access public
-     * @memberof TriggerManager#
-     * @param {Number} video - the main video element
-     */
-    checkEndConditions (video) {
-        return this._evaluateConditions(this._trigger.endConditions, video);
-    }
 }
 
 export default TriggerManager;

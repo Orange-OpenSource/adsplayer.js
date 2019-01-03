@@ -31,36 +31,46 @@
 * Errors and warning notifications handler.
 */
 
-import Debug from './Debug';
-import EventBus from './EventBus';
-
-let _instance = null;
+import { Logger } from './Logger';
+import { EventBus } from './EventBus';
 
 
-class ErrorHandler {
+export enum ERROR {
+    DOWNLOAD_ERR_FILES = 'DOWNLOAD_ERR_FILES',
+    DOWNLOAD_ERR_NOT_XML = 'DOWNLOAD_ERR_NOT_XML',
+    LOAD_VAST_FAILED = 'LOAD_VAST_FAILED',
+    NO_VALID_MEDIA_FOUND = 'NO_VALID_MEDIA_FOUND',
+    LOAD_MEDIA_FAILED = 'LOAD_MEDIA_FAILED',
+    UNSUPPORTED_MEDIA_FILE = 'UNSUPPORTED_MEDIA_FILE',
+    UNAVAILABLE_LINK = 'UNAVAILABLE_LINK'
+}  
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+export class ErrorHandler {
+
+    // #region MEMBERS
+    // --------------------------------------------------
+
+    private static instance: ErrorHandler = null;
+
+    private logger: Logger;
+    private eventBus: EventBus;
+
+    // #endregion MEMBERS
+    // --------------------------------------------------
+
+    // #region PUBLIC FUNCTIONS
+    // --------------------------------------------------
 
     static getInstance() {
-        if (_instance === null) {
-            _instance = new ErrorHandler();
+        if (this.instance === null) {
+            this.instance = new ErrorHandler();
         }
-
-        return _instance;
+        return this.instance;
     }
 
     constructor() {
-
-        if (_instance !== null) {
-            return _instance;
-        }
-
-        this._eventBus = EventBus.getInstance();
-        this._debug = Debug.getInstance();
-
-        _instance = this;
-        return _instance;
+        this.logger = Logger.getInstance();
+        this.eventBus = EventBus.getInstance();
     }
 
     /**
@@ -71,7 +81,7 @@ class ErrorHandler {
      * @return {[type]}         [description]
      */
     sendWarning (code, message, data) {
-        this._eventBus.dispatchEvent({
+        this.eventBus.dispatchEvent({
             type: 'warning',
             data: {
                 code: code,
@@ -79,7 +89,7 @@ class ErrorHandler {
                 data: data
             }
         });
-        this._debug.warn("[Warn] Code: " + code + ", Message: " + message + ", Data: " + JSON.stringify(data, null, '\t'));
+        this.logger.warn('[Warn] Code: ' + code + ', Message: ' + message + ', Data: ' + JSON.stringify(data, null, '\t'));
     }
 
     /**
@@ -90,7 +100,7 @@ class ErrorHandler {
      * @return {[type]}         [description]
      */
     sendError (code, message, data) {
-        this._eventBus.dispatchEvent({
+        this.eventBus.dispatchEvent({
             type: 'error',
             data: {
                 code: code,
@@ -98,20 +108,9 @@ class ErrorHandler {
                 data: data
             }
         });
-        this._debug.error("[Error] Code: " + code + ", Message: " + message + ", Data: " + JSON.stringify(data, null, '\t'));
+        this.logger.error('[Error] Code: ' + code + ', Message: ' + message + ', Data: ' + JSON.stringify(data, null, '\t'));
     }
+
+    // #endregion PUBLIC FUNCTIONS
+    // --------------------------------------------------
 }
-
-// File Loader errors
-ErrorHandler.DOWNLOAD_ERR_FILES = "DOWNLOAD_ERR_FILES";
-ErrorHandler.DOWNLOAD_ERR_NOT_XML = "DOWNLOAD_ERR_NOT_XML";
-
-ErrorHandler.LOAD_VAST_FAILED = "LOAD_VAST_FAILED";
-
-// Media Player errors
-ErrorHandler.NO_VALID_MEDIA_FOUND = "NO_VALID_MEDIA_FOUND";
-ErrorHandler.LOAD_MEDIA_FAILED = "LOAD_MEDIA_FAILED";
-ErrorHandler.UNSUPPORTED_MEDIA_FILE = "UNSUPPORTED_MEDIA_FILE";
-ErrorHandler.UNAVAILABLE_LINK = "UNAVAILABLE_LINK";
-
-export default ErrorHandler;

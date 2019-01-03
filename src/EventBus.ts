@@ -31,52 +31,41 @@
 * Event bus utility class for events listening and notifying.
 */
 
-import Debug from './Debug';
+import { Logger } from './Logger';
 
 let _instance = null;
 
-class EventBus {
+export class EventBus {
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
+    // #region MEMBERS
+    // --------------------------------------------------
 
+    private static instance: EventBus = null;
 
-    _getListeners (type, useCapture) {
-        if (useCapture === undefined) { // to provide a default parameter that works !!
-            useCapture = false;
-        }
-        var captype = (useCapture ? '1' : '0') + type;
+    private registrations: object;
+    private logger: Logger;
 
-        if (!(captype in this._registrations)) {
-            this._registrations[captype] = [];
-        }
+    // #endregion MEMBERS
+    // --------------------------------------------------
 
-        return this._registrations[captype];
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+    // #region PUBLIC FUNCTIONS
+    // --------------------------------------------------
 
     static getInstance() {
-        if (_instance === null) {
-            _instance = new EventBus();
+        if (this.instance === null) {
+            this.instance = new EventBus();
         }
-
-        return _instance;
+        return this.instance;
     }
 
     constructor() {
-
-        if (_instance !== null) {
-            return _instance;
-        }
-
-        this._registrations = {};
-        this._debug = Debug.getInstance();
-
-        _instance = this;
-        return _instance;
+        this.registrations = {};
+        this.logger = Logger.getInstance();
     }
+
+
+    // #endregion PUBLIC FUNCTIONS
+    // --------------------------------------------------
 
     /**
      * [addEventListener description]
@@ -84,8 +73,8 @@ class EventBus {
      * @param {[type]} listener   [description]
      * @param {[type]} useCapture [description]
      */
-    addEventListener (type, listener, useCapture) {
-        var listeners = this._getListeners(type, useCapture),
+    public addEventListener (type: string, listener: any, useCapture?: boolean) {
+        var listeners = this.getListeners(type, useCapture),
             idx = listeners.indexOf(listener);
 
         if (idx === -1) {
@@ -100,8 +89,8 @@ class EventBus {
      * @param  {[type]} useCapture [description]
      * @return {[type]}            [description]
      */
-    removeEventListener (type, listener, useCapture) {
-        var listeners = this._getListeners(type, useCapture),
+    public removeEventListener (type: string, listener: any, useCapture?: boolean) {
+        var listeners = this.getListeners(type, useCapture),
             idx = listeners.indexOf(listener);
 
         if (idx !== -1) {
@@ -114,16 +103,36 @@ class EventBus {
      * @param  {[type]} evt [description]
      * @return {[type]}     [description]
      */
-    dispatchEvent (evt) {
-        var listeners = this._getListeners(evt.type, false).slice(),
+    public dispatchEvent (evt: any) {
+        var listeners = this.getListeners(evt.type, false).slice(),
             i = 0;
 
-        this._debug.log("# Event: " + evt.type);
+        this.logger.debug('# Event: ' + evt.type);
         for (i = 0; i < listeners.length; i += 1) {
             listeners[i].call(this, evt);
         }
         return !evt.defaultPrevented;
     }
+
+    // #region PRIVATE FUNCTIONS
+    // --------------------------------------------------
+
+    private getListeners (type: string, useCapture?: boolean) {
+        if (useCapture === undefined) { // to provide a default parameter that works !!
+            useCapture = false;
+        }
+        var captype = (useCapture ? '1' : '0') + type;
+
+        if (!(captype in this.registrations)) {
+            this.registrations[captype] = [];
+        }
+
+        return this.registrations[captype];
+    }
+
+    // #endregion PUBLIC FUNCTIONS
+    // --------------------------------------------------
+
 }
 
-export default EventBus;
+// export default EventBus;

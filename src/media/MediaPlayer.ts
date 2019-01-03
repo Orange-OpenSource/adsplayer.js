@@ -27,70 +27,37 @@
 * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-var xmldom = {};
+import * as vast from '../vast/model/Vast'
 
-xmldom.getElementsByTagName = function(node, name) {
-    var elements = node.getElementsByTagName(name);
-    if (elements.length < 1) {
-        var child = node.firstElementChild || node.firstChild;
-        if (child) {
-            var namespaceURI = child.namespaceURI;
-            elements = node.getElementsByTagNameNS(namespaceURI, name);
-        }
-    }
-    return elements;
-};
+export interface MediaPlayer {
 
-xmldom.getElement = function(node, name) {
-    var elements = this.getElementsByTagName(node, name);
-    if (elements.length < 1) {
-        return null;
-    }
-    return elements[0];
-};
+    load (baseUrl: string, mediaFiles: vast.MediaFile[])
 
-xmldom.getElements = function(node, name) {
-    return this.getElementsByTagName(node, name);
-};
+    getType (): string
 
-xmldom.getSubElements = function(node, name, subName) {
-    var element = this.getElement(node, name);
-    if (element === null) {
-        return [];
-    }
-    return this.getElements(element, subName);
-};
+    getElement (): HTMLElement
 
-xmldom.getChildNode = function (node, name) {
-    if (!node || !node.childNodes) {
-        return null;
-    }
-    for (var i = 0; i < node.childNodes.length; i++) {
-        if (node.childNodes[i].nodeName === name) {
-            return node.childNodes[i];
-        }
-    }
-    return null;
-};
+    addEventListener (type: string, listener: any)
 
-xmldom.getNodeTextValue = function (node) {
-    var cdataSection = this.getChildNode(node, '#cdata-section'),
-        textSection = this.getChildNode(node, '#text');
-    if (cdataSection) {
-        return cdataSection.nodeValue;
-    } else if (textSection) {
-        return textSection.nodeValue;
-    }
-    return '';
-};
+    removeEventListener (type: string, listener: any)
 
-xmldom.getChildNodeTextValue = function (node, name) {
-    var element = this.getElement(node, name);
-    if (element === null) {
-        return '';
-    }
-    return this.getNodeTextValue(element);
-};
+    setDuration (duration: number)
 
+    getDuration (): number
 
-export default xmldom;
+    getCurrentTime (): number
+
+    setVolume (volume: number)
+
+    getVolume (): number
+
+    play ()
+
+    pause ()
+
+    stop ()
+
+    reset ()
+
+    isEnded (): boolean 
+}

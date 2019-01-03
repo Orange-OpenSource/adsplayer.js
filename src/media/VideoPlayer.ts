@@ -31,46 +31,43 @@
 * The VideoPlayer is a MediaPlayer implementation for playing video files.
 */
 
-import Debug from '../Debug';
-import utils from '../utils/utils';
+import * as vast from '../vast/model/Vast'
+import { MediaPlayer } from './MediaPlayer'
+import { Logger } from '../Logger'
+import { Utils } from '../utils/utils'
 
 
-class VideoPlayer {
+export class VideoPlayer implements MediaPlayer {
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
+    // #region MEMBERS
+    // --------------------------------------------------
 
-    isMediaSupported (mimeType) {
-        if (!this._video) {
-            throw "isMediaSupported(): element not created";
-        }
-        if (!(this._video instanceof HTMLMediaElement)) {
-            throw "isMediaSupported(): element must be of type HTMLMediaElement";
-        }
+    private uri: string;
+    private video: HTMLMediaElement;
+    private logger: Logger;
 
-        var canPlay = this._video.canPlayType(mimeType);
-        return (canPlay === "probably" || canPlay === "maybe");
-    }
+    // #endregion MEMBERS
+    // --------------------------------------------------
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+    // #region PUBLIC FUNCTIONS
+    // --------------------------------------------------
 
     constructor() {
-        this._uri = '';
-        this._video = null;
-        this._debug = Debug.getInstance();
+        this.uri = '';
+        this.video = null;
+        this.logger = Logger.getInstance();
     }
 
-    load (baseUrl, mediaFiles) {
+    load (baseUrl: string, mediaFiles: vast.MediaFile[]) {
 
         // Get 'adsplayer-video' element if already declared in DOM
-        this._video = document.getElementById('adsplayer-video');
+        this.video = document.getElementById('adsplayer-video') as HTMLMediaElement;
 
-        if (!this._video) {
+        if (!this.video) {
             // Create the video element
-            this._video = document.createElement('video');
-            this._video.autoplay = false;
-            this._video.id = 'adsplayer-video';
+            this.video = document.createElement('video');
+            this.video.autoplay = false;
+            this.video.id = 'adsplayer-video';
         }
 
         // Check if input format is supported
@@ -87,109 +84,132 @@ class VideoPlayer {
         });
 
         // Play the media file with lowest bitrate
-        this._uri = mediaFiles[0].uri;
+        this.uri = mediaFiles[0].uri;
 
         // Add base URL
-        this._uri = utils.isAbsoluteURI(this._uri) ? this._uri : (baseUrl + this._uri);
+        this.uri = Utils.isAbsoluteURI(this.uri) ? this.uri : (baseUrl + this.uri);
 
-        this._debug.log("Load video media, uri = " + this._uri);
+        this.logger.debug('Load video media, uri = ' + this.uri);
 
-        this._video.addEventListener('error', function(e) {
+        this.video.addEventListener('error', function(e) {
             console.log(e);
         });
 
-        this._video.src = this._uri;
+        this.video.src = this.uri;
 
         return true;
     }
 
     getType () {
-        return "video";
+        return 'video';
     }
 
     getElement () {
-        return this._video;
+        return this.video;
     }
 
-    addEventListener (type, listener) {
-        if (!this._video) {
+    addEventListener (type: string, listener: any) {
+        if (!this.video) {
             return;
         }
-        this._video.addEventListener(type, listener);
+        this.video.addEventListener(type, listener);
     }
 
-    removeEventListener (type, listener) {
-        if (!this._video) {
+    removeEventListener (type: string, listener: any) {
+        if (!this.video) {
             return;
         }
-        this._video.removeEventListener(type, listener);
+        this.video.removeEventListener(type, listener);
     }
 
-    setDuration (/*duration*/) {
+    setDuration (duration: number) {
         // duration is handled by the video element
     }
 
-    getDuration () {
-        if (!this._video) {
+    getDuration (): number {
+        if (!this.video) {
             return 0;
         }
-        return this._video.duration;
+        return this.video.duration;
     }
 
-    getCurrentTime () {
-        if (!this._video) {
+    getCurrentTime (): number {
+        if (!this.video) {
             return 0;
         }
-        return this._video.currentTime;
+        return this.video.currentTime;
     }
 
-    getVolume () {
-        if (!this._video) {
+    getVolume (): number {
+        if (!this.video) {
             return 0;
         }
-        return this._video.muted ? 0 : this._video.volume;
+        return this.video.muted ? 0 : this.video.volume;
     }
 
-    setVolume (volume) {
-        if (!this._video) {
+    setVolume (volume: number) {
+        if (!this.video) {
             return;
         }
-        this._video.volume = volume;
+        this.video.volume = volume;
     }
 
     play () {
-        if (!this._video) {
+        if (!this.video) {
             return;
         }
-        this._video.play();
+        this.video.play();
     }
 
     stop () {
-        if (!this._video) {
+        if (!this.video) {
             return;
         }
-        this._video.pause();
-        this._video.removeAttribute('src');
-        this._video.load();
+        this.video.pause();
+        this.video.removeAttribute('src');
+        this.video.load();
     }
 
     pause () {
-        if (!this._video) {
+        if (!this.video) {
             return;
         }
-        this._video.pause();
+        this.video.pause();
     }
 
     reset () {
-        if (!this._video) {
+        if (!this.video) {
             return;
         }
-        this._video = null;
+        this.video = null;
     }
 
     isEnded () {
-        return this._video.ended;
+        return this.video.ended;
     }
+
+    // #endregion PUBLIC FUNCTIONS
+    // --------------------------------------------------
+
+    // #region PRIVATE FUNCTIONS
+    // --------------------------------------------------    
+
+    private isMediaSupported (mimeType) {
+        if (!this.video) {
+            throw 'isMediaSupported(): element not created';
+        }
+        if (!(this.video instanceof HTMLMediaElement)) {
+            throw 'isMediaSupported(): element must be of type HTMLMediaElement';
+        }
+
+        var canPlay = this.video.canPlayType(mimeType);
+        return (canPlay === 'probably' || canPlay === 'maybe');
+    }
+
+    // #endregion PRIVATE FUNCTIONS
+    // --------------------------------------------------    
+
+
 }
 
 export default VideoPlayer;

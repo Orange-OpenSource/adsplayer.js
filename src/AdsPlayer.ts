@@ -30,48 +30,49 @@
 /**
 * AdsPlayer.
 * @constructor AdsPlayer
-* @param {Object} adsPlayerContainer - the DOM container in which &lt;video&gt; and &lt;img&gt; HTML components will be appended
 */
 
-import AdsPlayerController from './AdsPlayerController';
-import EventBus from './EventBus';
-import Debug from './Debug';
+import { AdsPlayerController } from './AdsPlayerController';
+import { EventBus } from './EventBus';
+import { Logger } from './Logger';
 
 const NAME = 'AdsPlayer';
 const VERSION = '';
 const GIT_TAG = '@@REVISION';
 const BUILD_DATE = '@@TIMESTAMP';
 
-///////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////// PRIVATE ////////////////////////////////////////////
 
-function _onError (e) {
-    this._error = e.data;
-}
+export class AdsPlayer {
 
-function _onWarning (e) {
-    this._warning = e.data;
-}
+    // #region MEMBERS
+    // --------------------------------------------------
 
-class AdsPlayer {
+    private adsPlayerController: AdsPlayerController;
+    private logger: Logger;
+    private eventBus: EventBus;
 
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    ////////////////////////////////////////// PUBLIC /////////////////////////////////////////////
+    private error;
+    private warning;
+    private onErrorListener;
+    private onWarningListener;
 
-    constructor (adsPlayerContainer) {
 
-        this._adsPlayerContainer = adsPlayerContainer;
-        this._error = null;
-        this._warning = null;
-        this._eventBus = EventBus.getInstance();
-        this._debug = Debug.getInstance();
-        this._adsPlayerController = null;
+    // #endregion MEMBERS
+    // --------------------------------------------------
 
-        this.onErrorListener = _onError.bind(this);
-        this.onWarningListener = _onWarning.bind(this);
+    // #region PUBLIC FUNCTIONS
+    // --------------------------------------------------
+
+    constructor () {
+        this.adsPlayerController = null;
+        this.eventBus = EventBus.getInstance();
+        this.logger = Logger.getInstance();
+
+        this.error = null;
+        this.warning = null;
+        this.onErrorListener = this.onError.bind(this);
+        this.onWarningListener = this.onWarning.bind(this);
     }
-
-    // Plugin API
 
     /**
     * [Plugin API, invoked by hasplayer.js]
@@ -81,7 +82,7 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @return {string} the plugin name
     */
-    getName () {
+    getName (): string {
         return NAME;
     }
 
@@ -93,11 +94,11 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @param {Object} video - the main video player
     */
-    init (video, handleMainPlayerPlayback) {
-        this._adsPlayerController = new AdsPlayerController();
-        this._adsPlayerController.init(video, this._adsPlayerContainer, handleMainPlayerPlayback);
-        this._eventBus.addEventListener('error', this.onErrorListener);
-        this._eventBus.addEventListener('warning', this.onWarningListener);
+    init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = false) {
+        this.adsPlayerController = new AdsPlayerController();
+        this.adsPlayerController.init(video, adsPlayerContainer, handleMainPlayerPlayback);
+        this.eventBus.addEventListener('error', this.onErrorListener);
+        this.eventBus.addEventListener('warning', this.onWarningListener);
     }
 
     /**
@@ -108,10 +109,10 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @param {object} stream - the stream contaning all stream informations (url, protData, adsUrl)
     */
-    load (stream) {
+    load (stream: object) {
         return new Promise((resolve, reject) => {
-            if (stream.adsUrl) {
-                this._adsPlayerController.load(stream.adsUrl).then(function (res) {
+            if (stream.hasOwnProperty('adsUrl')) {
+                this.adsPlayerController.load(stream['adsUrl']).then(function (res) {
                     resolve(res);
                 }).catch(function (e) {
                     reject(e);
@@ -130,7 +131,7 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     */
     stop () {
-        this._adsPlayerController.stop();
+        this.adsPlayerController.stop();
     }
 
     /**
@@ -141,7 +142,7 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     */
     reset () {
-        this._adsPlayerController.reset();
+        this.adsPlayerController.reset();
     }
 
     /**
@@ -152,9 +153,9 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     */
     destroy () {
-        this._adsPlayerController.destroy();
-        this._eventBus.removeEventListener('error', this.onErrorListener);
-        this._eventBus.removeEventListener('warning', this.onWarningListener);
+        this.adsPlayerController.destroy();
+        this.eventBus.removeEventListener('error', this.onErrorListener);
+        this.eventBus.removeEventListener('warning', this.onWarningListener);
     }
 
     // AdsPlayer additionnal API
@@ -166,7 +167,7 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @return {string} the plugin version
     */
-    getVersion () {
+    getVersion (): string {
         return VERSION;
     }
 
@@ -176,7 +177,7 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @return {string} the full plugin version, including git revision
     */
-    getVersionFull  () {
+    getVersionFull (): string {
         if (GIT_TAG.indexOf("@@") === -1) {
             return VERSION + '_' + GIT_TAG;
         } else {
@@ -191,7 +192,7 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     * @return {string} the build date
     */
-    getBuildDate () {
+    getBuildDate (): string {
         if (BUILD_DATE.indexOf("@@") === -1) {
             return BUILD_DATE;
         } else {
@@ -206,7 +207,7 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     */
     play () {
-        this._adsPlayerController.play();
+        this.adsPlayerController.play();
     }
 
     /**
@@ -216,7 +217,7 @@ class AdsPlayer {
     * @memberof AdsPlayer#
     */
     pause () {
-        this._adsPlayerController.pause();
+        this.adsPlayerController.pause();
     }
 
     /**
@@ -234,8 +235,8 @@ class AdsPlayer {
     * @param {callback} listener - the callback which is called when an event of the specified type occurs
     * @param {boolean} useCapture - see HTML DOM addEventListener() method specification
     */
-    addEventListener (type, listener, useCapture) {
-        this._eventBus.addEventListener(type, listener, useCapture);
+    addEventListener (type: string, listener: any, useCapture?: boolean) {
+        this.eventBus.addEventListener(type, listener, useCapture);
     }
 
     /**
@@ -247,8 +248,8 @@ class AdsPlayer {
     * @param {string} type - the event type on which the listener was registered
     * @param {callback} listener - the callback which was registered to the event type
     */
-    removeEventListener (type, listener) {
-        this._eventBus.removeEventListener(type, listener);
+    removeEventListener (type: string, listener: any, useCapture?: boolean) {
+        this.eventBus.removeEventListener(type, listener, useCapture);
     }
 
     /**
@@ -258,7 +259,7 @@ class AdsPlayer {
     * @return {object} the Error object for the most recent error, or null if there has not been an error
     */
     getError () {
-        return this._error;
+        return this.error;
     }
 
     /**
@@ -268,32 +269,27 @@ class AdsPlayer {
     * @return {object} the Warning object for the most recent warning, or null if there has not been a warning
     */
     getWarning () {
-        return this._warning;
+        return this.warning;
     }
 
     enableLogs (enable) {
-        this._debug.setLevel(enable? 4 : 0);
+        this.logger.setLevel(enable? 4 : 0);
     }
+
+    // #region PRIVATE FUNCTIONS
+    // --------------------------------------------------
+
+    private onError (e) {
+        this.error = e.data;
+    }
+    
+    private onWarning (e) {
+        this.warning = e.data;
+    }
+
+    // #endregion PRIVATE FUNCTIONS
+    // --------------------------------------------------
 }
-
-// /**
-//  * @class
-//  * @classdesc AdsPlayer
-//  */
-// AdsPlayer.prototype = {
-//     constructor: AdsPlayer
-// };
-
-// AdsPlayer.mast = {};
-// AdsPlayer.mast.model = {};
-// AdsPlayer.mast.model.Trigger = {};
-// AdsPlayer.mast.model.Trigger.Condition = {};
-// AdsPlayer.vast = {};
-// AdsPlayer.vast.model = {};
-// AdsPlayer.vast.model.Vast = {};
-// AdsPlayer.media = {};
-// AdsPlayer.utils = {};
-
 
 
 /////////// EVENTS
