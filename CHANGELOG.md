@@ -1,3 +1,7 @@
+### Release Notes v1.4.0 (2019/01/04)
+* Migrate source code to TypeScript
+* Migrate module bunlder to webpack
+
 ### v1.3.0 (2018/10/15)
 * Add option to disable main video playback management (pause, resume)
 * AdsPlayer.load() method resolve true if pre-roll trigger
