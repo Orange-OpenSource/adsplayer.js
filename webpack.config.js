@@ -1,30 +1,27 @@
 'use strict'
 
 var webpack = require('webpack');
-var path = require('path');
-var argv = require('yargs').argv;
 var pkg = require("./package.json");
 
 var TypedocWebpackPlugin = require('typedoc-webpack-plugin');
 var CopyWebpackPlugin = require('copy-webpack-plugin');
+var ZipPlugin = require('zip-webpack-plugin');
 
-var ouptutname = 'adsplayer';
+var ouptutname = 'adsplayer.js';
 
 var commitDate = require('child_process')
   .execSync('git log -1 --format=%cD')
   .toString();
 
-console.log(commitDate);
 var date = new Date(commitDate);
 var gitDate = (date.getFullYear()) + '-' + (date.getMonth() + 1) + '-' + (date.getDate());
-console.log(gitDate);
 
 module.exports = {
   entry: __dirname + '/index.ts',
   devtool: 'source-map',
   output: {
     path: __dirname + '/dist',
-    filename: ouptutname + '.js',
+    filename: ouptutname,
     library: 'adsplayer',
     libraryTarget: 'umd',
     umdNamedDefine: true
@@ -90,6 +87,9 @@ module.exports = {
       excludeNotExported: true,
       excludePrivate: true,
       ignoreCompilerErrors: true
+    }),
+    new ZipPlugin({
+      filename: ouptutname + '-v' + pkg.version + '.zip',
     })
   ]
 };

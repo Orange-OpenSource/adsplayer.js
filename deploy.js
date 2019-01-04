@@ -1,5 +1,5 @@
 var exec = require('child_process').exec,
-    fs = require('fs'),
+    fs = require('fs-extra'),
     del = require('del'),
     pkg = require('./package.json');
 
@@ -102,12 +102,10 @@ getBranchName().then(
 // 5 - Copy 'dist' directory contents into corresponding subfolder of gh-pages
 .then(function() {
     var path = 'gh-pages/' + pkg.version;
-    if (!fs.existsSync(path)) {
-        console.info('Create new folder: ', path);
-        fs.mkdirSync(path);
-    }
+    fs.removeSync(path);
     console.info('Copy dist/* into ' + path);
-    return execCommand('cp -r dist/* ' + path);
+    fs.copySync('dist', path);
+    return Promise.resolve();
 })
 
 // 6 - Upate home file (index.html) in case of a new release
