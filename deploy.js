@@ -1,5 +1,5 @@
 var exec = require('child_process').exec,
-    fs = require('fs'),
+    fs = require('fs-extra'),
     del = require('del'),
     pkg = require('./package.json');
 
@@ -62,9 +62,9 @@ getBranchName().then(
         branch = branch.replace(/\s/g, '').trim();
         console.info('Branch: ' + branch);
 
-        // If 'development' branch set version to 'development'
-        if (branch === 'development') {
-            pkg.version = 'development';
+        // If 'develop' branch set version to 'develop'
+        if (branch === 'develop') {
+            pkg.version = 'develop';
         } else if (branch !== 'master') {
             // For any other branch than master 'branch', do not deploy
             return Promise.reject('Branch not deployed');
@@ -102,12 +102,10 @@ getBranchName().then(
 // 5 - Copy 'dist' directory contents into corresponding subfolder of gh-pages
 .then(function() {
     var path = 'gh-pages/' + pkg.version;
-    if (!fs.existsSync(path)) {
-        console.info('Create new folder: ', path);
-        fs.mkdirSync(path);
-    }
+    fs.removeSync(path);
     console.info('Copy dist/* into ' + path);
-    return execCommand('cp -r dist/* ' + path);
+    fs.copySync('dist', path);
+    return Promise.resolve();
 })
 
 // 6 - Upate home file (index.html) in case of a new release
@@ -120,7 +118,7 @@ getBranchName().then(
     if (index.indexOf(pkg.version) === -1) {
         var pos = index.indexOf('<p/>');
         if (pos !== -1) {
-            // Insert new link (before 'development' version)
+            // Insert new link (before 'develop' version)
             console.info('Update index.html');
             index = index.substring(0, pos - 1) +
                     '\n<a href=\"' + pkg.version + '/index.html\">Version ' + pkg.version + '</a> - (' + pkg.date + ')<br/>\n' +

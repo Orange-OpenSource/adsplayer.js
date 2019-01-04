@@ -27,10 +27,8 @@
 * WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 
-var utils = {};
-
-utils.isAbsoluteURI = function(uri) {
-    return ((uri.toLowerCase().indexOf('http://') >= 0) || (uri.toLowerCase().indexOf('https://') >= 0));
-};
-
-export default utils;
+export class Utils {
+    static isAbsoluteURI = function (uri: string): boolean {
+        return ((uri.toLowerCase().indexOf('http://') >= 0) || (uri.toLowerCase().indexOf('https://') >= 0));
+    }
+}
