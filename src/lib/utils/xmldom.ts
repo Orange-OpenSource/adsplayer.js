@@ -34,10 +34,11 @@ export class XmlDom {
             return elements;
         }
         let child = node.firstElementChild || node.firstChild;
-        if (child) {
-            let namespaceURI = child.namespaceURI;
-            return node.getElementsByTagNameNS(namespaceURI, name);
+        if (!child) {
+            return elements;
         }
+        let namespaceURI = child.namespaceURI;
+        return node.getElementsByTagNameNS(namespaceURI, name);
     }
 
     static getElement = function(node, name) {
