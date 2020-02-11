@@ -92,6 +92,13 @@ export enum EventTypes {
     PAUSE = 'pause',
 
     /**
+     * The 'timeChanged' event is fired when the current ad playback time changed.
+     * @event TIME_CHANGED
+     * @property <b>currentTime</b>: number - the current time
+     */
+    TIME_CHANGED = 'timeChanged',
+
+    /**
      * The 'click' event is fired when a click has been performed on the ad component.
      * When the 'click' event is fired, the application shall open the web page with the provided URI.
      * <br/>Event data properties:
