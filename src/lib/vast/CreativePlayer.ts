@@ -43,6 +43,7 @@ import { ImagePlayer } from '../media/ImagePlayer';
 import { Logger } from '../Logger';
 import { EventBus, AdEvents } from '../EventBus';
 import { EventTypes } from '../../Events';
+import { Utils } from '../utils/utils';
 
 export class CreativePlayer {
 
@@ -117,27 +118,6 @@ export class CreativePlayer {
 
     // #region PRIVATE FUNCTIONS
     // --------------------------------------------------
-
-    private parseTime (str: string) {
-        var timeParts,
-            SECONDS_IN_HOUR = 60 * 60,
-            SECONDS_IN_MIN = 60;
-
-        if (!str) {
-            return -1;
-        }
-
-        timeParts = str.split(':');
-
-        // Check time format, must be HH:MM:SS(.mmm)
-        if (timeParts.length !== 3) {
-            return -1;
-        }
-
-        return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) +
-                (parseInt(timeParts[1]) * SECONDS_IN_MIN) +
-                (parseFloat(timeParts[2]));
-    }
 
     private onMediaPlay () {
         this.logger.debug('Creative media play');
@@ -234,7 +214,7 @@ export class CreativePlayer {
             return false;
         }
 
-        this.mediaPlayer.setDuration(this.parseTime(creative.duration));
+        this.mediaPlayer.setDuration(Utils.parseTime(creative.duration));
         this.mediaPlayer.addEventListener('play', this.onMediaPlayListener);
         this.mediaPlayer.addEventListener('pause', this.onMediaPauseListener);
         this.mediaPlayer.addEventListener('error', this.onMediaErrorListener);

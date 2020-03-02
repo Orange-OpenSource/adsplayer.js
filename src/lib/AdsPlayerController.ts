@@ -374,7 +374,7 @@ export class AdsPlayerController {
         }
     }
 
-    private playTrigger (trigger) {
+    private playTrigger (trigger: Trigger, firstTrigger: boolean) {
         if (trigger.vasts.length === 0) {
             this.onTriggerEnd();
             return;
@@ -387,6 +387,17 @@ export class AdsPlayerController {
         this.logger.debug('Start playing trigger ' + trigger.id);
         this.vastPlayerManager = new VastPlayerManager();
         this.vastPlayerManager.init(trigger.vasts, this.adsPlayerContainer, this.mainVideo);
+
+        if (firstTrigger) {
+            // Notifies the application ad(s) playback starts
+            this.eventBus.dispatchEvent(EventTypes.START, {
+                id: trigger.id,
+                duration: this.vastPlayerManager.getVastsDuration(),
+                currentTime: this.mainVideo.currentTime,
+                ended: this.mainVideo.ended
+            });
+        }
+
         this.vastPlayerManager.start();
     }
 
@@ -397,14 +408,6 @@ export class AdsPlayerController {
             return;
         }
 
-        if (firstTrigger) {
-            // Notifies the application ad(s) playback starts
-            this.eventBus.dispatchEvent(EventTypes.START, {
-                currentTime: this.mainVideo.currentTime,
-                ended: this.mainVideo.ended
-            });
-        }
-
         this.logger.debug('Activate trigger ' + trigger.id);
 
         trigger.activated = true;
@@ -412,10 +415,10 @@ export class AdsPlayerController {
         if (trigger.vasts.length === 0) {
             // Download VAST files
             this.loadTriggerVasts(trigger).then(() => {
-                this.playTrigger(trigger);
+                this.playTrigger(trigger, firstTrigger);
             });
         } else {
-            this.playTrigger(trigger);
+            this.playTrigger(trigger, firstTrigger);
         }
     }
 

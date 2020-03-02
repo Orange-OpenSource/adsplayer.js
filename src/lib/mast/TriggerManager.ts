@@ -34,6 +34,8 @@
 */
 
 import * as mast from './model/Mast';
+import { Utils } from '../utils/utils';
+
 
 export class TriggerManager {
 
@@ -102,27 +104,6 @@ export class TriggerManager {
     // #region PRIVATE FUNCTIONS
     // --------------------------------------------------
 
-    private parseTime (str: string): number {
-        let timeParts,
-            SECONDS_IN_HOUR = 60 * 60,
-            SECONDS_IN_MIN = 60;
-
-        if (!str) {
-            return -1;
-        }
-
-        timeParts = str.split(':');
-
-        // Check time format, must be HH:MM:SS(.mmm)
-        if (timeParts.length !== 3) {
-            return -1;
-        }
-
-        return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) +
-                (parseInt(timeParts[1]) * SECONDS_IN_MIN) +
-                (parseFloat(timeParts[2]));
-    }
-
     private compareValues (value1: number, value2: number, operator: string): boolean {
 
         if (value1 < 0 || value2 < 0) {
@@ -170,10 +151,10 @@ export class TriggerManager {
         if (condition.type === mast.CONDITION_TYPE.PROPERTY) {
             switch (condition.name) {
                 case mast.CONDITION_NAME.POSITION:
-                    res = this.compareValues(video.currentTime, this.parseTime(condition.value), condition.operator);
+                    res = this.compareValues(video.currentTime, Utils.parseTime(condition.value), condition.operator);
                     break;
                 case mast.CONDITION_NAME.DURATION:
-                    res = this.compareValues(video.duration, this.parseTime(condition.value), condition.operator);
+                    res = this.compareValues(video.duration, Utils.parseTime(condition.value), condition.operator);
                     break;
                 default:
                     break;

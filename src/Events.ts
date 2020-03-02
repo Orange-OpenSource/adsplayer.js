@@ -45,6 +45,8 @@ export enum EventTypes {
      * and displayed.
      * <br/>Event data properties:
      * @event START
+     * @property <b>id</b>: string - the ad id
+     * @property <b>duration</b>: number - the ad duration (duration of all clips contained in the ad break)
      * @property <b>currentTime</b>: number - the main video element current time
      * @property <b>ended</b>: boolean - the main video element ended state (true in case of end-roll ad)
      */

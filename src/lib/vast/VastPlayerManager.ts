@@ -38,6 +38,7 @@ import * as vast from './model/Vast';
 import { AdPlayer } from './AdPlayer';
 import { Logger } from '../Logger';
 import { EventBus, AdEvents } from '../EventBus';
+import { Utils } from '../utils/utils';
 
 export class VastPlayerManager {
 
@@ -111,6 +112,26 @@ export class VastPlayerManager {
         this.stopAd();
     }
 
+    getVastsDuration() {
+        let duration = 0;
+        // Get all VASTs duration
+        for (let i = 0; i < this.vasts.length; i++) {
+            let vast = this.vasts[i];
+            // Get all Ads duration
+            for (let j = 0; j < vast.ads.length; j++) {
+                let ad = vast.ads[j];
+                // Get all linear Creatives duration
+                for (let k = 0; k < ad.inLine.creatives.length; k++) {
+                    let creative = ad.inLine.creatives[k];
+                    if (creative.linear) {
+                        duration += Utils.parseTime(creative.linear.duration);
+                    }
+                }
+            }
+        }
+        return duration;
+    }
+
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
@@ -118,7 +139,6 @@ export class VastPlayerManager {
     // --------------------------------------------------
 
     private onAdEnd () {
-
         this.logger.debug('Ad ended');
 
         // Stop the current Ad
@@ -192,7 +212,6 @@ export class VastPlayerManager {
     }
 
     private playNextVast () {
-
         this.vastIndex++;
 
         if (this.vastIndex < this.vasts.length) {
