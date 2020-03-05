@@ -2,13 +2,17 @@
   "name": "adsplayer.js",
   "version": "1.5.0",
   "description": "Plugin for hasplayer.js used to handle ad-insertion in MAST/VAST format",
-  "main": "adsplayer.js",
-  "types": "lib/index.d.ts",
+  "main": "dist/adsplayer.js",
+  "types": "dist/lib/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "clean": "rimraf dist",
     "dev": "webpack --config ./webpack.config.js  --mode development --watch --progress",
     "build": "webpack --config ./webpack.config.js  --mode production --progress",
-    "deploy": "node deploy.js"
+    "deploy": "node deploy.js",
+    "prepack": "npm run build"
   },
   "repository": {
     "type": "git",
