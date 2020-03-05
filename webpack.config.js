@@ -65,12 +65,6 @@ module.exports = {
         return content;
       }
     }]),
-    new CopyWebpackPlugin([
-      './package.json',
-      './README.md',
-      './CHANGELOG.md',
-      './COPYRIGHT'
-    ]),
     new TypedocWebpackPlugin({
       name: 'adsplayer.js',
       out: './doc',
