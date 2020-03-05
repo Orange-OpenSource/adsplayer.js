@@ -1,3 +1,9 @@
+### Release Notes v1.5.0 (2020/03/05)
+* Add trigger id and whole trigger duration in 'start' event
+* Add 'timeChanged' event when media playback is progressing
+* Bugs fixing:
+  - Fix XML DOM parser
+
 ### Release Notes v1.4.0 (2019/01/04)
 * Migrate source code to TypeScript
 * Migrate module bunlder to webpack
