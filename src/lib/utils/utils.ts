@@ -31,4 +31,25 @@ export class Utils {
     static isAbsoluteURI = function (uri: string): boolean {
         return ((uri.toLowerCase().indexOf('http://') >= 0) || (uri.toLowerCase().indexOf('https://') >= 0));
     }
+
+    static parseTime = function (str: string): number {
+        let timeParts,
+            SECONDS_IN_HOUR = 60 * 60,
+            SECONDS_IN_MIN = 60;
+
+        if (!str) {
+            return -1;
+        }
+
+        timeParts = str.split(':');
+
+        // Check time format, must be HH:MM:SS(.mmm)
+        if (timeParts.length !== 3) {
+            return -1;
+        }
+
+        return  (parseInt(timeParts[0]) * SECONDS_IN_HOUR) +
+                (parseInt(timeParts[1]) * SECONDS_IN_MIN) +
+                (parseFloat(timeParts[2]));
+    }
 }
