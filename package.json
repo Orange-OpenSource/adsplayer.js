@@ -1,6 +1,6 @@
 {
   "name": "adsplayer.js",
-  "version": "1.5.2",
+  "version": "1.6.0-dev",
   "description": "Plugin for hasplayer.js used to handle ad-insertion in MAST/VAST format",
   "main": "dist/adsplayer.js",
   "types": "dist/lib/index.d.ts",
