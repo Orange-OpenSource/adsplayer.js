@@ -1,3 +1,6 @@
+### Release Notes v1.5.2 (2020/04/01)
+* ErrorHandler and EventBus no more singleton
+
 ### Release Notes v1.5.1 (2020/03/05)
 * Add trigger id and whole trigger duration in 'start' event
 * Add 'timeChanged' event when media playback is progressing

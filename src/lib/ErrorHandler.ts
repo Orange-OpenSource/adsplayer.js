@@ -41,8 +41,6 @@ export class ErrorHandler {
     // #region MEMBERS
     // --------------------------------------------------
 
-    private static instance: ErrorHandler = null;
-
     private logger: Logger;
     private eventBus: EventBus;
 
@@ -52,16 +50,9 @@ export class ErrorHandler {
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
-    static getInstance() {
-        if (this.instance === null) {
-            this.instance = new ErrorHandler();
-        }
-        return this.instance;
-    }
-
-    constructor () {
+    constructor (eventBus) {
         this.logger = Logger.getInstance();
-        this.eventBus = EventBus.getInstance();
+        this.eventBus = eventBus;
     }
 
     sendError (code: ErrorCodes, data: object) {

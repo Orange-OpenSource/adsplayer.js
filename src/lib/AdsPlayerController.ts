@@ -77,7 +77,7 @@ export class AdsPlayerController {
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
-    constructor () {
+    constructor (eventBus: EventBus) {
 
         this.mainVideo = null;
         this.adsPlayerContainer = null;
@@ -87,9 +87,9 @@ export class AdsPlayerController {
         this.vastPlayerManager = null;
         this.mastParser = new MastParser();
         this.vastParser = new VastParser();
-        this.errorHandler = ErrorHandler.getInstance();
         this.logger = Logger.getInstance();
-        this.eventBus = EventBus.getInstance();
+        this.eventBus = eventBus;
+        this.errorHandler = new ErrorHandler(eventBus);
 
         this.handleMainPlayerPlayback = true;
 
@@ -385,7 +385,7 @@ export class AdsPlayerController {
 
         // Play the trigger
         this.logger.debug('Start playing trigger ' + trigger.id);
-        this.vastPlayerManager = new VastPlayerManager();
+        this.vastPlayerManager = new VastPlayerManager(this.eventBus);
         this.vastPlayerManager.init(trigger.vasts, this.adsPlayerContainer, this.mainVideo);
 
         if (firstTrigger) {
