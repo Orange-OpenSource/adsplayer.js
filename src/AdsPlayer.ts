@@ -59,7 +59,7 @@ export class AdsPlayer {
 
     constructor () {
         this.adsPlayerController = null;
-        this.eventBus = EventBus.getInstance();
+        this.eventBus = new EventBus();
         this.logger = Logger.getInstance();
 
         this.error = null;
@@ -81,7 +81,7 @@ export class AdsPlayer {
     * @param {boolean} handleMainPlayerPlayback - true (by default) if AdsPlayer shall handle the main video playback state
     */
     init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = true) {
-        this.adsPlayerController = new AdsPlayerController();
+        this.adsPlayerController = new AdsPlayerController(this.eventBus);
         this.adsPlayerController.init(video, adsPlayerContainer, handleMainPlayerPlayback);
         this.eventBus.addEventListener(EventTypes.ERROR, this.onErrorListener);
     }
@@ -123,7 +123,7 @@ export class AdsPlayer {
     */
     destroy () {
         this.adsPlayerController.destroy();
-        this.eventBus.removeEventListener(EventTypes.ERROR, this.onErrorListener);
+        this.eventBus.removeAllEventListener();
     }
 
     /**
@@ -205,7 +205,7 @@ export class AdsPlayer {
     private onError (e) {
         this.error = e.data;
     }
-    
+
     // #endregion PRIVATE FUNCTIONS
     // --------------------------------------------------
 }
