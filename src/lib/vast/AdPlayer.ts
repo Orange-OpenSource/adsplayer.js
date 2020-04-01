@@ -73,7 +73,7 @@ export class AdPlayer {
      * @memberof AdPlayer#
      */
 
-    constructor () {
+    constructor (eventBus) {
         this.ad = null;
         this.adPlayerContainer = null;
         this.mainVideo = null;
@@ -81,7 +81,7 @@ export class AdPlayer {
         this.creativeIndex = -1;
         this.creativePlayer = null;
         this.logger = Logger.getInstance();
-        this.eventBus = EventBus.getInstance();
+        this.eventBus = eventBus;
 
         this.onCreativeEndListener = this.onCreativeEnd.bind(this);
     }
@@ -198,7 +198,7 @@ export class AdPlayer {
         if (linear) {
             this.logger.debug('Play Linear Ad, duration = ' + linear.duration);
             this.eventBus.addEventListener(AdEvents.CREATIVE_END, this.onCreativeEndListener);
-            this.creativePlayer = new CreativePlayer();
+            this.creativePlayer = new CreativePlayer(this.eventBus);
             if (!this.creativePlayer.init(creative.linear, this.adPlayerContainer, this.mainVideo, this.baseUrl)) {
                 this.playNextCreative();
             }
