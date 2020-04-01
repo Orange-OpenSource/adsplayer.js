@@ -63,7 +63,7 @@ export class VastPlayerManager {
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
-    constructor () {
+    constructor (eventBus) {
         this.vasts = [];
         this.adPlayerContainer = null;
         this.mainVideo = null;
@@ -71,7 +71,7 @@ export class VastPlayerManager {
         this.adIndex = -1;
         this.adPlayer = null;
         this.logger = Logger.getInstance();
-        this.eventBus = EventBus.getInstance();
+        this.eventBus = eventBus;
         this.onAdEndListener = this.onAdEnd.bind(this);
     }
 
@@ -179,7 +179,7 @@ export class VastPlayerManager {
         this.logger.debug('Play Ad - index = ' + this.adIndex);
 
         this.eventBus.addEventListener(AdEvents.AD_END, this.onAdEndListener);
-        this.adPlayer = new AdPlayer();
+        this.adPlayer = new AdPlayer(this.eventBus);
         this.adPlayer.init(ad, this.adPlayerContainer, this.mainVideo, vast.baseUrl);
         this.adPlayer.start();
     }

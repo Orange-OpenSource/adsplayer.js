@@ -70,13 +70,13 @@ export class CreativePlayer {
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
-    constructor() {
+    constructor(eventBus) {
         this.adPlayerContainer = null;
         this.mediaPlayer = null;
         this.trackingEventsManager = null;
         this.mainVideo = null;
         this.logger = Logger.getInstance();
-        this.eventBus = EventBus.getInstance();
+        this.eventBus = eventBus;
 
         this.onMediaPlayListener = this.onMediaPlay.bind(this);
         this.onMediaPauseListener = this.onMediaPause.bind(this);

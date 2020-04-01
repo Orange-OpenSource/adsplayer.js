@@ -52,8 +52,6 @@ export class EventBus {
     // #region MEMBERS
     // --------------------------------------------------
 
-    private static instance: EventBus = null;
-
     private registrations: object;
     private logger: Logger;
 
@@ -63,18 +61,10 @@ export class EventBus {
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
-    static getInstance() {
-        if (this.instance === null) {
-            this.instance = new EventBus();
-        }
-        return this.instance;
-    }
-
     constructor() {
         this.registrations = {};
         this.logger = Logger.getInstance();
     }
-
 
     // #endregion PUBLIC FUNCTIONS
     // --------------------------------------------------
@@ -95,6 +85,10 @@ export class EventBus {
         if (idx !== -1) {
             listeners.splice(idx, 1);
         }
+    }
+
+    public removeAllEventListener () {
+        this.registrations = {};
     }
 
     public dispatchEvent (type: string, data?: object) {
