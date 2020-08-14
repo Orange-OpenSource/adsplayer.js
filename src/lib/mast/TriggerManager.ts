@@ -84,6 +84,12 @@ export class TriggerManager {
         if (this.trigger.activated) {
             return false;
         }
+
+        if (this.trigger.sources.length === 0) {
+            // no ads sources to play, do not activate this trigger
+            return false;
+        }
+
         return this.evaluateConditions(this.trigger.startConditions, video);
     }
 
