@@ -1,3 +1,8 @@
+### Release Notes v1.5.3 (2020/08/14)
+* Update packages dependencies (fix security vulnerability)
+* Bugs fixing:
+  - Ignore trigger with empty sources
+
 ### Release Notes v1.5.2 (2020/04/01)
 * ErrorHandler and EventBus no more singleton
 
