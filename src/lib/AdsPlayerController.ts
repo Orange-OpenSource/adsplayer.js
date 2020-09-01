@@ -65,6 +65,8 @@ export class AdsPlayerController {
     private errorHandler: ErrorHandler;
 
     private handleMainPlayerPlayback: boolean;
+    private filterTriggersFn: Function;
+
     private onVideoPlayingListener;
     private onVideoTimeupdateListener;
     private onVideoEndedListener;
@@ -92,6 +94,7 @@ export class AdsPlayerController {
         this.errorHandler = new ErrorHandler(eventBus);
 
         this.handleMainPlayerPlayback = true;
+        this.filterTriggersFn = undefined;
 
         this.onVideoPlayingListener = this.onVideoPlaying.bind(this);
         this.onVideoTimeupdateListener = this.onVideoTimeupdate.bind(this);
@@ -106,11 +109,14 @@ export class AdsPlayerController {
      * @memberof AdsPlayerController#
      * @param {Object} video - the HTML5 video element used by the main media player
      * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
+     * @param {boolean} handleMainPlayerPlayback - true (by default) if AdsPlayer shall handle the main video playback state
+     * @param {Function} filterTriggersFn - the callback function for filtering triggers
      */
-    init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = false) {
+    init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = false, filterTriggersFn?: Function) {
         this.mainVideo = video;
         this.adsPlayerContainer = adsPlayerContainer;
         this.handleMainPlayerPlayback = handleMainPlayerPlayback;
+        this.filterTriggersFn = filterTriggersFn;
 
         // Add <video> event listener
         this.mainVideo.addEventListener('playing', this.onVideoPlayingListener);
@@ -301,8 +307,17 @@ export class AdsPlayerController {
             return;
         }
 
-        // Store base URL for subsequent VATS files download
+        // Store base URL for subsequent VAST files download
         this.mast.baseUrl = mastBaseUrl;
+
+        // Filter the triggers
+        if (this.filterTriggersFn) {
+            try {
+                this.mast.triggers = this.filterTriggersFn(this.mast.triggers);
+            } catch (e) {
+                this.logger.error('Failed to filter triggers');
+            }
+        }
 
         // Initialize the trigger managers
         for (let i = 0; i < this.mast.triggers.length; i++) {
