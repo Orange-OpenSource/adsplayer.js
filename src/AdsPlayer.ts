@@ -79,7 +79,7 @@ export class AdsPlayer {
     * @param {HTMLMediaElement} video - the main video player
     * @param {HTMLElement} adsPlayerContainer - the HTML element that will contains ad media element
     * @param {boolean} handleMainPlayerPlayback - true (by default) if AdsPlayer shall handle the main video playback state
-    * @param {Function} filterTriggersFn - the callback function for filtering triggers
+    * @param {Function} filterTriggersFn - the callback function to filter triggers
     */
     init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = true, filterTriggersFn?: Function) {
         this.adsPlayerController = new AdsPlayerController(this.eventBus);

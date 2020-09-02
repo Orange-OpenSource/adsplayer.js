@@ -110,7 +110,7 @@ export class AdsPlayerController {
      * @param {Object} video - the HTML5 video element used by the main media player
      * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
      * @param {boolean} handleMainPlayerPlayback - true (by default) if AdsPlayer shall handle the main video playback state
-     * @param {Function} filterTriggersFn - the callback function for filtering triggers
+     * @param {Function} filterTriggersFn - the callback function to filter triggers
      */
     init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = false, filterTriggersFn?: Function) {
         this.mainVideo = video;
