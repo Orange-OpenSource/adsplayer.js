@@ -135,8 +135,9 @@ export class AdsPlayerController {
      * @access public
      * @memberof AdsPlayerController#
      * @param {string} mastUrl - the MAST file url
+     * @param {number} startTime - the playback time before which triggers shall be ignored
      */
-    load (url: string) {
+    load (url: string, startTime?: number): Promise<boolean> {
         let fileLoader = new FileLoader();
 
         // Reset the MAST and trigger managers
@@ -149,7 +150,7 @@ export class AdsPlayerController {
         return new Promise((resolve, reject) => {
             fileLoader.load(url).then(result => {
                 this.logger.debug('Parse MAST file');
-                this.parseMastFile(result['dom'], result['baseUrl']);
+                this.parseMastFile(result['dom'], result['baseUrl'], startTime);
                 // Start managing triggers and ads playing
                 resolve(this.start());
             }).catch(error => {
@@ -297,7 +298,7 @@ export class AdsPlayerController {
         });
     }
 
-    private parseMastFile (mastContent: Document, mastBaseUrl: string) {
+    private parseMastFile (mastContent: Document, mastBaseUrl: string, startTime?: number) {
         let triggerManager;
 
         // Parse the MAST file
@@ -322,7 +323,7 @@ export class AdsPlayerController {
         // Initialize the trigger managers
         for (let i = 0; i < this.mast.triggers.length; i++) {
             triggerManager = new TriggerManager();
-            triggerManager.init(this.mast.triggers[i]);
+            triggerManager.init(this.mast.triggers[i], startTime);
             this.triggerManagers.push(triggerManager);
         }
     }

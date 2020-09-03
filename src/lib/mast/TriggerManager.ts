@@ -43,12 +43,14 @@ export class TriggerManager {
     // --------------------------------------------------
 
     trigger: mast.Trigger;
+    startTime: number;
 
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
     constructor() {
         this.trigger = null;
+        this.startTime = -1;
     }
 
     /**
@@ -57,9 +59,11 @@ export class TriggerManager {
      * @access public
      * @memberof TriggerManager#
      * @param {Trigger} trigger - the trigger to handle by this manager
+     * @param {number} startTime - the playback time before which triggers shall be ignored
      */
-    init (trigger: mast.Trigger) {
+    init (trigger: mast.Trigger, startTime?: number) {
         this.trigger = trigger;
+        this.startTime = !isNaN(startTime) ? startTime: -1;
     }
 
     /**
@@ -149,18 +153,23 @@ export class TriggerManager {
         let res: boolean = false;
 
         // Check pre-roll condition for activation
-        if (video.currentTime === 0 && condition.type === mast.CONDITION_TYPE.EVENT && condition.name === mast.CONDITION_NAME.ON_ITEM_START) {
+        if (video.currentTime === 0 &&
+            this.startTime <= 0 &&
+            condition.type === mast.CONDITION_TYPE.EVENT &&
+            condition.name === mast.CONDITION_NAME.ON_ITEM_START) {
             res = true;
         }
 
         // Check mid-roll condition for activation
         if (condition.type === mast.CONDITION_TYPE.PROPERTY) {
+            let time = Utils.parseTime(condition.value);
             switch (condition.name) {
                 case mast.CONDITION_NAME.POSITION:
-                    res = this.compareValues(video.currentTime, Utils.parseTime(condition.value), condition.operator);
+                    // Check start time if condition is relative to current position
+                    res = this.compareValues(video.currentTime, time, condition.operator) && (time >= this.startTime);
                     break;
                 case mast.CONDITION_NAME.DURATION:
-                    res = this.compareValues(video.duration, Utils.parseTime(condition.value), condition.operator);
+                    res = this.compareValues(video.duration, time, condition.operator);
                     break;
                 default:
                     break;
