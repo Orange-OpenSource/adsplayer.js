@@ -442,6 +442,10 @@ export class AdsPlayerController {
         for (let i = 0; i < this.triggerManagers.length; i++) {
             if (this.triggerManagers[i].checkStartConditions(this.mainVideo)) {
                 return this.triggerManagers[i].getTrigger();
+            } else if (this.triggerManagers[i].getIsSkipped()) {
+                // Remove triggers that are skipped since trigger time is anterior to provided stream start tileme
+                this.triggerManagers.splice(0, 1);
+                i--;
             }
         }
         return null;

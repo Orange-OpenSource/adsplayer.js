@@ -44,6 +44,7 @@ export class TriggerManager {
 
     trigger: mast.Trigger;
     startTime: number;
+    isSkipped: boolean;
 
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
@@ -51,6 +52,7 @@ export class TriggerManager {
     constructor() {
         this.trigger = null;
         this.startTime = -1;
+        this.isSkipped = false;
     }
 
     /**
@@ -108,6 +110,14 @@ export class TriggerManager {
         return this.evaluateConditions(this.trigger.endConditions, video);
     }
 
+    /**
+     * Return true if trigger is skipped since trigger time is anterior to provided stream start time
+     * @return true if trigger is skipped since trigger time is anterior to provided stream start time
+     */
+    getIsSkipped (): boolean {
+        return this.isSkipped;
+    }
+
     // #endregion PUBLIC FUNCTIONS
     // --------------------------------------------------
 
@@ -154,22 +164,30 @@ export class TriggerManager {
 
         // Check pre-roll condition for activation
         if (video.currentTime === 0 &&
-            this.startTime <= 0 &&
             condition.type === mast.CONDITION_TYPE.EVENT &&
             condition.name === mast.CONDITION_NAME.ON_ITEM_START) {
             res = true;
+            if (this.startTime > 0) {
+                res = false;
+                this.isSkipped = true;
+            }
         }
 
         // Check mid-roll condition for activation
         if (condition.type === mast.CONDITION_TYPE.PROPERTY) {
-            let time = Utils.parseTime(condition.value);
+            let triggerTime = Utils.parseTime(condition.value);
             switch (condition.name) {
                 case mast.CONDITION_NAME.POSITION:
-                    // Check start time if condition is relative to current position
-                    res = this.compareValues(video.currentTime, time, condition.operator) && (time >= this.startTime);
+                    // Check trigger time with stream start time if condition is relative to current position
+                    if (triggerTime < this.startTime) {
+                        res = false;
+                        this.isSkipped = true;
+                    } else {
+                        res = this.compareValues(video.currentTime, triggerTime, condition.operator);
+                    }
                     break;
                 case mast.CONDITION_NAME.DURATION:
-                    res = this.compareValues(video.duration, time, condition.operator);
+                    res = this.compareValues(video.duration, triggerTime, condition.operator);
                     break;
                 default:
                     break;
