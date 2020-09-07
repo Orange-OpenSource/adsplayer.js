@@ -89,20 +89,11 @@ export class AdsPlayer {
 
     /**
     * This method is invoked when a new stream is to be loaded/opened.
-    * @param {object} stream - the stream contaning all stream informations (url, protData, adsUrl)
+    * @param {object} url - the ads (MAST) description file url
+    * @param {number} startTime - the playback time before which triggers shall be ignored
     */
-    load (stream: object) {
-        return new Promise((resolve, reject) => {
-            if (stream.hasOwnProperty('adsUrl')) {
-                this.adsPlayerController.load(stream['adsUrl']).then(function (res) {
-                    resolve(res);
-                }).catch(function (e) {
-                    reject(e);
-                });
-            } else {
-                resolve(false);
-            }
-        });
+    load (adsUrl: string, startTime?: number): Promise<boolean> {
+        return this.adsPlayerController.load(adsUrl, startTime);
     }
 
     /**
