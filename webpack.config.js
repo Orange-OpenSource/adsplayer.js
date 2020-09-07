@@ -55,16 +55,20 @@ module.exports = {
       __VERSION__: JSON.stringify(pkg.version),
       __BUILDDATE__: JSON.stringify(gitDate)
     }),
-    new CopyWebpackPlugin([{
-      from: './index.html',
-      transform: function (content, toto) {
-        content = content.toString()
-          .replace(new RegExp('@@VERSION', 'g'), pkg.version)
-          .replace('@@DATE', gitDate);
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: './index.html',
+          transform: function (content) {
+            content = content.toString()
+              .replace(new RegExp('@@VERSION', 'g'), pkg.version)
+              .replace('@@DATE', gitDate);
 
-        return content;
-      }
-    }]),
+            return content;
+          }
+        }
+      ]
+    }),
     new TypedocWebpackPlugin({
       name: 'adsplayer.js',
       out: './doc',

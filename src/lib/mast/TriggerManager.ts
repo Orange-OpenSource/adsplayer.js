@@ -43,12 +43,16 @@ export class TriggerManager {
     // --------------------------------------------------
 
     trigger: mast.Trigger;
+    startTime: number;
+    isSkipped: boolean;
 
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
     constructor() {
         this.trigger = null;
+        this.startTime = -1;
+        this.isSkipped = false;
     }
 
     /**
@@ -57,9 +61,11 @@ export class TriggerManager {
      * @access public
      * @memberof TriggerManager#
      * @param {Trigger} trigger - the trigger to handle by this manager
+     * @param {number} startTime - the playback time before which triggers shall be ignored
      */
-    init (trigger: mast.Trigger) {
+    init (trigger: mast.Trigger, startTime?: number) {
         this.trigger = trigger;
+        this.startTime = !isNaN(startTime) ? startTime: -1;
     }
 
     /**
@@ -102,6 +108,14 @@ export class TriggerManager {
      */
     checkEndConditions (video: HTMLMediaElement) {
         return this.evaluateConditions(this.trigger.endConditions, video);
+    }
+
+    /**
+     * Return true if trigger is skipped since trigger time is anterior to provided stream start time
+     * @return true if trigger is skipped since trigger time is anterior to provided stream start time
+     */
+    getIsSkipped (): boolean {
+        return this.isSkipped;
     }
 
     // #endregion PUBLIC FUNCTIONS
@@ -149,18 +163,31 @@ export class TriggerManager {
         let res: boolean = false;
 
         // Check pre-roll condition for activation
-        if (video.currentTime === 0 && condition.type === mast.CONDITION_TYPE.EVENT && condition.name === mast.CONDITION_NAME.ON_ITEM_START) {
+        if (video.currentTime === 0 &&
+            condition.type === mast.CONDITION_TYPE.EVENT &&
+            condition.name === mast.CONDITION_NAME.ON_ITEM_START) {
             res = true;
+            if (this.startTime > 0) {
+                res = false;
+                this.isSkipped = true;
+            }
         }
 
         // Check mid-roll condition for activation
         if (condition.type === mast.CONDITION_TYPE.PROPERTY) {
+            let triggerTime = Utils.parseTime(condition.value);
             switch (condition.name) {
                 case mast.CONDITION_NAME.POSITION:
-                    res = this.compareValues(video.currentTime, Utils.parseTime(condition.value), condition.operator);
+                    // Check trigger time with stream start time if condition is relative to current position
+                    if (triggerTime < this.startTime) {
+                        res = false;
+                        this.isSkipped = true;
+                    } else {
+                        res = this.compareValues(video.currentTime, triggerTime, condition.operator);
+                    }
                     break;
                 case mast.CONDITION_NAME.DURATION:
-                    res = this.compareValues(video.duration, Utils.parseTime(condition.value), condition.operator);
+                    res = this.compareValues(video.duration, triggerTime, condition.operator);
                     break;
                 default:
                     break;

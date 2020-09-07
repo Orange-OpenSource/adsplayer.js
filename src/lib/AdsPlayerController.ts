@@ -65,6 +65,8 @@ export class AdsPlayerController {
     private errorHandler: ErrorHandler;
 
     private handleMainPlayerPlayback: boolean;
+    private filterTriggersFn: Function;
+
     private onVideoPlayingListener;
     private onVideoTimeupdateListener;
     private onVideoEndedListener;
@@ -92,6 +94,7 @@ export class AdsPlayerController {
         this.errorHandler = new ErrorHandler(eventBus);
 
         this.handleMainPlayerPlayback = true;
+        this.filterTriggersFn = undefined;
 
         this.onVideoPlayingListener = this.onVideoPlaying.bind(this);
         this.onVideoTimeupdateListener = this.onVideoTimeupdate.bind(this);
@@ -106,11 +109,14 @@ export class AdsPlayerController {
      * @memberof AdsPlayerController#
      * @param {Object} video - the HTML5 video element used by the main media player
      * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
+     * @param {boolean} handleMainPlayerPlayback - true (by default) if AdsPlayer shall handle the main video playback state
+     * @param {Function} filterTriggersFn - the callback function to filter triggers
      */
-    init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = false) {
+    init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = false, filterTriggersFn?: Function) {
         this.mainVideo = video;
         this.adsPlayerContainer = adsPlayerContainer;
         this.handleMainPlayerPlayback = handleMainPlayerPlayback;
+        this.filterTriggersFn = filterTriggersFn;
 
         // Add <video> event listener
         this.mainVideo.addEventListener('playing', this.onVideoPlayingListener);
@@ -129,8 +135,9 @@ export class AdsPlayerController {
      * @access public
      * @memberof AdsPlayerController#
      * @param {string} mastUrl - the MAST file url
+     * @param {number} startTime - the playback time before which triggers shall be ignored
      */
-    load (url: string) {
+    load (url: string, startTime?: number): Promise<boolean> {
         let fileLoader = new FileLoader();
 
         // Reset the MAST and trigger managers
@@ -143,7 +150,7 @@ export class AdsPlayerController {
         return new Promise((resolve, reject) => {
             fileLoader.load(url).then(result => {
                 this.logger.debug('Parse MAST file');
-                this.parseMastFile(result['dom'], result['baseUrl']);
+                this.parseMastFile(result['dom'], result['baseUrl'], startTime);
                 // Start managing triggers and ads playing
                 resolve(this.start());
             }).catch(error => {
@@ -291,7 +298,7 @@ export class AdsPlayerController {
         });
     }
 
-    private parseMastFile (mastContent: Document, mastBaseUrl: string) {
+    private parseMastFile (mastContent: Document, mastBaseUrl: string, startTime?: number) {
         let triggerManager;
 
         // Parse the MAST file
@@ -301,13 +308,22 @@ export class AdsPlayerController {
             return;
         }
 
-        // Store base URL for subsequent VATS files download
+        // Store base URL for subsequent VAST files download
         this.mast.baseUrl = mastBaseUrl;
+
+        // Filter the triggers
+        if (this.filterTriggersFn) {
+            try {
+                this.mast.triggers = this.filterTriggersFn(this.mast.triggers);
+            } catch (e) {
+                this.logger.error('Failed to filter triggers');
+            }
+        }
 
         // Initialize the trigger managers
         for (let i = 0; i < this.mast.triggers.length; i++) {
             triggerManager = new TriggerManager();
-            triggerManager.init(this.mast.triggers[i]);
+            triggerManager.init(this.mast.triggers[i], startTime);
             this.triggerManagers.push(triggerManager);
         }
     }
@@ -426,6 +442,10 @@ export class AdsPlayerController {
         for (let i = 0; i < this.triggerManagers.length; i++) {
             if (this.triggerManagers[i].checkStartConditions(this.mainVideo)) {
                 return this.triggerManagers[i].getTrigger();
+            } else if (this.triggerManagers[i].getIsSkipped()) {
+                // Remove triggers that are skipped since trigger time is anterior to provided stream start tileme
+                this.triggerManagers.splice(0, 1);
+                i--;
             }
         }
         return null;

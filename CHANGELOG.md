@@ -1,3 +1,7 @@
+### Release Notes v1.6.0 (2020/09/07)
+* Add possibility to specify playback time before which triggers shall be ignored (playback resume scenario)
+* Add possibility to enable triggers filtering by application
+
 ### Release Notes v1.5.3 (2020/08/14)
 * Update packages dependencies (fix security vulnerability)
 * Bugs fixing:
