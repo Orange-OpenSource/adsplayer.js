@@ -39,10 +39,7 @@ export enum AdEvents {
     TRIGGER_START = 'triggerStart',
     TRIGGER_END = 'triggerEnd',
     AD_START = 'adStart',
-    AD_END = 'adEnd',
-    PLAY = 'play',
-    PAUSE = 'pause',
-    CLICK = 'click'
+    AD_END = 'adEnd'
 }
 
 export class EventBus {

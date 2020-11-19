@@ -122,13 +122,13 @@ export class CreativePlayer {
     private onMediaPlay () {
         this.logger.debug('Creative media play');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent(AdEvents.PLAY);
+        this.eventBus.dispatchEvent(EventTypes.PLAY);
     }
 
     private onMediaPause () {
         this.logger.debug('Creative media pause');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent(AdEvents.PAUSE);
+        this.eventBus.dispatchEvent(EventTypes.PAUSE);
     }
 
     private onMediaError () {
@@ -167,7 +167,7 @@ export class CreativePlayer {
         // ClickThrough : send an event for the application to open the web page
         if (creative.videoClicks.clickThrough) {
             this.logger.debug('Ad click, uri = ' + creative.videoClicks.clickThrough);
-            this.eventBus.dispatchEvent(AdEvents.CLICK, {
+            this.eventBus.dispatchEvent(EventTypes.CLICK, {
                 uri: creative.videoClicks.clickThrough
             });
         }
