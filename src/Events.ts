@@ -82,6 +82,23 @@ export enum EventTypes {
     REMOVE_ELEMENT = 'removeElement',
 
     /**
+     * The 'creativeStart' event is fired when a creative starts to play
+     * <br/>Event data properties:
+     * @event CREATIVE_START
+     * @property <b>mediaType</b>: string - the creative media type ('audio' or 'video')
+     * @property <b>duration</b>: number - the media duration
+     * @property <b>clickThroughUrl</b>: string - the click through url
+     */
+    CREATIVE_START = 'creativeStart',
+
+    /**
+     * The 'creativeEnd' event is fired when a creative ended
+     * <br/>Event data properties:
+     * @event CREATIVE_END
+     */
+    CREATIVE_END = 'creativeEnd',
+
+    /**
      * The 'play' event is fired when the playback of media ad is starting.
      * @event PLAY
      */

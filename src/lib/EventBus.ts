@@ -40,8 +40,6 @@ export enum AdEvents {
     TRIGGER_END = 'triggerEnd',
     AD_START = 'adStart',
     AD_END = 'adEnd',
-    CREATIVE_START = 'creativeStart',
-    CREATIVE_END = 'creativeEnd',
     PLAY = 'play',
     PAUSE = 'pause',
     CLICK = 'click'

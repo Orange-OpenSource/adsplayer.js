@@ -42,6 +42,7 @@ import * as vast from './model/Vast';
 import { CreativePlayer } from './CreativePlayer';
 import { Logger } from '../Logger';
 import { EventBus, AdEvents } from '../EventBus';
+import { EventTypes } from '../../Events';
 
 export class AdPlayer {
 
@@ -197,7 +198,7 @@ export class AdPlayer {
 
         if (linear) {
             this.logger.debug('Play Linear Ad, duration = ' + linear.duration);
-            this.eventBus.addEventListener(AdEvents.CREATIVE_END, this.onCreativeEndListener);
+            this.eventBus.addEventListener(EventTypes.CREATIVE_END, this.onCreativeEndListener);
             this.creativePlayer = new CreativePlayer(this.eventBus);
             if (!this.creativePlayer.init(creative.linear, this.adPlayerContainer, this.mainVideo, this.baseUrl)) {
                 this.playNextCreative();

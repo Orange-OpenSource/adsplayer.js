@@ -134,13 +134,13 @@ export class CreativePlayer {
     private onMediaError () {
         this.logger.debug('Creative media error');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent(AdEvents.CREATIVE_END);
+        this.eventBus.dispatchEvent(EventTypes.CREATIVE_END);
     }
 
     private onMediaEnded () {
         this.logger.debug('creative media ended');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent(AdEvents.CREATIVE_END);
+        this.eventBus.dispatchEvent(EventTypes.CREATIVE_END);
     }
 
     private onMediaTimeupdate () {
@@ -229,7 +229,11 @@ export class CreativePlayer {
         }
 
         // Notify a creative is starting to play
-        this.eventBus.dispatchEvent(AdEvents.CREATIVE_START);
+        this.eventBus.dispatchEvent(EventTypes.CREATIVE_START, {
+            mediaType: isVideo ? 'video' : 'audio',
+            duration: creative.duration,
+            clickThroughUrl: (creative.videoClicks && creative.videoClicks.clickThrough) ? creative.videoClicks.clickThrough : undefined
+        });
 
         // Notify a media element has been created and appended into document
         this.eventBus.dispatchEvent(EventTypes.ADD_ELEMENT, {
