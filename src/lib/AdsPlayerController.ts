@@ -71,6 +71,7 @@ export class AdsPlayerController {
     private onVideoEndedListener;
     private onTriggerEndListener;
 
+    private currentTrigger: Trigger;
 
     // #endregion MEMBERS
     // --------------------------------------------------
@@ -97,6 +98,8 @@ export class AdsPlayerController {
         this.onVideoTimeupdateListener = this.onVideoTimeupdate.bind(this);
         this.onVideoEndedListener = this.onVideoEnded.bind(this);
         this.onTriggerEndListener = this.onTriggerEnd.bind(this);
+
+        this.currentTrigger = null;
     }
 
     /**
@@ -368,6 +371,8 @@ export class AdsPlayerController {
             this.vastPlayerManager = null;
         }
 
+        this.currentTrigger = null;
+        
         // Check if another trigger has to be activated
         let trigger = this.checkTriggersStart();
         if (trigger !== null) {
@@ -413,12 +418,13 @@ export class AdsPlayerController {
     private activateTrigger (trigger: Trigger, firstTrigger: boolean) {
 
         // Check if a trigger is not already activated
-        if (this.vastPlayerManager) {
+        if (this.currentTrigger) {
             return;
         }
 
         this.logger.debug('Activate trigger ' + trigger.id);
 
+        this.currentTrigger = trigger;
         trigger.activated = true;
 
         if (trigger.vasts.length === 0) {
