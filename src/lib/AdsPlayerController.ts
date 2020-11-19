@@ -34,6 +34,7 @@
 */
 
 import { Mast, Trigger } from './mast/model/Mast'
+import { Config } from './Config';
 import { Logger } from './Logger';
 import { FileLoader } from './FileLoader';
 import { ErrorHandler } from './ErrorHandler';
@@ -60,12 +61,10 @@ export class AdsPlayerController {
     private mastParser: MastParser;
     private vastParser: VastParser;
 
+    private config: Config;
     private logger: Logger;
     private eventBus: EventBus;
     private errorHandler: ErrorHandler;
-
-    private handleMainPlayerPlayback: boolean;
-    private filterTriggersFn: Function;
 
     private onVideoPlayingListener;
     private onVideoTimeupdateListener;
@@ -89,12 +88,10 @@ export class AdsPlayerController {
         this.vastPlayerManager = null;
         this.mastParser = new MastParser();
         this.vastParser = new VastParser();
+        this.config = Config.getInstance();
         this.logger = Logger.getInstance();
         this.eventBus = eventBus;
         this.errorHandler = new ErrorHandler(eventBus);
-
-        this.handleMainPlayerPlayback = true;
-        this.filterTriggersFn = undefined;
 
         this.onVideoPlayingListener = this.onVideoPlaying.bind(this);
         this.onVideoTimeupdateListener = this.onVideoTimeupdate.bind(this);
@@ -109,14 +106,10 @@ export class AdsPlayerController {
      * @memberof AdsPlayerController#
      * @param {Object} video - the HTML5 video element used by the main media player
      * @param {Object} adsPlayerContainer - The container to create the HTML5 video/image elements used to play and render the ads media
-     * @param {boolean} handleMainPlayerPlayback - true (by default) if AdsPlayer shall handle the main video playback state
-     * @param {Function} filterTriggersFn - the callback function to filter triggers
      */
-    init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = false, filterTriggersFn?: Function) {
+    init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement) {
         this.mainVideo = video;
         this.adsPlayerContainer = adsPlayerContainer;
-        this.handleMainPlayerPlayback = handleMainPlayerPlayback;
-        this.filterTriggersFn = filterTriggersFn;
 
         // Add <video> event listener
         this.mainVideo.addEventListener('playing', this.onVideoPlayingListener);
@@ -312,9 +305,9 @@ export class AdsPlayerController {
         this.mast.baseUrl = mastBaseUrl;
 
         // Filter the triggers
-        if (this.filterTriggersFn) {
+        if (this.config.filterTriggersFn) {
             try {
-                this.mast.triggers = this.filterTriggersFn(this.mast.triggers);
+                this.mast.triggers = this.config.filterTriggersFn(this.mast.triggers);
             } catch (e) {
                 this.logger.error('Failed to filter triggers');
             }
@@ -329,7 +322,7 @@ export class AdsPlayerController {
     }
 
     private onVideoPlaying () {
-        if (this.handleMainPlayerPlayback && this.vastPlayerManager) {
+        if (this.config.handleMainPlayerPlayback && this.vastPlayerManager) {
             this.logger.debug('Pause main video');
             this.mainVideo.pause();
         }
@@ -354,14 +347,14 @@ export class AdsPlayerController {
     }
 
     private pauseVideo () {
-        if (this.handleMainPlayerPlayback && this.mainVideo && !this.mainVideo.paused) {
+        if (this.config.handleMainPlayerPlayback && this.mainVideo && !this.mainVideo.paused) {
             this.logger.debug('Pause main video');
             this.mainVideo.pause();
         }
     }
 
     private resumeVideo () {
-        if (this.handleMainPlayerPlayback && this.mainVideo && this.mainVideo.paused) {
+        if (this.config.handleMainPlayerPlayback && this.mainVideo && this.mainVideo.paused) {
             this.logger.debug('Resume main video');
             this.mainVideo.play();
         }

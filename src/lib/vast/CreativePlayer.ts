@@ -40,6 +40,7 @@ import { TrackingEventsManager } from './TrackingEventsManager';
 import { MediaPlayer } from '../media/MediaPlayer';
 import { VideoPlayer } from '../media/VideoPlayer';
 import { ImagePlayer } from '../media/ImagePlayer';
+import { Config } from '../Config';
 import { Logger } from '../Logger';
 import { EventBus, AdEvents } from '../EventBus';
 import { EventTypes } from '../../Events';
@@ -54,6 +55,7 @@ export class CreativePlayer {
     private mediaPlayer: MediaPlayer;
     private trackingEventsManager: TrackingEventsManager;
     private mainVideo: HTMLMediaElement;
+    private config: Config;
     private logger: Logger;
     private eventBus: EventBus;
 
@@ -75,6 +77,7 @@ export class CreativePlayer {
         this.mediaPlayer = null;
         this.trackingEventsManager = null;
         this.mainVideo = null;
+        this.config = Config.getInstance();
         this.logger = Logger.getInstance();
         this.eventBus = eventBus;
 
@@ -245,7 +248,7 @@ export class CreativePlayer {
         this.adPlayerContainer.appendChild(this.mediaPlayer.getElement());
 
         // Listener for click
-        if (creative.videoClicks) {
+        if (creative.videoClicks && this.config.handleClickThrough) {
             if (creative.videoClicks.clickThrough) {
                 this.mediaPlayer.getElement().style.cursor = 'pointer';
             }
