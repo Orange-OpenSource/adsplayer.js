@@ -145,7 +145,7 @@ export class CreativePlayer {
 
     private onMediaTimeupdate () {
         //this.logger.debug('Media timeupdate: ' + this.mediaPlayer.getCurrentTime());
-        this.eventBus.dispatchEvent(EventTypes.TIME_CHANGED, {
+        this.eventBus.dispatchEvent(EventTypes.TIMEUPDATE, {
             currentTime: this.mediaPlayer.getCurrentTime()
         });
 
