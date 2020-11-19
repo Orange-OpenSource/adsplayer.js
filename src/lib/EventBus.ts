@@ -93,7 +93,7 @@ export class EventBus {
                 data: data ? data : {}
             }
 
-        this.logger.debug('# Event: ' + type);
+        // this.logger.debug('# Event: ' + type);
         for (let i = 0; i < listeners.length; i += 1) {
             listeners[i].call(this, event);
         }
