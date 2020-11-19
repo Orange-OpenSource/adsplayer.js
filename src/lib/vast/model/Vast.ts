@@ -165,7 +165,7 @@ export class TrackingEvent {
     offsetPercent: number = 0;      // [Optional] Required in 'Progess' event, not use with other events
     condition: Function;            // Used by TrackingEventsManager
     oneShot: boolean = true;        // Used by TrackingEventsManager
-    completed: boolean = true;      // Used by TrackingEventsManager
+    completed: boolean = false;      // Used by TrackingEventsManager
 }
 
 
