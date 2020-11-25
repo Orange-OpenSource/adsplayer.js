@@ -28,27 +28,19 @@
 */
 
 /**
-* Event bus utility class for events listening and notifying.
+* Config utility class for managing configuration parameters.
 */
 
-import { Logger } from './Logger';
-import { EventTypes } from '../Events';
-
-
-export enum AdEvents {
-    TRIGGER_START = 'triggerStart',
-    TRIGGER_END = 'triggerEnd',
-    AD_START = 'adStart',
-    AD_END = 'adEnd'
-}
-
-export class EventBus {
+export class Config {
 
     // #region MEMBERS
     // --------------------------------------------------
 
-    private registrations: object;
-    private logger: Logger;
+    private static instance: Config = null;
+
+    private _handleMainPlayerPlayback: boolean;
+    private _handleClickThrough: boolean;
+    private _filterTriggersFn: Function;
 
     // #endregion MEMBERS
     // --------------------------------------------------
@@ -56,57 +48,44 @@ export class EventBus {
     // #region PUBLIC FUNCTIONS
     // --------------------------------------------------
 
+    static getInstance() {
+        if (this.instance === null) {
+            this.instance = new Config();
+        }
+        return this.instance;
+    }
+
     constructor() {
-        this.registrations = {};
-        this.logger = Logger.getInstance();
+        this._handleMainPlayerPlayback = true;
+        this._handleClickThrough = true;
+        this._filterTriggersFn = undefined;
     }
 
     // #endregion PUBLIC FUNCTIONS
     // --------------------------------------------------
 
-    public addEventListener (type: string, listener: any) {
-        let listeners = this.getListeners(type),
-            idx = listeners.indexOf(listener);
-
-        if (idx === -1) {
-            listeners.push(listener);
-        }
+    get handleMainPlayerPlayback (): boolean {
+        return this._handleMainPlayerPlayback;
+    }
+    
+    set handleMainPlayerPlayback (value: boolean) {
+        this._handleMainPlayerPlayback = value;
     }
 
-    public removeEventListener (type: string, listener: any) {
-        let listeners = this.getListeners(type),
-            idx = listeners.indexOf(listener);
-
-        if (idx !== -1) {
-            listeners.splice(idx, 1);
-        }
+    get handleClickThrough (): boolean {
+        return this._handleClickThrough;
+    }
+    
+    set handleClickThrough (value: boolean) {
+        this._handleClickThrough = value;
     }
 
-    public removeAllEventListener () {
-        this.registrations = {};
+    get filterTriggersFn (): Function {
+        return this._filterTriggersFn;
     }
-
-    public dispatchEvent (type: string, data?: object) {
-        let listeners = this.getListeners(type).slice(),
-            event = {
-                type: type,
-                data: data ? data : {}
-            }
-
-        // this.logger.debug('# Event: ' + type);
-        for (let i = 0; i < listeners.length; i += 1) {
-            listeners[i].call(this, event);
-        }
-    }
-
-    // #region PRIVATE FUNCTIONS
-    // --------------------------------------------------
-
-    private getListeners (type: string) {
-        if (!(type in this.registrations)) {
-            this.registrations[type] = [];
-        }
-        return this.registrations[type];
+    
+    set filterTriggersFn (value: Function) {
+        this._filterTriggersFn = value;
     }
 
     // #endregion PUBLIC FUNCTIONS

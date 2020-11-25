@@ -137,6 +137,7 @@ export class TrackingEventsManager {
 
         for (let i = 0; i < this.trackingEvents.length; i++) {
             let trackingEvent = this.trackingEvents[i];
+            trackingEvent.completed = false;
             if (trackingEvent.uri && trackingEvent.uri.length > 0) {
                 switch (trackingEvent.event) {
                     case 'creativeView':

@@ -29,6 +29,7 @@
 
 import { AdsPlayerController } from './lib/AdsPlayerController';
 import { EventBus } from './lib/EventBus';
+import { Config } from './lib/Config';
 import { Logger } from './lib/Logger';
 import { EventTypes } from './Events';
 
@@ -44,6 +45,7 @@ export class AdsPlayer {
     // --------------------------------------------------
 
     private adsPlayerController: AdsPlayerController;
+    private config: Config;
     private logger: Logger;
     private eventBus: EventBus;
 
@@ -61,6 +63,7 @@ export class AdsPlayer {
         this.adsPlayerController = null;
         this.eventBus = new EventBus();
         this.logger = Logger.getInstance();
+        this.config = Config.getInstance();
 
         this.error = null;
         this.onErrorListener = this.onError.bind(this);
@@ -79,11 +82,19 @@ export class AdsPlayer {
     * @param {HTMLMediaElement} video - the main video player
     * @param {HTMLElement} adsPlayerContainer - the HTML element that will contains ad media element
     * @param {boolean} handleMainPlayerPlayback - true (by default) if AdsPlayer shall handle the main video playback state
+    * @param {boolean} handleClickThrough - true (by default) if AdsPlayer shall handle the user clicks during ad playback
     * @param {Function} filterTriggersFn - the callback function to filter triggers
     */
-    init (video: HTMLMediaElement, adsPlayerContainer: HTMLElement, handleMainPlayerPlayback: boolean = true, filterTriggersFn?: Function) {
+    init (video: HTMLMediaElement,
+          adsPlayerContainer: HTMLElement,
+          handleMainPlayerPlayback: boolean = true,
+          handleClickThrough: boolean = true,
+          filterTriggersFn?: Function) {
         this.adsPlayerController = new AdsPlayerController(this.eventBus);
-        this.adsPlayerController.init(video, adsPlayerContainer, handleMainPlayerPlayback, filterTriggersFn);
+        this.adsPlayerController.init(video, adsPlayerContainer);
+        this.config.handleMainPlayerPlayback = handleMainPlayerPlayback;
+        this.config.handleClickThrough = handleClickThrough;
+        this.config.filterTriggersFn = filterTriggersFn;
         this.eventBus.addEventListener(EventTypes.ERROR, this.onErrorListener);
     }
 

@@ -40,6 +40,7 @@ import { TrackingEventsManager } from './TrackingEventsManager';
 import { MediaPlayer } from '../media/MediaPlayer';
 import { VideoPlayer } from '../media/VideoPlayer';
 import { ImagePlayer } from '../media/ImagePlayer';
+import { Config } from '../Config';
 import { Logger } from '../Logger';
 import { EventBus, AdEvents } from '../EventBus';
 import { EventTypes } from '../../Events';
@@ -54,6 +55,7 @@ export class CreativePlayer {
     private mediaPlayer: MediaPlayer;
     private trackingEventsManager: TrackingEventsManager;
     private mainVideo: HTMLMediaElement;
+    private config: Config;
     private logger: Logger;
     private eventBus: EventBus;
 
@@ -75,6 +77,7 @@ export class CreativePlayer {
         this.mediaPlayer = null;
         this.trackingEventsManager = null;
         this.mainVideo = null;
+        this.config = Config.getInstance();
         this.logger = Logger.getInstance();
         this.eventBus = eventBus;
 
@@ -122,30 +125,30 @@ export class CreativePlayer {
     private onMediaPlay () {
         this.logger.debug('Creative media play');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent(AdEvents.PLAY);
+        this.eventBus.dispatchEvent(EventTypes.PLAY);
     }
 
     private onMediaPause () {
         this.logger.debug('Creative media pause');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent(AdEvents.PAUSE);
+        this.eventBus.dispatchEvent(EventTypes.PAUSE);
     }
 
     private onMediaError () {
         this.logger.debug('Creative media error');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent(AdEvents.CREATIVE_END);
+        this.eventBus.dispatchEvent(EventTypes.CREATIVE_END);
     }
 
     private onMediaEnded () {
         this.logger.debug('creative media ended');
         // Notify the creative has ended
-        this.eventBus.dispatchEvent(AdEvents.CREATIVE_END);
+        this.eventBus.dispatchEvent(EventTypes.CREATIVE_END);
     }
 
     private onMediaTimeupdate () {
         //this.logger.debug('Media timeupdate: ' + this.mediaPlayer.getCurrentTime());
-        this.eventBus.dispatchEvent(EventTypes.TIME_CHANGED, {
+        this.eventBus.dispatchEvent(EventTypes.TIMEUPDATE, {
             currentTime: this.mediaPlayer.getCurrentTime()
         });
 
@@ -167,7 +170,7 @@ export class CreativePlayer {
         // ClickThrough : send an event for the application to open the web page
         if (creative.videoClicks.clickThrough) {
             this.logger.debug('Ad click, uri = ' + creative.videoClicks.clickThrough);
-            this.eventBus.dispatchEvent(AdEvents.CLICK, {
+            this.eventBus.dispatchEvent(EventTypes.CLICK, {
                 uri: creative.videoClicks.clickThrough
             });
         }
@@ -229,7 +232,11 @@ export class CreativePlayer {
         }
 
         // Notify a creative is starting to play
-        this.eventBus.dispatchEvent(AdEvents.CREATIVE_START);
+        this.eventBus.dispatchEvent(EventTypes.CREATIVE_START, {
+            mediaType: isVideo ? 'video' : 'audio',
+            duration: creative.duration,
+            clickThroughUrl: (creative.videoClicks && creative.videoClicks.clickThrough) ? creative.videoClicks.clickThrough : undefined
+        });
 
         // Notify a media element has been created and appended into document
         this.eventBus.dispatchEvent(EventTypes.ADD_ELEMENT, {
@@ -241,7 +248,7 @@ export class CreativePlayer {
         this.adPlayerContainer.appendChild(this.mediaPlayer.getElement());
 
         // Listener for click
-        if (creative.videoClicks) {
+        if (creative.videoClicks && this.config.handleClickThrough) {
             if (creative.videoClicks.clickThrough) {
                 this.mediaPlayer.getElement().style.cursor = 'pointer';
             }
