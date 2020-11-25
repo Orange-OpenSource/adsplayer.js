@@ -1,3 +1,10 @@
+### Release Notes v1.7.0 (2020/11/25)
+* Add events 'creativeStart' and 'creativeEnd'
+* Rename event 'timeChanged' into 'timeupdate'
+* Bugs fixing:
+  - Fix regression for tracking events that were disabled
+  - Fix issue if multiple mid-roll triggers after a seek
+
 ### Release Notes v1.6.0 (2020/09/07)
 * Add possibility to specify playback time before which triggers shall be ignored (playback resume scenario)
 * Add possibility to enable triggers filtering by application
