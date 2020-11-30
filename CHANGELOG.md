@@ -1,3 +1,7 @@
+### Release Notes v1.7.1 (2020/11/30)
+* Bugs fixing:
+  - Fix regression for trigger activation after a reset
+
 ### Release Notes v1.7.0 (2020/11/25)
 * Add events 'creativeStart' and 'creativeEnd'
 * Rename event 'timeChanged' into 'timeupdate'

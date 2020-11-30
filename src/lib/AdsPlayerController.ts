@@ -196,6 +196,7 @@ export class AdsPlayerController {
 
         // Reset the MAST
         this.mast = null;
+        this.currentTrigger = null;
     }
 
     destroy () {
