@@ -18,7 +18,7 @@ var gitDate = (date.getFullYear()) + '-' + (date.getMonth() + 1) + '-' + (date.g
 
 module.exports = {
   entry: __dirname + '/index.ts',
-  devtool: 'eval-source-map',
+  devtool: 'source-map',
   output: {
     path: __dirname + '/dist',
     filename: ouptutname,
