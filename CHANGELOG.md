@@ -1,3 +1,7 @@
+### Release Notes v1.7.2 (2021/06/02)
+* upgrade package dependencies
+* Remove source maps from bundle
+
 ### Release Notes v1.7.1 (2020/11/30)
 * Bugs fixing:
   - Fix regression for trigger activation after a reset
