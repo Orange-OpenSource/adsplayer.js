@@ -1,3 +1,6 @@
+### Release Notes v1.8.0 (2022/01/12)
+* Add event PLAYBACK_NOT_ALLOWED triggered when ad video playback is not allowed by autoplay policy
+
 ### Release Notes v1.7.2 (2021/06/02)
 * upgrade package dependencies
 * Remove source maps from bundle
