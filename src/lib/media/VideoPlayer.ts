@@ -154,11 +154,11 @@ export class VideoPlayer implements MediaPlayer {
         this.video.volume = volume;
     }
 
-    play () {
+    play (): Promise<void> {
         if (!this.video) {
-            return;
+            return Promise.resolve();
         }
-        this.video.play();
+        return this.video.play();
     }
 
     stop () {

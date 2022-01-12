@@ -163,11 +163,12 @@ export class ImagePlayer implements MediaPlayer {
         return 0;
     }
 
-    play () {
+    play (): Promise<void> {
         if (!this.image) {
             return;
         }
         this.startTimer();
+        return Promise.resolve();
     }
 
     pause () {

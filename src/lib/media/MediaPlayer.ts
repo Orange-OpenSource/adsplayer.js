@@ -51,7 +51,7 @@ export interface MediaPlayer {
 
     getVolume (): number
 
-    play ()
+    play (): Promise<void>
 
     pause ()
 
