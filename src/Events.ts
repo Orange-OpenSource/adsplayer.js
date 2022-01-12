@@ -134,5 +134,11 @@ export enum EventTypes {
      * @property <b>message</b>: string - the error message
      * @property <b>data</b>: object -  error additionnal data
      */
-    ERROR = 'error'
+    ERROR = 'error',
+
+    /**
+     * The media playback is not allowed (for example if user gesture is needed)
+     * @event PLAYBACK_NOT_ALLOWED
+     */
+    PLAYBACK_NOT_ALLOWED = 'playbackNotAllowed'    
 }

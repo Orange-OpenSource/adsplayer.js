@@ -104,8 +104,8 @@ export class CreativePlayer {
         return this.load(creative, baseUrl);
     }
 
-    play () {
-        this.play_();
+    play (): Promise<void> {
+        return this.play_();
     }
 
     pause () {
@@ -260,12 +260,14 @@ export class CreativePlayer {
         this.mainVideo.addEventListener('volumechange', this.onMainVideoVolumeChange.bind(this));
 
         // Start playing the media
-        this.play();
+        this.play().catch(() => {
+            this.eventBus.dispatchEvent(EventTypes.PLAYBACK_NOT_ALLOWED);
+        });
 
         return true;
     }
 
-    private play_ () {
+    private play_ (): Promise<void> {
 
         if (!this.mediaPlayer) {
             return;
@@ -274,7 +276,7 @@ export class CreativePlayer {
         this.logger.debug('Creative play');
 
         // Play the media player
-        this.mediaPlayer.play();
+        return this.mediaPlayer.play();
     }
 
     private pause_ () {
